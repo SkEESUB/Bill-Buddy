@@ -229,7 +229,7 @@ describe("weekly summary", () => {
   it("summarises a week with real activity", () => {
     const result = weeklySummaryDraft(week(), wctx);
     expect(result.skipped).toBe(false);
-    expect(result.draft?.title).toBe("Your weekly PocketPilot summary");
+    expect(result.draft?.title).toBe("Your weekly BillBuddy summary");
     expect(result.draft?.body).toContain("₹30,000");
     expect(result.draft?.body).toContain("Food");
     expect(result.draft?.dedupeKey).toBe("weekly_summary:2026-08-12");

@@ -417,7 +417,7 @@ export const replyToTicket = createServerFn({ method: "POST" })
       await insertDraft(db as never, ticket.user_id, {
         type: "security",
         title: "Support replied to your request",
-        body: `“${ticket.subject}” has a new reply from the PocketPilot team.`,
+        body: `“${ticket.subject}” has a new reply from the BillBuddy team.`,
         dedupeKey: `support:${data.ticketId}:${Date.now()}`,
       } as never);
     }

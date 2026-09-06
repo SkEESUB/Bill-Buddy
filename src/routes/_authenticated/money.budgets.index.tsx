@@ -5,12 +5,12 @@ import { BudgetsPage } from "@/pages/BudgetsPage";
 export const Route = createFileRoute("/_authenticated/money/budgets/")({
   head: () => ({
     meta: [
-      { title: "Budgets — PocketPilot" },
+      { title: "Budgets — BillBuddy" },
       {
         name: "description",
         content: "Create and track category budgets with spend, remaining amount and status.",
       },
-      { property: "og:title", content: "Budgets — PocketPilot" },
+      { property: "og:title", content: "Budgets — BillBuddy" },
       {
         property: "og:description",
         content: "Create and track category budgets with spend, remaining amount and status.",

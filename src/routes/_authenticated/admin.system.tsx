@@ -6,9 +6,9 @@ import { AdminSystemPage } from "@/pages/admin/AdminSystemPage";
 export const Route = createFileRoute("/_authenticated/admin/system")({
   head: () => ({
     meta: [
-      { title: "System and jobs — PocketPilot Operations" },
+      { title: "System and jobs — BillBuddy Operations" },
       { name: "description", content: "Scheduled job history and manual, idempotent re-runs." },
-      { property: "og:title", content: "System and jobs — PocketPilot Operations" },
+      { property: "og:title", content: "System and jobs — BillBuddy Operations" },
       { property: "og:description", content: "Scheduled job history and manual, idempotent re-runs." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

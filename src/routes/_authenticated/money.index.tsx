@@ -5,12 +5,12 @@ import { MoneyPage } from "@/pages/MoneyPage";
 export const Route = createFileRoute("/_authenticated/money/")({
   head: () => ({
     meta: [
-      { title: "Money Tracker — PocketPilot" },
+      { title: "Money Tracker — BillBuddy" },
       {
         name: "description",
         content: "Track income, expenses and category budgets alongside your bills.",
       },
-      { property: "og:title", content: "Money Tracker — PocketPilot" },
+      { property: "og:title", content: "Money Tracker — BillBuddy" },
       {
         property: "og:description",
         content: "Track income, expenses and category budgets alongside your bills.",

@@ -4,6 +4,7 @@
 // For user-authenticated queries (with RLS), use the auth middleware instead.
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
+import { normalizeSupabaseUrl } from "@/lib/utils/normalize-url";
 
 function isNewSupabaseApiKey(value: string): boolean {
   return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
@@ -33,7 +34,12 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 }
 
 function createSupabaseAdminClient() {
-  const SUPABASE_URL = process.env["SUPABASE_URL"];
+  const rawUrl =
+    process.env["SUPABASE_URL"] ??
+    process.env["VITE_SUPABASE_URL"] ??
+    (typeof import.meta !== "undefined" && import.meta.env?.["VITE_SUPABASE_URL"]) ??
+    "";
+  const SUPABASE_URL = normalizeSupabaseUrl(rawUrl);
   const SUPABASE_SERVICE_ROLE_KEY = process.env["SUPABASE_SERVICE_ROLE_KEY"];
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
@@ -70,3 +76,12 @@ export const supabaseAdmin = new Proxy({} as ReturnType<typeof createSupabaseAdm
     return Reflect.get(_supabaseAdmin, prop, receiver);
   },
 });
+
+export function getAdminClient() {
+  if (!process.env["SUPABASE_SERVICE_ROLE_KEY"]) {
+    throw new Error(
+      "[BillBuddy] SUPABASE_SERVICE_ROLE_KEY is not set. Add it to Vercel environment variables."
+    );
+  }
+  return supabaseAdmin;
+}

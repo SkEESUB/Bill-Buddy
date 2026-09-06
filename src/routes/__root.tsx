@@ -15,6 +15,11 @@ import { PreferencesProvider } from "@/lib/preferences";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { initTheme } from "@/lib/hooks/useTheme";
+
+if (typeof window !== "undefined") {
+  initTheme();
+}
 
 function NotFoundComponent() {
   return (
@@ -81,13 +86,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "BillBoard — Smart Bill & Payment Manager" },
+      { title: "BillBuddy — Smart Bill & Payment Manager" },
       {
         name: "description",
         content: "Track bills, due dates and payments in one bright, simple dashboard.",
       },
-      { name: "author", content: "BillBoard" },
-      { property: "og:title", content: "BillBoard — Smart Bill & Payment Manager" },
+      { name: "author", content: "BillBuddy" },
+      { property: "og:title", content: "BillBuddy — Smart Bill & Payment Manager" },
       {
         property: "og:description",
         content: "Track bills, due dates and payments in one bright, simple dashboard.",

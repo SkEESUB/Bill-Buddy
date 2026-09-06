@@ -5,9 +5,9 @@ import { NotificationsPage } from "@/pages/NotificationsPage";
 export const Route = createFileRoute("/_authenticated/notifications")({
   head: () => ({
     meta: [
-      { title: "Notifications — PocketPilot" },
+      { title: "Notifications — BillBuddy" },
       { name: "description", content: "Every bill reminder, budget alert and payment confirmation in one place." },
-      { property: "og:title", content: "Notifications — PocketPilot" },
+      { property: "og:title", content: "Notifications — BillBuddy" },
       { property: "og:description", content: "Every bill reminder, budget alert and payment confirmation in one place." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

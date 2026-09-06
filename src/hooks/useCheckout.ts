@@ -177,7 +177,7 @@ export function useCheckout(options: { onSettled?: (() => void | Promise<unknown
         orderId: session.providerOrderId,
         amountMinor: session.amountMinor,
         currency: session.currency,
-        name: "PocketPilot",
+        name: "BillBuddy",
         description: session.billTitle,
         prefillEmail: input.email ?? null,
         onOpened: () => {

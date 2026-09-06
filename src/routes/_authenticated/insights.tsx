@@ -5,12 +5,12 @@ import { InsightsPage } from "@/pages/InsightsPage";
 export const Route = createFileRoute("/_authenticated/insights")({
   head: () => ({
     meta: [
-      { title: "Insights — PocketPilot" },
+      { title: "Insights — BillBuddy" },
       {
         name: "description",
         content: "Cash flow, category trends, safe-to-spend and deterministic forecasts.",
       },
-      { property: "og:title", content: "Insights — PocketPilot" },
+      { property: "og:title", content: "Insights — BillBuddy" },
       {
         property: "og:description",
         content: "Cash flow, category trends, safe-to-spend and deterministic forecasts.",

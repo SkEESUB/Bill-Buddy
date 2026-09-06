@@ -6,10 +6,10 @@ import { AdminSupportPage } from "@/pages/admin/AdminSupportPage";
 export const Route = createFileRoute("/_authenticated/admin/support/")({
   head: () => ({
     meta: [
-      { title: "Support inbox — PocketPilot Operations" },
-      { name: "description", content: "Triage and answer PocketPilot support requests." },
-      { property: "og:title", content: "Support inbox — PocketPilot Operations" },
-      { property: "og:description", content: "Triage and answer PocketPilot support requests." },
+      { title: "Support inbox — BillBuddy Operations" },
+      { name: "description", content: "Triage and answer BillBuddy support requests." },
+      { property: "og:title", content: "Support inbox — BillBuddy Operations" },
+      { property: "og:description", content: "Triage and answer BillBuddy support requests." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },

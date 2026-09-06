@@ -260,7 +260,7 @@ export const exportAccountData = createServerFn({ method: "POST" })
 
     const stamp = new Date().toISOString().slice(0, 10);
     return {
-      filename: `pocketpilot-account-${stamp}.json`,
+      filename: `billbuddy-account-${stamp}.json`,
       mime: "application/json;charset=utf-8",
       content: JSON.stringify(archive, null, 2),
     };

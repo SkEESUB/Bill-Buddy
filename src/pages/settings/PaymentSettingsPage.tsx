@@ -29,7 +29,7 @@ export function PaymentSettingsPage() {
 
   return (
     <section className="animate-fade-in pb-8">
-      <SettingsHeader title="Payments" subtitle="How bills get paid from PocketPilot." />
+      <SettingsHeader title="Payments" subtitle="How bills get paid from BillBuddy." />
 
       {isLoading && !profile ? (
         <div className="card flex items-center justify-center p-10 text-text-secondary">
@@ -74,7 +74,7 @@ export function PaymentSettingsPage() {
             </Row>
             <p className="mt-3 flex items-start gap-2 text-[13px] text-text-tertiary">
               <CreditCard className="mt-0.5 h-4 w-4 shrink-0" />
-              Until a payment provider is connected, PocketPilot records payments manually and hands
+              Until a payment provider is connected, BillBuddy records payments manually and hands
               off to your UPI app. Nothing is simulated.
             </p>
           </Group>

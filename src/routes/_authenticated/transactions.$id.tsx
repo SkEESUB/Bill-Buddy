@@ -5,9 +5,9 @@ import { TransactionDetailPage } from "@/pages/TransactionDetailPage";
 export const Route = createFileRoute("/_authenticated/transactions/$id")({
   head: () => ({
     meta: [
-      { title: "Transaction details — PocketPilot" },
+      { title: "Transaction details — BillBuddy" },
       { name: "description", content: "Full audit trail for a single financial record." },
-      { property: "og:title", content: "Transaction details — PocketPilot" },
+      { property: "og:title", content: "Transaction details — BillBuddy" },
       { property: "og:description", content: "Full audit trail for a single financial record." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

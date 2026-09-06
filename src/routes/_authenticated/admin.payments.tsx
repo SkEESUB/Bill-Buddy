@@ -6,9 +6,9 @@ import { AdminPaymentsPage } from "@/pages/admin/AdminPaymentsPage";
 export const Route = createFileRoute("/_authenticated/admin/payments")({
   head: () => ({
     meta: [
-      { title: "Payment operations — PocketPilot Operations" },
+      { title: "Payment operations — BillBuddy Operations" },
       { name: "description", content: "Inspect payment orders and provider webhook delivery." },
-      { property: "og:title", content: "Payment operations — PocketPilot Operations" },
+      { property: "og:title", content: "Payment operations — BillBuddy Operations" },
       { property: "og:description", content: "Inspect payment orders and provider webhook delivery." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

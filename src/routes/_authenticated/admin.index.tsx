@@ -6,10 +6,10 @@ import { AdminOverviewPage } from "@/pages/admin/AdminOverviewPage";
 export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({
     meta: [
-      { title: "Operations overview — PocketPilot Operations" },
-      { name: "description", content: "Platform health, scheduler status and operational metrics for PocketPilot staff." },
-      { property: "og:title", content: "Operations overview — PocketPilot Operations" },
-      { property: "og:description", content: "Platform health, scheduler status and operational metrics for PocketPilot staff." },
+      { title: "Operations overview — BillBuddy Operations" },
+      { name: "description", content: "Platform health, scheduler status and operational metrics for BillBuddy staff." },
+      { property: "og:title", content: "Operations overview — BillBuddy Operations" },
+      { property: "og:description", content: "Platform health, scheduler status and operational metrics for BillBuddy staff." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },

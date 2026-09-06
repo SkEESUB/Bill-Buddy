@@ -32,7 +32,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <ShieldAlert className="mx-auto h-10 w-10 text-error" />
         <h1 className="mt-4 text-xl font-bold text-text-primary">Restricted area</h1>
         <p className="mt-2 text-sm text-text-secondary">
-          This area is limited to PocketPilot operators. Your account does not have an operations role.
+          This area is limited to BillBuddy operators. Your account does not have an operations role.
         </p>
         <Link to="/" className="btn btn-secondary mt-5 inline-flex">
           Back to your dashboard

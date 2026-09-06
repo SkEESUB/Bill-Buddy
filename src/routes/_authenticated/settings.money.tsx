@@ -5,9 +5,9 @@ import { MoneySettingsPage } from "@/pages/settings/MoneySettingsPage";
 export const Route = createFileRoute("/_authenticated/settings/money")({
   head: () => ({
     meta: [
-      { title: "Money & Budget Settings — PocketPilot" },
+      { title: "Money & Budget Settings — BillBuddy" },
       { name: "description", content: "Set your income, starting balance and the defaults used for new budgets." },
-      { property: "og:title", content: "Money & Budget Settings — PocketPilot" },
+      { property: "og:title", content: "Money & Budget Settings — BillBuddy" },
       { property: "og:description", content: "Set your income, starting balance and the defaults used for new budgets." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

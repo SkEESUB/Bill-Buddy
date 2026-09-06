@@ -26,6 +26,8 @@ import { moneyCategory } from "@/lib/categories";
 import { classifyError } from "@/lib/errors";
 import { formatAmount, formatAmountShort, formatDate } from "@/lib/format";
 import { useFinanceSync } from "@/lib/finance-sync";
+import { SpendingDonutChart } from "@/components/insights/SpendingDonutChart";
+import { MonthlyBarChart } from "@/components/insights/MonthlyBarChart";
 
 const TONE_STYLES = {
   neutral: { bg: "#EEE5F5", color: "#4B1D3F" },
@@ -80,6 +82,39 @@ export function InsightsPage() {
       safe: data.safe,
       currency: (value) => formatAmount(value),
     });
+  }, [data]);
+
+  const donutData = useMemo(() => {
+    if (!data?.categories?.length) return [];
+    const total = data.categories.reduce((acc, c) => acc + c.amount, 0);
+    if (total <= 0) return [];
+    return data.categories.map((c, i) => {
+      const meta = moneyCategory(c.category);
+      return {
+        category: meta?.label || c.category,
+        amount: c.amount,
+        color:
+          (meta?.color ??
+            ["#6366f1", "#10b981", "#f59e0b", "#ec4899", "#8b5cf6", "#14b8a6"][i % 6]) as string,
+        percentage: (c.amount / total) * 100,
+      };
+    });
+  }, [data?.categories]);
+
+  const monthlyBarData = useMemo(() => {
+    if (!data) return [];
+    return [
+      {
+        month: "Previous",
+        income: data.comparison.previous.income,
+        expenses: data.comparison.previous.spending,
+      },
+      {
+        month: "Current",
+        income: data.comparison.current.income,
+        expenses: data.comparison.current.spending,
+      },
+    ];
   }, [data]);
 
   if (error) {
@@ -301,7 +336,10 @@ export function InsightsPage() {
 
       {/* Comparison */}
       <div className="card p-5">
-        <h2 className="text-sm font-bold text-text-primary">Compared with the previous period</h2>
+        <h2 className="text-sm font-bold text-text-primary mb-3">Compared with the previous period</h2>
+        <div className="mb-4">
+          <MonthlyBarChart data={monthlyBarData} />
+        </div>
         {data.comparison.reliable ? (
           <ul className="mt-2 space-y-1.5 text-sm text-text-secondary">
             <li>
@@ -333,13 +371,17 @@ export function InsightsPage() {
 
       {/* Spending by category */}
       <div className="card p-5">
-        <h2 className="text-sm font-bold text-text-primary">Top spending categories</h2>
+        <h2 className="text-sm font-bold text-text-primary mb-3">Top spending categories</h2>
         {topCategories.length === 0 ? (
           <p className="mt-2 text-sm text-text-secondary">
             No completed spending recorded in this period.
           </p>
         ) : (
-          <ul className="mt-3 space-y-3">
+          <>
+            <div className="mb-6">
+              <SpendingDonutChart data={donutData} />
+            </div>
+            <ul className="mt-3 space-y-3">
             {topCategories.map((row) => {
               const meta = moneyCategory(row.category);
               return (
@@ -369,7 +411,8 @@ export function InsightsPage() {
                 </li>
               );
             })}
-          </ul>
+            </ul>
+          </>
         )}
         {categories.length > 5 ? (
           <p className="mt-3 text-xs text-text-tertiary">

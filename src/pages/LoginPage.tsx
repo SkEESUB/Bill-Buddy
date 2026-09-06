@@ -56,7 +56,12 @@ export function LoginPage() {
     try {
       const { data, error: otpError } = await supabase.auth.signInWithOtp({
         email: target,
-        options: { shouldCreateUser: true },
+        options: {
+          shouldCreateUser: true,
+          ...(typeof window !== "undefined" && window.location.origin
+            ? { emailRedirectTo: window.location.origin }
+            : {}),
+        },
       });
       console.log("📨 Backend response:", { data, error: otpError });
       if (otpError) throw otpError;
@@ -174,7 +179,7 @@ export function LoginPage() {
             <Wallet className="h-7 w-7 text-white" strokeWidth={1.75} />
           </div>
           <h1 className="mb-1.5 text-[28px] font-bold tracking-tight text-text-primary">
-            PocketPilot
+            BillBuddy
           </h1>
           <p className="text-[15px] text-text-secondary">Never miss a payment again</p>
         </div>

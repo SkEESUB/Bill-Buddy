@@ -6,10 +6,10 @@ import { AdminUserDetailPage } from "@/pages/admin/AdminUserDetailPage";
 export const Route = createFileRoute("/_authenticated/admin/users/$id")({
   head: () => ({
     meta: [
-      { title: "Account detail — PocketPilot Operations" },
-      { name: "description", content: "Operational view of one PocketPilot account." },
-      { property: "og:title", content: "Account detail — PocketPilot Operations" },
-      { property: "og:description", content: "Operational view of one PocketPilot account." },
+      { title: "Account detail — BillBuddy Operations" },
+      { name: "description", content: "Operational view of one BillBuddy account." },
+      { property: "og:title", content: "Account detail — BillBuddy Operations" },
+      { property: "og:description", content: "Operational view of one BillBuddy account." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },

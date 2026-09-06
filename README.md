@@ -1,6 +1,6 @@
-# BillBoard — Smart Bill & Payment Manager
+# BillBuddy — Smart Bill & Payment Manager
 
-BillBoard is a bright, mobile-first web app for tracking recurring and one-off
+BillBuddy is a bright, mobile-first web app for tracking recurring and one-off
 bills: when they're due, how much they cost, and what you've already paid.
 
 ## Features

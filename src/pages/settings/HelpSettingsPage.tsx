@@ -113,14 +113,14 @@ export function HelpSettingsPage() {
 
       <Group title="About">
         <Row label="App">
-          <span className="text-sm font-medium text-text-secondary">PocketPilot</span>
+          <span className="text-sm font-medium text-text-secondary">BillBuddy</span>
         </Row>
         <Row label="Version">
           <span className="text-sm font-medium text-text-secondary">{APP_VERSION}</span>
         </Row>
         <p className="mt-3 flex items-start gap-2 text-[13px] text-text-tertiary">
           <LifeBuoy className="mt-0.5 h-4 w-4 shrink-0" />
-          PocketPilot keeps a deterministic ledger: every figure on screen is derived from records
+          BillBuddy keeps a deterministic ledger: every figure on screen is derived from records
           you can export at any time.
         </p>
       </Group>

@@ -5,9 +5,9 @@ import { SecuritySettingsPage } from "@/pages/settings/SecuritySettingsPage";
 export const Route = createFileRoute("/_authenticated/settings/security")({
   head: () => ({
     meta: [
-      { title: "Security — PocketPilot" },
+      { title: "Security — BillBuddy" },
       { name: "description", content: "Review your sign-in identity, manage sessions and see recent account activity." },
-      { property: "og:title", content: "Security — PocketPilot" },
+      { property: "og:title", content: "Security — BillBuddy" },
       { property: "og:description", content: "Review your sign-in identity, manage sessions and see recent account activity." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

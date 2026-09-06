@@ -20,6 +20,7 @@ import {
 } from "@/lib/payments/state";
 import { statusResult } from "@/lib/payments/status";
 import { assertAccountActive, AccountInactiveError } from "@/lib/auth/active-account";
+import { classifyError, toUserMessage } from "@/lib/errors";
 
 describe("Financial Invariant 1 & 3: Occurrence settlement and single-payment guarantee", () => {
   it("never transitions a settled payment to another state except refund", () => {
@@ -316,3 +317,75 @@ describe("Security Invariant 13: Secret isolation in client bundles", () => {
     expect(envContent).not.toMatch(/RAZORPAY_WEBHOOK_SECRET\s*=\s*[^\s]+/);
   });
 });
+
+describe("Error classification (Part 14)", () => {
+  it("classifies invalid API key errors correctly", () => {
+    const err = classifyError(new Error("Invalid API key"));
+    expect(err.kind).toBe("invalid_api_key");
+    expect(err.message).toContain("configuration error");
+
+    const err2 = classifyError("401 Invalid API key provided");
+    expect(err2.kind).toBe("invalid_api_key");
+
+    const err3 = classifyError(new Error("Missing Supabase environment variable(s): SUPABASE_URL"));
+    expect(err3.kind).toBe("invalid_api_key");
+  });
+
+  it("classifies missing table / schema cache errors as database errors, never session expired", () => {
+    const err1 = classifyError("Could not find the table 'public.transactions' in the schema cache");
+    expect(err1.kind).toBe("missing_table");
+    expect(err1.message).toContain("Service temporarily unavailable");
+    expect(err1.message).not.toContain("session has expired");
+
+    const err2 = classifyError(new Error("PGRST205: relation does not exist"));
+    expect(err2.kind).toBe("missing_table");
+  });
+
+  it("classifies account status / provisioning errors as account errors, never session expired", () => {
+    const err = classifyError(new Error("Unauthorized: account status could not be verified"));
+    expect(err.kind).toBe("missing_account");
+    expect(err.message).toContain("Setting up your account");
+    expect(err.message).not.toContain("session has expired");
+
+    const err2 = classifyError(new Error("ACCOUNT_SUSPENDED: this account cannot perform this operation."));
+    expect(err2.kind).toBe("account_suspended");
+  });
+
+  it("classifies RLS denial as permission denied, never session expired", () => {
+    const err = classifyError(new Error("permission denied for table transactions (code 42501)"));
+    expect(err.kind).toBe("rls_denied");
+    expect(err.message).toContain("permission");
+    expect(err.message).not.toContain("session has expired");
+  });
+
+  it("classifies true session expiration as session_expired", () => {
+    const err = classifyError(new Error("JWT expired: token has expired"));
+    expect(err.kind).toBe("session_expired");
+    expect(err.message).toContain("Your session has expired");
+  });
+
+  it("classifies general unauthorized requests as auth_missing", () => {
+    const err = classifyError(new Error("Unauthorized: No authorization header provided"));
+    expect(err.kind).toBe("auth_missing");
+    expect(err.message).toContain("sign in");
+  });
+
+  it("classifies network failures as network errors", () => {
+    const err = classifyError(new TypeError("Failed to fetch"));
+    expect(err.kind).toBe("network");
+    expect(err.message).toContain("Network error");
+  });
+
+  it("classifies validation failures as validation errors", () => {
+    const err = classifyError(new Error("amount must be greater than 0"));
+    expect(err.kind).toBe("validation");
+    expect(err.message).toBe("amount must be greater than 0");
+  });
+
+  it("toUserMessage helper returns clean message string", () => {
+    expect(toUserMessage("Invalid API key")).toContain("configuration error");
+    expect(toUserMessage("Could not find the table 'public.transactions' in the schema cache")).toContain("temporarily unavailable");
+    expect(toUserMessage(new Error("Unauthorized: account status could not be verified"))).toContain("Setting up your account");
+  });
+});
+

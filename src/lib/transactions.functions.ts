@@ -449,14 +449,14 @@ export const exportTransactions = createServerFn({ method: "POST" })
     const stamp = new Date().toISOString().slice(0, 10);
     return data.format === "json"
       ? {
-          filename: `pocketpilot-transactions-${stamp}.json`,
+          filename: `billbuddy-transactions-${stamp}.json`,
           mime: "application/json;charset=utf-8",
           content: toLedgerJson(enriched),
           count: enriched.length,
           truncated: enriched.length === EXPORT_ROW_LIMIT,
         }
       : {
-          filename: `pocketpilot-transactions-${stamp}.csv`,
+          filename: `billbuddy-transactions-${stamp}.csv`,
           mime: "text/csv;charset=utf-8",
           content: toLedgerCsv(enriched),
           count: enriched.length,

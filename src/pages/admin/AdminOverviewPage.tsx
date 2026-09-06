@@ -20,7 +20,7 @@ export function AdminOverviewPage() {
       <div className="card flex flex-wrap items-center justify-between gap-3 p-5">
         <div>
           <p className="text-[13px] text-text-secondary">Overall status</p>
-          <p className="text-xl font-bold text-text-primary">PocketPilot platform</p>
+          <p className="text-xl font-bold text-text-primary">BillBuddy platform</p>
         </div>
         <StatusPill status={data.overall} />
       </div>

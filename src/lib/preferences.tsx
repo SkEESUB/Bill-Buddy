@@ -25,7 +25,8 @@ export type Preferences = {
   timezone: string;
 };
 
-const STORAGE_KEY = "pocketpilot.preferences";
+const STORAGE_KEY = "billbuddy.preferences";
+const LEGACY_STORAGE_KEY = "pocketpilot.preferences";
 
 export const DEFAULT_PREFERENCES: Preferences = {
   theme: "system",
@@ -46,7 +47,9 @@ const PreferencesContext = createContext<PreferencesContextValue | null>(null);
 function readCache(): Preferences {
   if (typeof window === "undefined") return DEFAULT_PREFERENCES;
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw =
+      window.localStorage.getItem(STORAGE_KEY) ??
+      window.localStorage.getItem(LEGACY_STORAGE_KEY);
     if (!raw) return DEFAULT_PREFERENCES;
     return { ...DEFAULT_PREFERENCES, ...(JSON.parse(raw) as Partial<Preferences>) };
   } catch {
@@ -89,6 +92,9 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
       const next = { ...current, ...patch };
       try {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        if (patch.theme) {
+          window.localStorage.setItem("billbuddy.theme", patch.theme);
+        }
       } catch {
         /* storage may be unavailable in private mode — preferences still apply */
       }

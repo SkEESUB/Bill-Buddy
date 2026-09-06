@@ -1,7 +1,7 @@
 /**
  * Payment provider adapter (server-only).
  *
- * PocketPilot is India-first, so the implemented provider is Razorpay and the
+ * BillBuddy is India-first, so the implemented provider is Razorpay and the
  * checkout uses Razorpay's own UPI flow. We never see, request or store a UPI
  * PIN, bank password, banking OTP or card CVV — those are entered only inside
  * the provider's checkout or the user's own bank/UPI app.

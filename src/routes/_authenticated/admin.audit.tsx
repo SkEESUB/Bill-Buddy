@@ -6,9 +6,9 @@ import { AdminAuditPage } from "@/pages/admin/AdminAuditPage";
 export const Route = createFileRoute("/_authenticated/admin/audit")({
   head: () => ({
     meta: [
-      { title: "Audit trail — PocketPilot Operations" },
+      { title: "Audit trail — BillBuddy Operations" },
       { name: "description", content: "The immutable record of every administrative action." },
-      { property: "og:title", content: "Audit trail — PocketPilot Operations" },
+      { property: "og:title", content: "Audit trail — BillBuddy Operations" },
       { property: "og:description", content: "The immutable record of every administrative action." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

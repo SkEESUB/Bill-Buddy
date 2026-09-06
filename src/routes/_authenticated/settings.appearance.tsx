@@ -5,9 +5,9 @@ import { AppearanceSettingsPage } from "@/pages/settings/AppearanceSettingsPage"
 export const Route = createFileRoute("/_authenticated/settings/appearance")({
   head: () => ({
     meta: [
-      { title: "Appearance & Locale — PocketPilot" },
+      { title: "Appearance & Locale — BillBuddy" },
       { name: "description", content: "Choose light or dark theme, reduce motion, and set your currency and timezone." },
-      { property: "og:title", content: "Appearance & Locale — PocketPilot" },
+      { property: "og:title", content: "Appearance & Locale — BillBuddy" },
       { property: "og:description", content: "Choose light or dark theme, reduce motion, and set your currency and timezone." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

@@ -6,10 +6,10 @@ import { AdminTicketPage } from "@/pages/admin/AdminTicketPage";
 export const Route = createFileRoute("/_authenticated/admin/support/$id")({
   head: () => ({
     meta: [
-      { title: "Support ticket — PocketPilot Operations" },
-      { name: "description", content: "Read and answer one PocketPilot support request." },
-      { property: "og:title", content: "Support ticket — PocketPilot Operations" },
-      { property: "og:description", content: "Read and answer one PocketPilot support request." },
+      { title: "Support ticket — BillBuddy Operations" },
+      { name: "description", content: "Read and answer one BillBuddy support request." },
+      { property: "og:title", content: "Support ticket — BillBuddy Operations" },
+      { property: "og:description", content: "Read and answer one BillBuddy support request." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },

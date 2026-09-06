@@ -379,7 +379,7 @@ export function weeklySummaryDraft(
     skipped: false,
     draft: {
       type: "weekly_summary",
-      title: "Your weekly PocketPilot summary",
+      title: "Your weekly BillBuddy summary",
       body: lines.join(" · "),
       dedupeKey: `weekly_summary:${input.weekStart}`,
     },

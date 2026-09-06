@@ -5,12 +5,12 @@ import { TransactionsPage } from "@/pages/TransactionsPage";
 export const Route = createFileRoute("/_authenticated/transactions/")({
   head: () => ({
     meta: [
-      { title: "Transactions — PocketPilot" },
+      { title: "Transactions — BillBuddy" },
       {
         name: "description",
         content: "Search, filter and export every income, expense and bill payment you record.",
       },
-      { property: "og:title", content: "Transactions — PocketPilot" },
+      { property: "og:title", content: "Transactions — BillBuddy" },
       {
         property: "og:description",
         content: "Search, filter and export every income, expense and bill payment you record.",

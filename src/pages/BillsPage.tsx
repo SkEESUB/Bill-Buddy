@@ -255,7 +255,7 @@ export function BillsPage() {
           title={rows.length === 0 ? "No bills yet" : "Nothing matches this view"}
           subtitle={
             rows.length === 0
-              ? "Add your first bill and PocketPilot will keep every instalment on schedule."
+              ? "Add your first bill and BillBuddy will keep every instalment on schedule."
               : "Try a different filter or search term."
           }
           action={

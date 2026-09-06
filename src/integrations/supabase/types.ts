@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      spending_goals: {
+        Row: {
+          category: string | null
+          created_at: string
+          current_amount: number
+          description: string | null
+          id: string
+          status: "active" | "completed" | "cancelled"
+          target_amount: number
+          target_date: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          current_amount?: number
+          description?: string | null
+          id?: string
+          status?: "active" | "completed" | "cancelled"
+          target_amount: number
+          target_date?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          current_amount?: number
+          description?: string | null
+          id?: string
+          status?: "active" | "completed" | "cancelled"
+          target_amount?: number
+          target_date?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bill_reminders: {
+        Row: {
+          bill_occurrence_id: string
+          created_at: string
+          id: string
+          reminder_type: "email" | "push" | "in_app"
+          scheduled_for: string
+          sent_at: string | null
+          status: "pending" | "sent" | "failed" | "cancelled"
+          user_id: string
+        }
+        Insert: {
+          bill_occurrence_id: string
+          created_at?: string
+          id?: string
+          reminder_type: "email" | "push" | "in_app"
+          scheduled_for: string
+          sent_at?: string | null
+          status?: "pending" | "sent" | "failed" | "cancelled"
+          user_id: string
+        }
+        Update: {
+          bill_occurrence_id?: string
+          created_at?: string
+          id?: string
+          reminder_type?: "email" | "push" | "in_app"
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: "pending" | "sent" | "failed" | "cancelled"
+          user_id?: string
+        }
+        Relationships: []
+      }
       attachments: {
         Row: {
           bill_id: string | null
