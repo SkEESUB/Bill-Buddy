@@ -58,9 +58,6 @@ export function LoginPage() {
         email: target,
         options: {
           shouldCreateUser: true,
-          ...(typeof window !== "undefined" && window.location.origin
-            ? { emailRedirectTo: window.location.origin }
-            : {}),
         },
       });
       console.log("📨 Backend response:", { data, error: otpError });
