@@ -1,66 +1,52 @@
 import { Link } from "@tanstack/react-router";
-import { LogOut, Receipt, Shield } from "lucide-react";
+import { Receipt } from "lucide-react";
 import { NAV_ITEMS } from "./nav-items";
 import { useAuth } from "@/hooks/useAuth";
-import { useAdminSession } from "@/hooks/useAdminSession";
 import { NotificationBell } from "@/components/layout/NotificationBell";
+import { UserMenu } from "@/components/UserMenu";
 
 export function TopNav() {
-  const { isAuthenticated, signOut } = useAuth();
-  const { isAdmin } = useAdminSession({ enabled: isAuthenticated });
+  const { isAuthenticated } = useAuth();
 
   return (
-    <header className="sticky top-0 z-20 border-b border-border-light bg-background/90 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2 font-semibold text-text-primary">
-          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-[var(--shadow-primary)]">
+    <header className="sticky top-0 z-20 border-b border-border-light/80 bg-surface/90 backdrop-blur-md">
+      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
+        {/* Brand Logo */}
+        <Link to="/" className="flex items-center gap-2.5 font-semibold text-text-primary group">
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm transition-transform group-hover:scale-105">
             <Receipt className="h-4 w-4" />
           </span>
           <span className="text-[17px] font-extrabold tracking-tight">BillBuddy</span>
         </Link>
-        <nav aria-label="Primary" className="hidden items-center gap-1 sm:flex">
+
+        {/* Desktop Navigation Links */}
+        <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.to}
               to={item.to}
               activeOptions={{ exact: item.to === "/" }}
-              className="rounded-xl px-3 py-1.5 text-sm font-semibold text-text-secondary transition-colors hover:text-text-primary"
-              activeProps={{ className: "bg-lilac/45 !text-primary" }}
+              className="rounded-lg px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:text-text-primary hover:bg-muted"
+              activeProps={{ className: "bg-lilac/50 !text-primary font-bold" }}
             >
               {item.label}
             </Link>
           ))}
-          <Link
-            to="/settings"
-            className="rounded-xl px-3 py-1.5 text-sm font-semibold text-text-secondary transition-colors hover:text-text-primary"
-            activeProps={{ className: "bg-lilac/45 !text-primary" }}
-          >
-            Settings
-          </Link>
         </nav>
-        {isAuthenticated ? (
-          <div className="flex items-center gap-2">
-            {isAdmin ? (
-              <Link
-                to="/admin"
-                aria-label="Operations"
-                className="flex h-11 w-11 items-center justify-center rounded-xl text-text-secondary transition-colors hover:text-primary"
-                activeProps={{ className: "bg-lilac/45 !text-primary" }}
-              >
-                <Shield className="h-[18px] w-[18px]" />
-              </Link>
-            ) : null}
-            <NotificationBell />
-            <button onClick={() => void signOut()} className="btn btn-secondary !min-h-11 !text-xs">
-              <LogOut className="h-4 w-4" />
-              Sign out
-            </button>
-          </div>
-        ) : (
-          <Link to="/login" className="btn btn-primary !min-h-11 !text-xs">
-            Sign in
-          </Link>
-        )}
+
+        {/* Right Action Icons: Notification Bell & User Avatar Menu */}
+        <div className="flex items-center gap-2">
+          {isAuthenticated ? (
+            <>
+              <NotificationBell />
+              <UserMenu />
+            </>
+          ) : (
+            <Link to="/login" className="btn btn-primary !min-h-9 !py-1 !px-3.5 !text-xs">
+              Sign in
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   );

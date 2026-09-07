@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Plus, Search, SearchX, Wallet, X } from "lucide-react";
+import { ArrowLeftRight, Plus, Search, SearchX, Wallet, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   addTransaction,
@@ -14,18 +14,21 @@ import {
 import { EXPENSE_CATEGORIES, moneyCategory } from "@/lib/categories";
 import { formatAmount, formatAmountShort, monthLabel, toDay } from "@/lib/format";
 import { log } from "@/lib/logger";
+import { toUserMessage } from "@/lib/errors";
 import { useDebounced } from "@/hooks/useDebounced";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyState } from "@/components/EmptyState";
 import { BillListSkeleton } from "@/components/Skeletons";
 import { TransactionCard } from "@/components/TransactionCard";
 import { TransactionFormModal, type TransactionInput } from "@/components/TransactionFormModal";
+import { TransactionsPage } from "@/pages/TransactionsPage";
 import type { Budget, Transaction } from "@/types/database";
 import { useModalA11y } from "@/hooks/useModalA11y";
 
 type FilterKey = "all" | "income" | "expense";
 
 export function MoneyPage() {
+  const [viewMode, setViewMode] = useState<"overview" | "ledger">("overview");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [monthRows, setMonthRows] = useState<Transaction[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
@@ -64,7 +67,7 @@ export function MoneyPage() {
       setBudgets(b);
       setBalance(Number(settings.starting_balance ?? 0) + delta);
     } catch (e) {
-      const message = e instanceof Error ? e.message : "Failed to load money data";
+      const message = toUserMessage(e);
       log.error(message, e);
       setError(message);
     } finally {
@@ -192,7 +195,37 @@ export function MoneyPage() {
         </div>
       </header>
 
-      <div className="card p-6">
+      {/* Segment switcher */}
+      <div className="flex gap-1 border-b border-border-light pb-px">
+        <button
+          type="button"
+          onClick={() => setViewMode("overview")}
+          className={`flex items-center gap-2 rounded-t-xl px-4 py-2 text-xs font-semibold transition-colors border-b-2 cursor-pointer ${
+            viewMode === "overview"
+              ? "border-primary text-primary bg-lilac/20"
+              : "border-transparent text-text-secondary hover:text-text-primary"
+          }`}
+        >
+          <Wallet className="h-3.5 w-3.5" /> Overview & Budgets
+        </button>
+        <button
+          type="button"
+          onClick={() => setViewMode("ledger")}
+          className={`flex items-center gap-2 rounded-t-xl px-4 py-2 text-xs font-semibold transition-colors border-b-2 cursor-pointer ${
+            viewMode === "ledger"
+              ? "border-primary text-primary bg-lilac/20"
+              : "border-transparent text-text-secondary hover:text-text-primary"
+          }`}
+        >
+          <ArrowLeftRight className="h-3.5 w-3.5" /> Full Ledger & Transactions
+        </button>
+      </div>
+
+      {viewMode === "ledger" ? (
+        <TransactionsPage embedded />
+      ) : (
+        <>
+          <div className="card p-6">
         <h2 className="text-xs font-semibold uppercase tracking-widest text-text-tertiary">
           Current balance
         </h2>
@@ -480,6 +513,8 @@ export function MoneyPage() {
           </div>
         </div>
       ) : null}
+        </>
+      )}
     </section>
   );
 }

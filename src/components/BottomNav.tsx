@@ -1,28 +1,66 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { NAV_ITEMS } from "./nav-items";
+import { Plus } from "lucide-react";
+import { MOBILE_LEFT_ITEMS, MOBILE_RIGHT_ITEMS } from "./nav-items";
+import { QuickAddModal } from "./QuickAddModal";
 
 export function BottomNav() {
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
+
   return (
-    <nav
-      aria-label="Primary mobile"
-      className="safe-bottom fixed inset-x-3 bottom-3 z-20 rounded-[24px] border border-border-light/70 bg-surface py-2 shadow-[var(--neu-raised-lg)] sm:hidden"
-    >
-      <div className="flex items-stretch px-1.5">
-        {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
-          <Link
-            key={to}
-            to={to}
-            activeOptions={{ exact: to === "/" }}
-            className="mx-0.5 flex min-h-11 flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-semibold text-text-tertiary transition-all"
-            activeProps={{
-              className: "bg-lilac/45 !text-primary shadow-[var(--neu-inset)]",
-            }}
-          >
-            <Icon className="h-5 w-5" />
-            {label}
-          </Link>
-        ))}
-      </div>
-    </nav>
+    <>
+      <nav
+        aria-label="Primary mobile navigation"
+        className="safe-bottom fixed inset-x-0 bottom-0 z-30 sm:hidden border-t border-border-light/80 bg-surface/95 backdrop-blur-md px-2 py-1.5 shadow-lg"
+      >
+        <div className="flex items-center justify-around max-w-md mx-auto">
+          {/* Left items */}
+          {MOBILE_LEFT_ITEMS.map(({ to, label, icon: Icon }) => (
+            <Link
+              key={to}
+              to={to}
+              activeOptions={{ exact: to === "/" }}
+              className="flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1 text-[11px] font-medium text-text-tertiary transition-colors hover:text-text-primary"
+              activeProps={{
+                className: "!text-primary font-semibold",
+              }}
+            >
+              <Icon className="h-5 w-5" />
+              <span>{label}</span>
+            </Link>
+          ))}
+
+          {/* Center Quick Add Floating Button */}
+          <div className="flex flex-1 items-center justify-center -mt-4">
+            <button
+              type="button"
+              onClick={() => setQuickAddOpen(true)}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-transform active:scale-95 hover:brightness-110 cursor-pointer"
+              aria-label="Quick Add"
+            >
+              <Plus className="h-6 w-6 stroke-[2.5]" />
+            </button>
+          </div>
+
+          {/* Right items */}
+          {MOBILE_RIGHT_ITEMS.map(({ to, label, icon: Icon }) => (
+            <Link
+              key={to}
+              to={to}
+              activeOptions={{ exact: to === "/" }}
+              className="flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1 text-[11px] font-medium text-text-tertiary transition-colors hover:text-text-primary"
+              activeProps={{
+                className: "!text-primary font-semibold",
+              }}
+            >
+              <Icon className="h-5 w-5" />
+              <span>{label}</span>
+            </Link>
+          ))}
+        </div>
+      </nav>
+
+      <QuickAddModal open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />
+    </>
   );
 }

@@ -124,6 +124,8 @@ export type Profile = {
   avatar_url: string | null;
   mobile: string | null;
   default_upi_id: string | null;
+  onboarding_completed?: boolean;
+  onboarding_step?: number;
   created_at: string;
   updated_at: string;
 };

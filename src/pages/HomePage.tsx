@@ -202,52 +202,92 @@ export function HomePage() {
         </div>
       ) : null}
 
-      {/* Hero */}
-      <div className="card relative overflow-hidden rounded-[28px] p-6">
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-lilac/35 blur-2xl"
-        />
-        <h1 className="text-[15px] font-semibold text-text-secondary">
-          {greeting()}, <span className="text-text-primary">{name}</span>
-        </h1>
-        <p className="mt-3 text-[12px] font-bold uppercase tracking-[0.14em] text-text-tertiary">
-          Safe to spend this month
-        </p>
-        <p
-          className="mt-1 text-[36px] font-extrabold leading-tight tabular-nums"
-          style={{ color: spend.safeToSpend < 0 ? "#A73A4C" : "var(--primary)" }}
-        >
-          {formatAmountShort(spend.safeToSpend)}
-        </p>
-        <p className="mt-1 text-[13px] text-text-secondary">
-          {spend.safeToSpend < 0
-            ? `You're ${formatAmountShort(Math.abs(spend.safeToSpend))} short of this month's bills.`
-            : `${formatAmountShort(spend.dailySafeSpend)} a day for the rest of the month.`}
-        </p>
+      {/* Hero Financial Card */}
+      <div className="card relative overflow-hidden p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-sm font-semibold text-text-secondary">
+              {greeting()}, <span className="text-text-primary font-bold">{name}</span>
+            </h1>
+            <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-text-tertiary">
+              Safe to spend this month
+            </p>
+            <p
+              className="mt-0.5 text-3xl sm:text-4xl font-extrabold leading-tight tabular-nums"
+              style={{ color: spend.safeToSpend < 0 ? "var(--status-error)" : "var(--primary)" }}
+            >
+              {formatAmountShort(spend.safeToSpend)}
+            </p>
+            <p className="mt-1 text-xs text-text-secondary">
+              {spend.safeToSpend < 0
+                ? `You're ${formatAmountShort(Math.abs(spend.safeToSpend))} short of this month's bills.`
+                : `${formatAmountShort(spend.dailySafeSpend)} daily allowance remaining.`}
+            </p>
+          </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-3">
-          <div className="rounded-2xl bg-soft-plum p-3">
-            <p className="text-xs text-text-secondary">Due this week</p>
-            <p className="text-lg font-bold text-text-primary">
-              {formatAmountShort(totals.dueThisWeekAmount)}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setEditing(null);
+                setFormOpen(true);
+              }}
+              className="btn btn-primary !min-h-10 !text-xs cursor-pointer shadow-sm"
+            >
+              <Plus className="h-4 w-4" /> Add Bill
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setTxType("expense");
+                setTxOpen(true);
+              }}
+              className="btn btn-secondary !min-h-10 !text-xs cursor-pointer"
+            >
+              Record Spend
+            </button>
+          </div>
+        </div>
+
+        {/* 4 Financial KPI cards */}
+        <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div className="rounded-xl border border-border-light/80 bg-surface p-3">
+            <p className="text-[11px] font-medium text-text-secondary">Available Balance</p>
+            <p className="text-base font-bold text-text-primary tabular-nums">
+              {formatAmountShort(totals.available)}
+            </p>
+          </div>
+          <div className="rounded-xl border border-border-light/80 bg-soft-green/60 p-3">
+            <p className="text-[11px] font-medium text-status-success">Income this Month</p>
+            <p className="text-base font-bold text-status-success tabular-nums">
+              {formatAmountShort(totals.monthIncome)}
+            </p>
+          </div>
+          <div className="rounded-xl border border-border-light/80 bg-soft-red/60 p-3">
+            <p className="text-[11px] font-medium text-status-error">Spent this Month</p>
+            <p className="text-base font-bold text-status-error tabular-nums">
+              {formatAmountShort(totals.monthSpending)}
             </p>
           </div>
           <div
-            className="rounded-2xl p-3"
-            style={{ backgroundColor: totals.overdueAmount ? "#FCEAED" : "var(--soft-blue)" }}
+            className={`rounded-xl border border-border-light/80 p-3 ${
+              totals.overdueAmount > 0 ? "bg-soft-red/80 text-status-error" : "bg-surface"
+            }`}
           >
-            <p className="text-xs text-text-secondary">Overdue</p>
+            <p className="text-[11px] font-medium text-text-secondary">
+              {totals.overdueAmount > 0 ? "Overdue" : "Due This Week"}
+            </p>
             <p
-              className="text-lg font-bold"
-              style={{ color: totals.overdueAmount ? "#A73A4C" : "var(--text-primary)" }}
+              className="text-base font-bold tabular-nums"
+              style={{ color: totals.overdueAmount > 0 ? "var(--status-error)" : "var(--text-primary)" }}
             >
-              {formatAmountShort(totals.overdueAmount)}
+              {formatAmountShort(totals.overdueAmount > 0 ? totals.overdueAmount : totals.dueThisWeekAmount)}
             </p>
           </div>
         </div>
 
-        <div className="mt-4">
+        {/* Budget bar */}
+        <div className="mt-4 pt-3 border-t border-border-light/70">
           <div className="flex items-center justify-between text-xs text-text-secondary">
             <span>
               {totals.monthlyBudgetLimit > 0 ? "Monthly budget used" : "Spent this month"}
@@ -259,7 +299,7 @@ export function HomePage() {
             </span>
           </div>
           <div
-            className="neu-inset mt-1.5 h-2.5 w-full overflow-hidden rounded-full"
+            className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-muted"
             role="progressbar"
             aria-valuenow={finance.overallBudget.percentageUsed}
             aria-valuemin={0}
@@ -271,68 +311,14 @@ export function HomePage() {
               style={{
                 width: `${Math.min(100, finance.overallBudget.percentageUsed)}%`,
                 backgroundColor:
-                  finance.overallBudget.status === "over_budget" ? "#C94F62" : "var(--primary)",
+                  finance.overallBudget.status === "over_budget"
+                    ? "var(--status-error)"
+                    : "var(--primary)",
               }}
             />
           </div>
         </div>
       </div>
-
-      {/* Quick actions */}
-      <div className="mt-4 grid grid-cols-4 gap-3">
-        <QuickAction
-          icon={Plus}
-          label="Add Bill"
-          onClick={() => {
-            setEditing(null);
-            setFormOpen(true);
-          }}
-        />
-        <QuickAction
-          icon={ClipboardList}
-          label="Bills"
-          onClick={() => void navigate({ to: "/bills" })}
-        />
-        <QuickAction icon={Wallet} label="Money" onClick={() => void navigate({ to: "/money" })} />
-        <QuickAction
-          icon={BarChart3}
-          label="Insights"
-          onClick={() => void navigate({ to: "/analytics" })}
-        />
-      </div>
-
-      {/* Cash flow */}
-      <button
-        type="button"
-        onClick={() => void navigate({ to: "/money" })}
-        className="card mt-4 w-full p-5 text-left transition-shadow hover:shadow-lg"
-      >
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-text-tertiary">
-              Available balance
-            </p>
-            <p className="text-2xl font-bold tabular-nums text-text-primary">
-              {formatAmountShort(totals.available)}
-            </p>
-          </div>
-          <span className="text-xs font-semibold text-primary">Open tracker →</span>
-        </div>
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          <div className="rounded-2xl bg-[#E7F5EF] p-3">
-            <p className="text-xs text-[#1F7053]">Income this month</p>
-            <p className="text-base font-bold text-[#1F7053]">
-              {formatAmountShort(totals.monthIncome)}
-            </p>
-          </div>
-          <div className="rounded-2xl bg-[#FCEAED] p-3">
-            <p className="text-xs text-[#A73A4C]">Spent this month</p>
-            <p className="text-base font-bold text-[#A73A4C]">
-              {formatAmountShort(totals.monthSpending)}
-            </p>
-          </div>
-        </div>
-      </button>
 
       {/* Search + filters */}
       <div className="mt-6">
@@ -433,16 +419,57 @@ export function HomePage() {
         )}
       </div>
 
-      <FloatingAddButton
-        onAddBill={() => {
-          setEditing(null);
-          setFormOpen(true);
-        }}
-        onAddTransaction={(type) => {
-          setTxType(type);
-          setTxOpen(true);
-        }}
-      />
+      {/* Recent Activity Snapshot */}
+      {snapshot.transactions && snapshot.transactions.length > 0 && (
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-text-tertiary">
+              Recent Activity
+            </h2>
+            <Link
+              to="/money"
+              className="text-xs font-semibold text-primary hover:underline"
+            >
+              View all in Money →
+            </Link>
+          </div>
+          <div className="card divide-y divide-border-light/70 overflow-hidden">
+            {snapshot.transactions.slice(0, 4).map((tx) => (
+              <div key={tx.id} className="flex items-center justify-between p-3.5 hover:bg-muted/40 transition-colors">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-text-primary truncate">
+                    {tx.description || tx.category}
+                  </p>
+                  <p className="text-[11px] text-text-secondary">
+                    {tx.date} • {tx.category}
+                  </p>
+                </div>
+                <p
+                  className={`text-xs font-bold tabular-nums ml-3 shrink-0 ${
+                    tx.type === "income" ? "text-status-success" : "text-text-primary"
+                  }`}
+                >
+                  {tx.type === "income" ? "+" : "-"}{formatAmountShort(tx.amount)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Desktop speed dial (mobile uses center dock button) */}
+      <div className="hidden sm:block">
+        <FloatingAddButton
+          onAddBill={() => {
+            setEditing(null);
+            setFormOpen(true);
+          }}
+          onAddTransaction={(type) => {
+            setTxType(type);
+            setTxOpen(true);
+          }}
+        />
+      </div>
 
       <BillFormModal
         open={formOpen}

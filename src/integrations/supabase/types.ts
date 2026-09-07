@@ -838,6 +838,8 @@ export type Database = {
           full_name: string | null
           id: string
           mobile: string | null
+          onboarding_completed: boolean | null
+          onboarding_step: number | null
           status_changed_at: string | null
           status_reason: string | null
           updated_at: string
@@ -850,6 +852,8 @@ export type Database = {
           full_name?: string | null
           id: string
           mobile?: string | null
+          onboarding_completed?: boolean | null
+          onboarding_step?: number | null
           status_changed_at?: string | null
           status_reason?: string | null
           updated_at?: string
@@ -862,6 +866,8 @@ export type Database = {
           full_name?: string | null
           id?: string
           mobile?: string | null
+          onboarding_completed?: boolean | null
+          onboarding_step?: number | null
           status_changed_at?: string | null
           status_reason?: string | null
           updated_at?: string

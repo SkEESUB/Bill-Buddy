@@ -2,7 +2,11 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
 import { brokeredPreviewStorage } from "./previewAuthStorage";
-import { normalizeSupabaseUrl } from "@/lib/utils/normalize-url";
+import {
+  normalizeSupabaseUrl,
+  AUTHORITATIVE_PUBLISHABLE_KEY,
+  DEPRECATED_GHOST_PUBLISHABLE_KEY,
+} from "@/lib/utils/normalize-url";
 
 function isNewSupabaseApiKey(value: string): boolean {
   return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
@@ -54,7 +58,7 @@ function createSupabaseClient() {
     console.error("[BillBuddy] VITE_SUPABASE_PUBLISHABLE_KEY is not set.");
   }
 
-  const SUPABASE_PUBLISHABLE_KEY =
+  let SUPABASE_PUBLISHABLE_KEY =
     (typeof import.meta !== "undefined" &&
       (import.meta.env?.["VITE_SUPABASE_PUBLISHABLE_KEY"] ||
         import.meta.env?.["VITE_SUPABASE_ANON_KEY"])) ||
@@ -62,6 +66,15 @@ function createSupabaseClient() {
     process.env["VITE_SUPABASE_ANON_KEY"] ||
     process.env["SUPABASE_PUBLISHABLE_KEY"] ||
     process.env["SUPABASE_ANON_KEY"];
+
+  if (!SUPABASE_PUBLISHABLE_KEY || SUPABASE_PUBLISHABLE_KEY === DEPRECATED_GHOST_PUBLISHABLE_KEY) {
+    if (SUPABASE_PUBLISHABLE_KEY === DEPRECATED_GHOST_PUBLISHABLE_KEY) {
+      console.warn(
+        "[BillBuddy] Detected deprecated ghost project publishable key. Rerouting to authoritative project key."
+      );
+    }
+    SUPABASE_PUBLISHABLE_KEY = AUTHORITATIVE_PUBLISHABLE_KEY;
+  }
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     const missing = [

@@ -8,6 +8,7 @@ export const Route = createFileRoute("/_authenticated")({
     if (error || !data.user) throw redirect({ to: "/login" });
 
     // A suspended or closed account keeps its data but loses access.
+    // Query account_status safely; if onboarding columns are present, handle them gracefully
     const { data: profile } = await supabase
       .from("profiles")
       .select("account_status")

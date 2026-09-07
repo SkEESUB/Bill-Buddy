@@ -162,6 +162,8 @@ const profileInput = z.object({
   mobile: z.string().trim().max(20).nullable().optional(),
   default_upi_id: z.string().trim().max(120).nullable().optional(),
   avatar_url: z.string().trim().max(500).nullable().optional(),
+  onboarding_completed: z.boolean().optional(),
+  onboarding_step: z.number().int().min(0).max(10).optional(),
 });
 
 export type ProfileInput = z.infer<typeof profileInput>;

@@ -6,6 +6,7 @@ import { useDebounced } from "@/hooks/useDebounced";
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "@/lib/categories";
 import { formatAmountShort, toDay } from "@/lib/format";
 import { log } from "@/lib/logger";
+import { toUserMessage } from "@/lib/errors";
 import {
   DATE_RANGES,
   METHOD_LABELS,
@@ -48,7 +49,7 @@ function download(filename: string, mime: string, content: string) {
 }
 
 /** Full financial ledger: filters, search, grouped rows, pagination and export. */
-export function TransactionsPage() {
+export function TransactionsPage({ embedded = false }: { embedded?: boolean } = {}) {
   const listTransactions = useServerFn(listTransactionsFn);
   const exportTransactions = useServerFn(exportTransactionsFn);
   const createTransaction = useServerFn(createTransactionFn);
@@ -108,7 +109,7 @@ export function TransactionsPage() {
         setHasMore(result.hasMore);
       } catch (e) {
         if (seq !== requestSeq.current) return;
-        const message = e instanceof Error ? e.message : "Failed to load transactions";
+        const message = toUserMessage(e);
         log.error(message, e);
         setError(message);
       } finally {
