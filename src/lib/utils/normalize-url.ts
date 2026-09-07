@@ -8,10 +8,14 @@ export function normalizeSupabaseUrl(raw: string): string {
   if (!raw) return AUTHORITATIVE_SUPABASE_URL;
   const trimmed = raw.trim().replace(/\/$/, '');
 
-  // Guard against stale/empty ghost project URLs in production deployments
-  if (trimmed.includes(DEPRECATED_GHOST_PROJECT_ID)) {
+  // Guard against any typo, ghost domain, or non-authoritative domain
+  if (
+    trimmed.includes(DEPRECATED_GHOST_PROJECT_ID) ||
+    trimmed.includes("ocajeyatrckazoxavvgg") ||
+    !trimmed.includes(AUTHORITATIVE_SUPABASE_PROJECT_ID)
+  ) {
     console.warn(
-      `[BillBuddy] Detected deprecated ghost project (${DEPRECATED_GHOST_PROJECT_ID}). Rerouting to authoritative project (${AUTHORITATIVE_SUPABASE_PROJECT_ID}).`
+      `[BillBuddy] Intercepted non-authoritative or corrupted Supabase URL (${trimmed}). Enforcing authoritative URL (${AUTHORITATIVE_SUPABASE_URL}).`
     );
     return AUTHORITATIVE_SUPABASE_URL;
   }
