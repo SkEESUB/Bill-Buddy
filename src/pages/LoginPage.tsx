@@ -56,9 +56,6 @@ export function LoginPage() {
     try {
       const { data, error: otpError } = await supabase.auth.signInWithOtp({
         email: target,
-        options: {
-          shouldCreateUser: true,
-        },
       });
       console.log("📨 Backend response:", { data, error: otpError });
       if (otpError) throw otpError;

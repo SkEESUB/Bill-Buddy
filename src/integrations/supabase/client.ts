@@ -2,13 +2,9 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
 import { brokeredPreviewStorage } from "./previewAuthStorage";
-import {
-  AUTHORITATIVE_SUPABASE_URL,
-  AUTHORITATIVE_PUBLISHABLE_KEY,
-} from "@/lib/utils/normalize-url";
-
-export const SUPABASE_URL = AUTHORITATIVE_SUPABASE_URL;
-export const SUPABASE_PUBLISHABLE_KEY = AUTHORITATIVE_PUBLISHABLE_KEY;
+export const SUPABASE_PROJECT_ID = "xsytaixmyeypoiscfbim";
+export const SUPABASE_URL = "https://xsytaixmyeypoiscfbim.supabase.co";
+export const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_UIFyTcBEjaY-CjmupJEnNg__5rTgjKm";
 
 function isNewSupabaseApiKey(value: string): boolean {
   return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");

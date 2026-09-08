@@ -2,10 +2,7 @@ import { createMiddleware } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
-import {
-  AUTHORITATIVE_SUPABASE_URL,
-  AUTHORITATIVE_PUBLISHABLE_KEY,
-} from "@/lib/utils/normalize-url";
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "./client";
 
 function isNewSupabaseApiKey(value: string): boolean {
   return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
@@ -36,8 +33,8 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 
 export const requireSupabaseAuth = createMiddleware({ type: "function" }).server(
   async ({ next }) => {
-    const supabaseUrl = AUTHORITATIVE_SUPABASE_URL;
-    const anonKey = AUTHORITATIVE_PUBLISHABLE_KEY;
+    const supabaseUrl = SUPABASE_URL;
+    const anonKey = SUPABASE_PUBLISHABLE_KEY;
 
     const request = getRequest();
 
