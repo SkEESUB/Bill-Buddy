@@ -1,24 +1,10 @@
 export const AUTHORITATIVE_SUPABASE_PROJECT_ID = "ocajeaytrcakzoxavvvg";
 export const AUTHORITATIVE_SUPABASE_URL = "https://ocajeaytrcakzoxavvvg.supabase.co";
 export const AUTHORITATIVE_PUBLISHABLE_KEY = "sb_publishable_saQROBUNabTGkLIVL7V5gQ_7LMxhJI9";
-export const DEPRECATED_GHOST_PROJECT_ID = "xsytaixmyeypoiscfbim";
-export const DEPRECATED_GHOST_PUBLISHABLE_KEY = "sb_publishable_UIFyTcBEjaY-CjmupJEnNg__5rTgjKm";
 
-export function normalizeSupabaseUrl(raw: string): string {
+export function normalizeSupabaseUrl(raw?: string): string {
   if (!raw) return AUTHORITATIVE_SUPABASE_URL;
   const trimmed = raw.trim().replace(/\/$/, '');
-
-  // Guard against any typo, ghost domain, or non-authoritative domain
-  if (
-    trimmed.includes(DEPRECATED_GHOST_PROJECT_ID) ||
-    trimmed.includes("ocajeyatrckazoxavvgg") ||
-    !trimmed.includes(AUTHORITATIVE_SUPABASE_PROJECT_ID)
-  ) {
-    console.warn(
-      `[BillBuddy] Intercepted non-authoritative or corrupted Supabase URL (${trimmed}). Enforcing authoritative URL (${AUTHORITATIVE_SUPABASE_URL}).`
-    );
-    return AUTHORITATIVE_SUPABASE_URL;
-  }
 
   try {
     const parsed = new URL(trimmed);

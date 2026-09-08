@@ -3,9 +3,8 @@ import { getRequest } from "@tanstack/react-start/server";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
 import {
-  normalizeSupabaseUrl,
+  AUTHORITATIVE_SUPABASE_URL,
   AUTHORITATIVE_PUBLISHABLE_KEY,
-  DEPRECATED_GHOST_PUBLISHABLE_KEY,
 } from "@/lib/utils/normalize-url";
 
 function isNewSupabaseApiKey(value: string): boolean {
@@ -37,40 +36,8 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 
 export const requireSupabaseAuth = createMiddleware({ type: "function" }).server(
   async ({ next }) => {
-    const supabaseUrl = normalizeSupabaseUrl(
-      process.env["SUPABASE_URL"] ??
-      process.env["VITE_SUPABASE_URL"] ??
-      (typeof import.meta !== "undefined" && import.meta.env?.["VITE_SUPABASE_URL"]) ??
-      ""
-    );
-    let anonKey =
-      process.env["SUPABASE_PUBLISHABLE_KEY"] ??
-      process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ??
-      process.env["SUPABASE_ANON_KEY"] ??
-      process.env["VITE_SUPABASE_ANON_KEY"] ??
-      (typeof import.meta !== "undefined" &&
-        (import.meta.env?.["VITE_SUPABASE_PUBLISHABLE_KEY"] ||
-          import.meta.env?.["VITE_SUPABASE_ANON_KEY"])) ??
-      "";
-
-    if (!anonKey || anonKey === DEPRECATED_GHOST_PUBLISHABLE_KEY) {
-      if (anonKey === DEPRECATED_GHOST_PUBLISHABLE_KEY) {
-        console.warn(
-          "[BillBuddy] Detected deprecated ghost project publishable key in middleware. Rerouting to authoritative project key."
-        );
-      }
-      anonKey = AUTHORITATIVE_PUBLISHABLE_KEY;
-    }
-
-    if (!supabaseUrl || !anonKey) {
-      const missing = [
-        ...(!supabaseUrl ? ["SUPABASE_URL"] : []),
-        ...(!anonKey ? ["SUPABASE_PUBLISHABLE_KEY"] : []),
-      ];
-      const message = `Missing Supabase environment variable(s): ${missing.join(", ")}. Connect Supabase in Lovable Cloud.`;
-      console.error(`[Supabase] ${message}`);
-      throw new Error(message);
-    }
+    const supabaseUrl = AUTHORITATIVE_SUPABASE_URL;
+    const anonKey = AUTHORITATIVE_PUBLISHABLE_KEY;
 
     const request = getRequest();
 
