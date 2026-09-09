@@ -1,4 +1,4 @@
-﻿// src/lib/errors.ts
+// src/lib/errors.ts
 // BillBuddy Domain Error Classifier
 // Maps raw errors to user-friendly messages with correct context
 
@@ -85,6 +85,7 @@ export function classifyError(error: unknown): ClassifiedError {
     lower.includes('could not find the table') ||
     (lower.includes('relation') && lower.includes('does not exist'))
   ) {
+    console.error('[BillBuddy Database Error] Schema/table missing:', raw);
     return {
       kind: 'missing_table',
       message: 'Service temporarily unavailable.',

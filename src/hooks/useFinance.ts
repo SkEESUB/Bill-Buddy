@@ -118,6 +118,7 @@ export function useFinance() {
           });
         }
       } catch (e) {
+        console.error("[useFinance] Error loading financial data:", e);
         if (!mounted.current) return;
         setError(classifyError(e).message);
       } finally {

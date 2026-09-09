@@ -117,7 +117,8 @@ export function ProfilePage() {
       setNotifyPayments(s.notify_payment_recorded ?? true);
       setNotifyWeekly(s.notify_weekly_summary ?? true);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to load profile");
+      console.error("[ProfilePage] Error loading profile or settings:", err);
+      toast.error(toUserMessage(err));
     } finally {
       setLoading(false);
     }
