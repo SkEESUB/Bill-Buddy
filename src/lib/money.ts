@@ -10,6 +10,7 @@
 export type RepeatType = "none" | "weekly" | "monthly" | "quarterly" | "yearly" | "custom";
 
 export type OccurrenceStatus =
+  | "pending"
   | "upcoming"
   | "due_soon"
   | "due_today"
@@ -193,6 +194,7 @@ export function statusPriority(status: OccurrenceStatus): number {
     due_soon: 3,
     payment_pending: 4,
     upcoming: 5,
+    pending: 5,
     paid: 6,
     skipped: 7,
     cancelled: 8,

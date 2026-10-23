@@ -119,7 +119,7 @@ export async function syncBillOccurrences(
         user_id: userId,
         scheduled_date: date,
         expected_amount: bill.amount,
-        status: "upcoming",
+        status: "pending",
       })) as never,
     );
     if (error) throw error;

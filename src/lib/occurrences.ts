@@ -38,6 +38,7 @@ export const STATUS_BADGES: Record<
   due_today: { label: "Due today", bg: "#FFF3DF", color: "#9C6318" },
   due_soon: { label: "Due soon", bg: "#FFF3DF", color: "#9C6318" },
   upcoming: { label: "Upcoming", bg: "#EEE5F5", color: "#4B1D3F" },
+  pending: { label: "Pending", bg: "#EEE5F5", color: "#4B1D3F" },
   payment_pending: { label: "Payment pending", bg: "#E6EEFA", color: "#2C4E86" },
   payment_failed: { label: "Payment failed", bg: "#FCEAED", color: "#A73A4C" },
   paid: { label: "Paid", bg: "#E7F5EF", color: "#1F7053" },
@@ -47,7 +48,7 @@ export const STATUS_BADGES: Record<
 
 /** Map one occurrence row into its rendered view for `today`. */
 export function toView(row: OccurrenceWithBill, today: string): OccurrenceView {
-  const stored = (row.status as OccurrenceStatus) ?? "upcoming";
+  const stored = (row.status as OccurrenceStatus) ?? "pending";
   const status = deriveOccurrenceStatus(stored, row.scheduled_date, today);
   const amount = Number(row.actual_amount ?? row.expected_amount);
   return {

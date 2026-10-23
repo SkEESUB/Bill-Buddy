@@ -391,7 +391,7 @@ export async function recordRefund(
     // A fully refunded instalment is no longer settled.
     await db
       .from("bill_occurrences")
-      .update({ status: "upcoming", paid_at: null, actual_amount: null, transaction_id: null } as never)
+      .update({ status: "pending", paid_at: null, actual_amount: null, transaction_id: null } as never)
       .eq("id", order.bill_occurrence_id);
   }
 
