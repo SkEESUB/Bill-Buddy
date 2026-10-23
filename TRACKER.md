@@ -1,10 +1,10 @@
 # Project Task Tracker & Issue Register — BillBuddy
 
-**Document Version:** 1.1.0  
+**Document Version:** 1.2.0  
 **Status:** Living Document / Authoritative  
 **Target Repository:** BillBuddy / Money Mind Frame  
 **Authoritative Supabase Project:** `xsytaixmyeypoiscfbim`  
-**Current Verification:** 186/186 Unit Tests Passing | TypeScript Strict: 0 Errors | Production Build: Succeeded  
+**Current Verification:** 186/186 Unit Tests Passing | TypeScript Strict: 0 Errors | Production Build: Succeeded (Zero Warnings)  
 **Last Updated:** 2026-10-23  
 
 ---
@@ -76,7 +76,7 @@
 | Issue ID | Priority | Description | Classification | Status | Remediation Plan |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **ISSUE-001** | **P0** | PostgREST `PGRST205` / "schema cache" error & `public.payment_orders does not exist` on live site | E. Blocked by configuration / execution | Blocked on Supabase dashboard execution | Execute [`supabase/migrations/001_billbuddy_schema.sql`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/supabase/migrations/001_billbuddy_schema.sql) in project `xsytaixmyeypoiscfbim` SQL editor. |
-| **ISSUE-002** | **P1** | Deprecated `.inputValidator()` calls in `src/lib/*.functions.ts` generating build warnings | C. Partially implemented (deprecated API) | In Progress | Update `inputValidator(...)` calls to `validator(...)` as recommended by TanStack Start. |
+| **ISSUE-002** | **P1** | Deprecated `.inputValidator()` calls in `src/lib/*.functions.ts` | Refactored | ✅ Resolved | All 12 modules migrated to `.validator()`. Build is warning-free. |
 | **ISSUE-003** | **P2** | Live browser end-to-end verification of user workflows A–F | B. Implemented but not verified in live browser | Pending P0 completion | Run manual & automated browser verification once live schema is established. |
 
 ---
@@ -88,6 +88,6 @@
 - [x] Migration state and ordering are documented.
 - [x] Automated tests pass (186/186 passing).
 - [x] Type checking passes (0 errors).
-- [x] Production build succeeds (`vite build` / Nitro output generated cleanly).
+- [x] Production build succeeds (`vite build` / Nitro output generated cleanly with zero deprecation warnings).
 - [ ] Live database schema executed in Supabase project `xsytaixmyeypoiscfbim`.
 - [ ] End-to-end live browser authentication and data persistence verified.

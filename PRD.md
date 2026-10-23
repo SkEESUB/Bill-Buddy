@@ -1,6 +1,6 @@
 # Product Requirements Document (PRD) — BillBuddy (Money Mind Frame)
 
-**Document Version:** 1.1.0  
+**Document Version:** 1.2.0  
 **Status:** Living Document / Authoritative  
 **Target Runtime:** TanStack Start (SSR) + React 19 + Nitro + Supabase  
 **Authoritative Supabase Project:** `xsytaixmyeypoiscfbim` (`https://xsytaixmyeypoiscfbim.supabase.co`)  
@@ -89,7 +89,7 @@
 ### 4.1 Security & Compliance
 - **NFR-SEC-001 (Row-Level Security):** 100% of the 22 database tables containing user-associated data must enforce PostgreSQL RLS policies where `auth.uid() = user_id`.
 - **NFR-SEC-002 (Zero Secret Leakage):** Service-role keys and backend administrative credentials must never be bundled into client-accessible JavaScript artifacts.
-- **NFR-SEC-003 (Input Sanitization):** All inputs processed through TanStack Start server functions must validate payloads using Zod schemas before database dispatch.
+- **NFR-SEC-003 (Input Sanitization):** All inputs processed through TanStack Start server functions must validate payloads using Zod schemas (`.validator()`) before database dispatch.
 - **NFR-SEC-004 (Payment State Machine):** Strict transition validation for `payment_orders` preventing transitions out of `CAPTURED` except for verified refunds.
 
 ### 4.2 Performance & Responsiveness
@@ -99,48 +99,10 @@
 
 ---
 
-## 5. User Workflows
+## 5. Constraints & Dependencies
 
-### 5.1 Primary Authentication Journey
-```mermaid
-sequenceDiagram
-    autonumber
-    actor User as User Browser
-    participant UI as BillBuddy Login View
-    participant SB as Supabase Auth (xsytaixm...)
-    participant Mail as Email Dispatcher
-
-    User->>UI: Enters email address
-    UI->>SB: signInWithOtp({ email })
-    SB->>Mail: Sends 6-digit numeric token
-    Mail-->>User: Delivers OTP email
-    User->>UI: Inputs 6-digit code
-    UI->>SB: verifyOtp({ email, token, type: 'email' })
-    SB-->>UI: Returns Access & Refresh Tokens
-    UI->>UI: Sets local auth state & SSR session cookie
-    UI-->>User: Redirects to /dashboard (Home)
-```
-
-### 5.2 Bill Payment & Ledger Integrity Lifecycle
-```mermaid
-flowchart TD
-    Occ[Bill Occurrence Due] --> Order[Create payment_order: CREATED]
-    Order --> Attempt[Record payment_attempt: PENDING]
-    Attempt --> Provider{Provider Checkout}
-    Provider -- Success --> Capture[Transition payment_order: CAPTURED]
-    Capture --> Settle[Settle Bill Occurrence: PAID]
-    Capture --> Ledger[Append Settled Transaction to Ledger]
-    Provider -- Failure --> Fail[Transition payment_order: FAILED]
-    Fail --> Retry[Permit Retry / Secondary Attempt]
-```
-
----
-
-## 6. Constraints & Dependencies
-
-### 6.1 Database Schema Dependencies
+### 5.1 Database Schema Dependencies
 The application requires all 22 relational tables, RLS policies, triggers, and the two storage buckets (`avatars`, `receipts`) defined in [`supabase/migrations/001_billbuddy_schema.sql`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/supabase/migrations/001_billbuddy_schema.sql) to be active on project `xsytaixmyeypoiscfbim`.
 
-### 6.2 External Platform Guardrails
+### 5.2 External Platform Guardrails
 - **Lovable Sync Guardrail:** Changes pushed to repository branch `main` sync directly to the Lovable deployment engine. Force-pushing, history re-writing, and unverified package upgrades are strictly prohibited.
-- **Third-Party Integrations:** Payment gateway operations (Razorpay/Stripe) and Webhook ingestions run through strictly verified signature endpoints.

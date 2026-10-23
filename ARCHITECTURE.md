@@ -1,10 +1,10 @@
 # Architecture Document — BillBuddy (Money Mind Frame)
 
-**Document Version:** 1.1.0  
+**Document Version:** 1.2.0  
 **Status:** Living Document / Authoritative  
 **Target Runtime:** TanStack Start (SSR) + React 19 + Nitro + Supabase  
 **Authoritative Supabase Project:** `xsytaixmyeypoiscfbim` (`https://xsytaixmyeypoiscfbim.supabase.co`)  
-**Audit Verification:** 186/186 Tests Passing | TypeScript Strict: 0 Errors | Production Build: Verified  
+**Audit Verification:** 186/186 Tests Passing | TypeScript Strict: 0 Errors | Production Build: Clean (Zero Deprecation Warnings)  
 **Last Updated:** 2026-10-23  
 
 ---
@@ -25,7 +25,7 @@ flowchart TB
     subgraph SSRLayer ["Full-Stack SSR / Nitro Server Runtime"]
         Nitro["Nitro Server Engine"]
         StartSSR["TanStack Start SSR Pipeline"]
-        ServerFns["Server Functions (src/lib/*.functions.ts)"]
+        ServerFns["Server Functions (src/lib/*.functions.ts with .validator())"]
         AuthMid["SSR Cookie & Active Account Gate Middleware"]
         AdminSB["Supabase Server Admin Client<br/>(Service Role Key)"]
     end
@@ -55,7 +55,7 @@ flowchart TB
 
 ## 2. Server Functions Inventory (`src/lib/*.functions.ts`)
 
-Server-side mutations and aggregations are strictly partitioned into 12 dedicated server function modules:
+Server-side mutations and aggregations are strictly partitioned into 12 dedicated server function modules, fully modernized to `.validator()` schemas:
 
 | Server Function Module | File Path | Scope & Responsibilities |
 | :--- | :--- | :--- |
@@ -104,16 +104,3 @@ All tables are defined idempotently in [`supabase/migrations/001_billbuddy_schem
 ### Storage Buckets & Policies
 - **`avatars`**: Profile photos (user ID path-prefixed write access, public read).
 - **`receipts`**: Encrypted receipt and invoice document scans (authenticated user isolated).
-
----
-
-## 4. Architectural Boundaries & Security
-
-1. **Client / Server Boundary:**
-   - Client code cannot bypass RLS when querying via browser Supabase client.
-   - Privileged operations execute strictly through server functions verified by the `active-account` middleware.
-2. **Account Status Gating:**
-   - Any mutation attempted by a user whose profile `account_status != 'ACTIVE'` fails immediately before database execution.
-3. **Payment State Machine:**
-   - A payment order cannot transition to `CAPTURED` without verified provider authorization.
-   - Once `CAPTURED`, a payment order cannot be altered except by an explicit refund event.

@@ -1,6 +1,6 @@
 # Institutional Memory & Historical Decisions — BillBuddy
 
-**Document Version:** 1.1.0  
+**Document Version:** 1.2.0  
 **Status:** Living Document / Authoritative  
 **Target Repository:** BillBuddy / Money Mind Frame  
 **Authoritative Supabase Project:** `xsytaixmyeypoiscfbim`  
@@ -47,6 +47,11 @@ BillBuddy was initiated to solve recurring personal expense management, subscrip
   3. Active payment locks: Only one active payment order permitted per bill occurrence at any time.
   4. Append-only reversals: Reversals create offsetting rows linked to the original transaction without deleting historical data.
 
+### ADR-006: Server Function Modernization to `.validator()`
+- **Context:** TanStack Start deprecated `.inputValidator()` in favor of `.validator()`, causing 50+ compilation warnings across Vite build chunks.
+- **Decision:** Refactored all 12 server function modules in `src/lib/*.functions.ts` to use `.validator()`.
+- **Impact:** Clean, warning-free production builds and strict input parsing before server handler execution.
+
 ---
 
 ## 3. Critical Bug Fixes & Post-Mortems
@@ -58,8 +63,8 @@ BillBuddy was initiated to solve recurring personal expense management, subscrip
 
 ### Post-Mortem 002: PostgREST Schema Cache Miss (`PGRST205`) & Missing `payment_orders`
 - **Symptoms:** After successful 6-digit OTP login, navigating to Account & Profile showed `Failed to load profile: Could not find the table 'public.profiles' in the schema cache`, and creating indexes failed because `public.payment_orders does not exist`.
-- **Root Cause:** Migration files in `supabase/migrations/` were applied out of order or partially on the live Supabase project `xsytaixmyeypoiscfbim`. Specifically, `payment_orders` was defined in a later migration file (`20260818192938...`) that had not been executed, while earlier migrations expected it.
-- **Resolution:** Formulated the consolidated idempotent migration script [`supabase/migrations/001_billbuddy_schema.sql`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/supabase/migrations/001_billbuddy_schema.sql) ordering table creation strictly before indexing and trigger binding.
+- **Root Cause:** Live read-only probe of `xsytaixmyeypoiscfbim.supabase.co/rest/v1/*` confirmed that none of the application tables (`profiles`, `bills`, `payment_orders`, etc.) exist in the remote database catalog, and storage buckets (`avatars`, `receipts`) return `NoSuchBucket`. The live Supabase instance was never migrated.
+- **Resolution:** Formulated the safe, idempotent consolidated script [`supabase/migrations/001_billbuddy_schema.sql`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/supabase/migrations/001_billbuddy_schema.sql) and documented the exact execution procedure.
 
 ---
 
