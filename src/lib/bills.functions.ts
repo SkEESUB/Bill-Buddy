@@ -38,6 +38,8 @@ export const createBill = createServerFn({ method: "POST" })
     const { syncBillOccurrences, audit, privilegedDb } = await import("./bills.server");
     const db = await privilegedDb();
 
+    console.log(`[createBill] Creating bill for user ${userId}:`, data.title);
+
     const { data: bill, error } = await supabase
       .from("bills")
       .insert({
@@ -59,10 +61,25 @@ export const createBill = createServerFn({ method: "POST" })
       } as never)
       .select("*")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("[createBill] Supabase INSERT error:", error);
+      throw new Error(`Failed to create bill: ${error.message} (${error.code})`);
+    }
 
-    await syncBillOccurrences(db, userId, bill);
-    await audit(supabase, userId, "bill.created", "bill", bill.id, { title: bill.title });
+    try {
+      await syncBillOccurrences(db, userId, bill);
+    } catch (syncErr) {
+      console.error("[createBill] syncBillOccurrences error:", syncErr);
+      const msg = syncErr instanceof Error ? syncErr.message : String(syncErr);
+      throw new Error(`Bill created, but occurrence schedule failed: ${msg}`);
+    }
+
+    try {
+      await audit(supabase, userId, "bill.created", "bill", bill.id, { title: bill.title });
+    } catch (auditErr) {
+      console.warn("[createBill] Audit logging notice:", auditErr);
+    }
+
     return bill;
   });
 

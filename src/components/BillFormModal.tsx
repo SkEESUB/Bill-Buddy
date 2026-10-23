@@ -149,6 +149,7 @@ export function BillFormModal({
         due_date: dueDate,
         repeat_type: recurring ? recurringType : "none",
         repeat_interval: 1,
+        repeat_end_date: null,
         reminder_days_before: reminderDays,
         amount_type: "fixed",
         upi_id: upiId.trim() ? upiId.trim() : null,
@@ -158,9 +159,14 @@ export function BillFormModal({
       setDone(true);
       window.setTimeout(onClose, 1000);
     } catch (error) {
-      setFormError(
-        error instanceof Error ? error.message : "Failed to save bill. Please try again.",
-      );
+      console.error("[BillFormModal] Error saving bill:", error);
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message: unknown }).message)
+          : "Failed to save bill. Please try again.";
+      setFormError(message);
       setSubmitting(false);
     }
   };
