@@ -26,7 +26,7 @@ BEGIN
 END $$;
 
 -- ----------------------------------------------------------------------------
--- 2. HELPER FUNCTIONS & TRIGGERS
+-- 2. HELPER FUNCTIONS (Part 1: Functions without table dependencies)
 -- ----------------------------------------------------------------------------
 
 -- Function: update updated_at timestamp
@@ -38,19 +38,6 @@ BEGIN
   NEW.updated_at = now();
   RETURN NEW;
 END;
-$$;
-
--- Function: check user role (Security Definer)
-CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _role public.app_role)
-RETURNS boolean
-LANGUAGE sql
-STABLE SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM public.user_roles
-    WHERE user_id = _user_id AND role = _role
-  );
 $$;
 
 -- ----------------------------------------------------------------------------
@@ -409,8 +396,21 @@ CREATE TABLE IF NOT EXISTS public.job_runs (
 );
 
 -- ----------------------------------------------------------------------------
--- 4. FINANCIAL RPC FUNCTIONS
+-- 4. APPLICATION & FINANCIAL RPC FUNCTIONS
 -- ----------------------------------------------------------------------------
+
+-- Function: check user role (Security Definer)
+CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _role public.app_role)
+RETURNS boolean
+LANGUAGE sql
+STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.user_roles
+    WHERE user_id = _user_id AND role = _role
+  );
+$$;
 
 -- Function: calculate ledger delta for current user
 CREATE OR REPLACE FUNCTION public.ledger_balance_delta()
