@@ -1,21 +1,24 @@
 # Product Requirements Document (PRD) — BillBuddy (Money Mind Frame)
 
-**Document Version:** 1.0.0  
+**Document Version:** 1.1.0  
 **Status:** Living Document / Authoritative  
-**Target Runtime:** TanStack Start (SSR) + React 19 + Supabase  
+**Target Runtime:** TanStack Start (SSR) + React 19 + Nitro + Supabase  
+**Authoritative Supabase Project:** `xsytaixmyeypoiscfbim` (`https://xsytaixmyeypoiscfbim.supabase.co`)  
+**Audit Verification:** 186/186 Unit Tests Passing | TypeScript Strict: 0 Errors | Production Build: Verified  
 **Last Updated:** 2026-10-23  
 
 ---
 
 ## 1. Executive Summary & Vision
 
-**BillBuddy** (also referenced as **Money Mind Frame**) is a full-stack personal financial intelligence and bill-management web application. The platform provides individuals, households, and freelancers with proactive visibility into recurring liabilities, cash-flow cycles, variable spending, savings targets, and debt amortisation.
+**BillBuddy** (also referenced as **Money Mind Frame**) is a full-stack personal financial intelligence, bill-management, and liability-forecasting web application. The platform provides individuals, households, and freelancers with proactive visibility into recurring liabilities, cash-flow cycles, variable spending, savings targets, and debt amortisation.
 
 ### Core Value Proposition
 - **Predictive Liability Tracking:** Transitioning from reactive bill payment to automated, calendarized run-rate forecasting.
-- **Privacy-First Data Ownership:** Complete user data isolation using Supabase PostgreSQL Row-Level Security (RLS) policies.
+- **Privacy-First Data Ownership:** Complete user data isolation using Supabase PostgreSQL Row-Level Security (RLS) policies (`auth.uid() = user_id`).
 - **Frictionless Authentication:** 6-digit email One-Time Password (OTP) verification eliminating password fatigue while ensuring secure device sessions.
 - **Actionable Financial Analytics:** Real-time financial health scoring, subscription creep audits, and exportable audit trails (CSV/JSON/PDF) without mandatory third-party bank credential escrow.
+- **Transactional & Payment Integrity:** Strict state-machine enforcement for bill payment orders, idempotent financial writes (`client_request_id`), append-only reversals, and single active payment locks on bill occurrences.
 
 ---
 
@@ -46,23 +49,26 @@
 - **REQ-AUTH-003 (Session Persistence & SSR Cookie Mirroring):** Auth state is mirrored into secure HTTP cookies for TanStack Start SSR hydration and server function authorization.
 - **REQ-AUTH-004 (Strict Email Isolation):** No magic links or legacy redirection URLs are permitted in production; authentication strictly completes within the active web application frame.
 - **REQ-AUTH-005 (Graceful Sign Out):** Complete invalidation of client-side tokens and clearing of SSR session cookies on sign out.
+- **REQ-AUTH-006 (Account Status Gates):** Server functions gate mutations against `account_status` (`ACTIVE`, `SUSPENDED`, `CLOSED`, `PENDING_DELETION`), failing closed if non-active.
 
 ### 3.2 Bill & Subscription Management
 - **REQ-BILL-001 (CRUD Operations):** Create, read, update, archive, and delete recurring bills with custom recurrence frequencies (daily, weekly, bi-weekly, monthly, quarterly, semi-annually, annually).
-- **REQ-BILL-002 (Status Lifecycle):** Mark bills across states: `pending`, `paid`, `overdue`, or `skipped`.
-- **REQ-BILL-003 (Payment History):** Automatic generation of historical bill payment records upon confirmation of payment.
-- **REQ-BILL-004 (Auto-Pay & Reminder Flags):** Configuration of lead-time alerts (e.g., 1 day, 3 days, 7 days prior) and auto-pay tracking flags.
-- **REQ-BILL-005 (Category & Method Assignment):** Explicit linkage of bills to customizable expense categories and payment accounts (credit cards, checking accounts, cash).
+- **REQ-BILL-002 (Status Lifecycle):** Mark bills and occurrences across states: `pending`, `paid`, `overdue`, or `skipped`.
+- **REQ-BILL-003 (Occurrence Generation):** Recurrence rules generate concrete `bill_occurrences` records preventing duplicate schedules and tracking per-occurrence payment orders.
+- **REQ-BILL-004 (Auto-Pay & Reminder Flags):** Configuration of lead-time alerts (`bill_reminders`) and auto-pay tracking flags.
+- **REQ-BILL-005 (Category & Method Assignment):** Explicit linkage of bills to customizable expense categories and payment accounts.
 
 ### 3.3 Transaction Ledger & Expense Tracking
 - **REQ-TXN-001 (Ledger Management):** Ingestion of income, expense, and transfer records with timestamp, merchant, category, amount, and notes.
-- **REQ-TXN-002 (Bill-Transaction Reconcile):** Ability to link an outgoing expense transaction directly to an active bill liability.
-- **REQ-TXN-003 (Batch Import / Export):** Ingestion of CSV bank statements with client-side header mapping and export of transaction logs to CSV and JSON.
+- **REQ-TXN-002 (Idempotency):** Client mutations supply unique `client_request_id` keys to ensure duplicate submissions are deduplicated at the database layer.
+- **REQ-TXN-003 (Append-Only Reversals):** Transaction updates and cancellations generate auditable offsetting reversal records preserving full historical ledger integrity.
+- **REQ-TXN-004 (Net-Neutral Transfers):** Internal transfers between accounts maintain net-zero impact on aggregate user net worth.
+- **REQ-TXN-005 (Batch Import / Export):** Ingestion of CSV bank statements with client-side header mapping and export of transaction logs to CSV and JSON.
 
 ### 3.4 Budgets & Financial Goal Setting
 - **REQ-BDG-001 (Envelope & Category Budgets):** Allocation of spending ceilings per category on a calendar-month cadence.
 - **REQ-BDG-002 (Run-Rate Variance Alerts):** Visual indicators when current spending velocity projects a budget overrun prior to month-end.
-- **REQ-GOAL-001 (Savings Targets):** Creation of savings milestones with target amounts, target dates, and linked deposit allocations.
+- **REQ-GOAL-001 (Spending & Savings Targets):** Creation of goals in `spending_goals` with target amounts, target dates, and linked status tracking.
 - **REQ-GOAL-002 (Visual Progress Metrics):** Percentage completion tracking and projected time-to-completion calculations based on historical contribution velocity.
 
 ### 3.5 Financial Intelligence & Reporting
@@ -70,27 +76,26 @@
 - **REQ-REP-002 (Cash-Flow Projections):** Dynamic chart rendering projecting 30-day liquidity based on confirmed upcoming bills vs. anticipated recurring income.
 - **REQ-REP-003 (Category Breakdown Visualizations):** Recharts-driven donut and bar visualizations itemizing expenditure distributions.
 
-### 3.6 Profile & Account Configuration
-- **REQ-PROF-001 (User Profile Management):** User customization of display name, primary currency (USD, EUR, GBP, CAD, AUD, etc.), date format, and avatar photo.
-- **REQ-PROF-002 (Data Privacy & Export):** One-click full data export (JSON bundle of all user records) and self-service account erasure complying with GDPR/CCPA.
+### 3.6 Profile, Settings & Audit
+- **REQ-PROF-001 (User Profile Management):** User customization of display name, primary currency (USD, EUR, GBP, INR, etc.), date format, and avatar photo (`avatars` storage bucket).
+- **REQ-PROF-002 (User Settings & Notification Preferences):** Dedicated persistence in `user_settings` and `notification_preferences`.
+- **REQ-PROF-003 (Data Privacy & Export):** One-click full data export (JSON bundle of all user records) and self-service account erasure complying with GDPR/CCPA.
+- **REQ-AUD-001 (Audit Logging):** System and security events write structured, credential-stripped entries to `audit_logs`.
 
 ---
 
 ## 4. Non-Functional Requirements
 
 ### 4.1 Security & Compliance
-- **NFR-SEC-001 (Row-Level Security):** 100% of database tables containing user-associated data must enforce PostgreSQL RLS policies where `auth.uid() = user_id`.
+- **NFR-SEC-001 (Row-Level Security):** 100% of the 22 database tables containing user-associated data must enforce PostgreSQL RLS policies where `auth.uid() = user_id`.
 - **NFR-SEC-002 (Zero Secret Leakage):** Service-role keys and backend administrative credentials must never be bundled into client-accessible JavaScript artifacts.
 - **NFR-SEC-003 (Input Sanitization):** All inputs processed through TanStack Start server functions must validate payloads using Zod schemas before database dispatch.
+- **NFR-SEC-004 (Payment State Machine):** Strict transition validation for `payment_orders` preventing transitions out of `CAPTURED` except for verified refunds.
 
 ### 4.2 Performance & Responsiveness
 - **NFR-PERF-001 (Hydration & TTI):** SSR initial page load under 1.2s on standard broadband; Time to Interactive (TTI) under 1.8s.
 - **NFR-PERF-002 (Optimistic Updates):** Common interactions (marking a bill as paid, adding an expense) must apply TanStack Query optimistic cache updates immediately.
 - **NFR-PERF-003 (Responsive Layouts):** Adaptive interfaces supporting mobile devices (320px+), tablets (768px+), and high-resolution desktop viewports (1440px+).
-
-### 4.3 Data Integrity & Reliability
-- **NFR-REL-001 (Foreign Key Cascade Integrity):** Deletion of a user profile automatically triggers clean cascade removal of bills, transactions, categories, and logs.
-- **NFR-REL-002 (Idempotency):** Duplicate submissions of bill payment confirmations within a 5-second window must be de-duplicated at the server function layer.
 
 ---
 
@@ -116,24 +121,17 @@ sequenceDiagram
     UI-->>User: Redirects to /dashboard (Home)
 ```
 
-### 5.2 Bill Creation & Lifecycle Workflow
+### 5.2 Bill Payment & Ledger Integrity Lifecycle
 ```mermaid
 flowchart TD
-    Start([User opens 'Add Bill' Modal]) --> Input[Fill Name, Amount, Due Date, Recurrence, Category]
-    Input --> Submit{Form Valid?}
-    Submit -- No --> Err[Display Field Errors]
-    Err --> Input
-    Submit -- Yes --> ServerFn[Call Server Function: createBill]
-    ServerFn --> DB[(Supabase bills Table)]
-    DB --> Reval[Invalidate 'bills' Query Cache]
-    Reval --> Close[Close Modal & Display Toast]
-    Close --> Upcoming[Bill appears in Upcoming List & Calendar]
-
-    Upcoming --> Action{User Marks as Paid?}
-    Action -- Yes --> RecGen[Generate payment_history record]
-    RecGen --> DateCalc[Compute next due_date based on recurrence]
-    DateCalc --> DBUpdate[Update bill status and due_date]
-    DBUpdate --> Reval
+    Occ[Bill Occurrence Due] --> Order[Create payment_order: CREATED]
+    Order --> Attempt[Record payment_attempt: PENDING]
+    Attempt --> Provider{Provider Checkout}
+    Provider -- Success --> Capture[Transition payment_order: CAPTURED]
+    Capture --> Settle[Settle Bill Occurrence: PAID]
+    Capture --> Ledger[Append Settled Transaction to Ledger]
+    Provider -- Failure --> Fail[Transition payment_order: FAILED]
+    Fail --> Retry[Permit Retry / Secondary Attempt]
 ```
 
 ---
@@ -141,15 +139,8 @@ flowchart TD
 ## 6. Constraints & Dependencies
 
 ### 6.1 Database Schema Dependencies
-The application requires the complete 22-table PostgreSQL schema defined in `supabase/migrations/001_billbuddy_schema.sql` to be active on project `xsytaixmyeypoiscfbim`. Until applied, database calls will return schema cache misses.
+The application requires all 22 relational tables, RLS policies, triggers, and the two storage buckets (`avatars`, `receipts`) defined in [`supabase/migrations/001_billbuddy_schema.sql`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/supabase/migrations/001_billbuddy_schema.sql) to be active on project `xsytaixmyeypoiscfbim`.
 
 ### 6.2 External Platform Guardrails
-- **Lovable Sync Guardrail:** Changes pushed to repository branch `main` sync directly to the Lovable deployment engine. Force-pushing, history re-writing, and unverified package upgrades are prohibited.
-- **Third-Party Integrations:** Open banking/Plaid connections remain disabled in v1.0, relying on CSV import and manual logging to maintain zero vendor risk.
-
----
-
-## 7. Assumptions & Open Inquiries
-
-1. **Multi-Currency Conversion:** The v1.0 PRD assumes transactions and bills within a single profile use the profile's primary selected currency. Dynamic multi-currency exchange rate conversions are deferred to v2.0.
-2. **Notification Delivery:** Push notifications currently run via in-app banner/toast notifications and browser local storage reminders; native SMS and WebPush push endpoints are flagged for future phase development.
+- **Lovable Sync Guardrail:** Changes pushed to repository branch `main` sync directly to the Lovable deployment engine. Force-pushing, history re-writing, and unverified package upgrades are strictly prohibited.
+- **Third-Party Integrations:** Payment gateway operations (Razorpay/Stripe) and Webhook ingestions run through strictly verified signature endpoints.

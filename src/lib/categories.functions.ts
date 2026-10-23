@@ -45,7 +45,7 @@ export type CategoryInput = z.input<typeof categoryInput>;
 
 export const createCategory = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => categoryInput.parse(data))
+  .validator((data: unknown) => categoryInput.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: clash } = await supabase
@@ -67,7 +67,7 @@ export const createCategory = createServerFn({ method: "POST" })
 
 export const updateCategory = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     categoryInput
       .partial()
       .extend({ id: z.string().uuid(), is_active: z.boolean().optional() })
@@ -89,7 +89,7 @@ export const updateCategory = createServerFn({ method: "POST" })
 
 export const deleteCategory = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
+  .validator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: category, error: lookupError } = await supabase

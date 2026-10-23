@@ -1,10 +1,11 @@
 # Design System & UI/UX Guidelines — BillBuddy (Money Mind Frame)
 
-**Document Version:** 1.0.0  
+**Document Version:** 1.1.0  
 **Status:** Living Document / Authoritative  
 **Styling Framework:** Tailwind CSS v4 (`@tailwindcss/vite`) + Radix UI Primitives  
 **Iconography:** Lucide React  
 **Charts & Visualisations:** Recharts  
+**Verification:** Responsive Mobile & Desktop Layouts Verified  
 **Last Updated:** 2026-10-23  
 
 ---
@@ -55,74 +56,36 @@ The typographic scale uses system font stacks for native performance, zero flash
 - **Primary Interface Font:** System UI stack (`system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif`).
 - **Monospace & Numerical Stack:** `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`.
 
-### 3.2 Scale & Hierarchy
-| Level | Font Size | Weight | Line Height | Usage |
-| :--- | :--- | :--- | :--- | :--- |
-| **Display / Metric** | `2.25rem` (36px) | 700 (Bold) | 2.5rem | Total net worth, monthly upcoming run-rate |
-| **H1 (Page Title)** | `1.75rem` (28px) | 700 (Bold) | 2.25rem | Top-level view headers (e.g., "Bills & Subscriptions") |
-| **H2 (Section)** | `1.25rem` (20px) | 600 (Semibold)| 1.75rem | Widget headings, card titles, category groups |
-| **H3 (Sub-section)**| `1.00rem` (16px) | 600 (Semibold)| 1.50rem | Modal section headers, table column groups |
-| **Body (Default)** | `0.875rem` (14px)| 400 (Regular) | 1.25rem | Table cells, form descriptions, list text |
-| **Caption / Tiny** | `0.75rem` (12px) | 500 (Medium)  | 1.00rem | Relative dates ("in 3 days"), badge labels |
-
-### 3.3 Strict Financial Formatting Rules
+### 3.2 Strict Financial Formatting Rules
 1. **Tabular Numerals:** All currency amounts, percentages, and counters must include `tabular-nums` class to prevent horizontal layout shift during increments.
-2. **Standard Currency Mask:** Always prefix with the user's selected ISO currency symbol (e.g., `$1,240.50`, `€45.00`, `£120.00`).
+2. **Standard Currency Mask:** Always prefix with the user's selected ISO currency symbol (e.g., `$1,240.50`, `₹1,240.50`, `€45.00`, `£120.00`).
 3. **Signed Deltas:** Positive cash flows explicitly prefix `+` with green tint (`+$4,500.00`), while liabilities or expenses prefix `-` with rose tint (`-$150.00`).
 
 ---
 
-## 4. Spacing, Elevation & Layout Grid
+## 4. Component Library & Patterns
 
-### 4.1 Spacing Scale
-BillBuddy follows an **8-point grid** (with 4-point micro-spacing):
-- `p-1` / `4px`: Micro-padding inside badges and icon buttons.
-- `p-2` / `8px`: Standard button and input padding.
-- `p-4` / `16px`: Compact card padding and mobile container gutters.
-- `p-6` / `24px`: Desktop card padding and modal dialog interiors.
-- `p-8` / `32px`: Main page container padding on desktop viewports.
-
-### 4.2 Elevation & Border Radius
-- **Border Radius:**
-  - Badges & Pills: `rounded-full` (`9999px`)
-  - Form Inputs & Buttons: `rounded-lg` (`8px`)
-  - Cards & Modal Panels: `rounded-xl` (`12px`) or `rounded-2xl` (`16px`)
-- **Box Shadows:**
-  - Level 1 (Card): `shadow-sm` (`0 1px 2px 0 rgb(0 0 0 / 0.05)`)
-  - Level 2 (Dropdown / Popover): `shadow-md` (`0 4px 6px -1px rgb(0 0 0 / 0.1)`)
-  - Level 3 (Modal Dialog): `shadow-xl` (`0 20px 25px -5px rgb(0 0 0 / 0.1)`)
-
----
-
-## 5. Component Library & Patterns
-
-### 5.1 Buttons & Interactive Controls
+### 4.1 Buttons & Interactive Controls
 - **Primary Action Button:** High-contrast solid background (`bg-primary text-primary-foreground hover:opacity-90 active:scale-[0.98]`). Used exclusively for the main page task (e.g., "Add Bill", "Verify Code").
 - **Secondary / Outline Button:** Subtle border with hover fill (`border border-border bg-card hover:bg-muted text-foreground`). Used for cancel actions, secondary filters, and exports.
 - **Destructive Button:** Red fill or outline (`bg-rose-600 text-white hover:bg-rose-700`). Reserved for deleting bills, resetting categories, or deleting accounts.
 - **Loading State:** Disabled button state with a spinning Lucide `Loader2` icon and preserved button width to prevent layout shifts.
 
-### 5.2 Bill & Transaction Status Badges
+### 4.2 Bill & Transaction Status Badges
 Badges communicate immediate operational status:
-- **Paid:** `bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800`
+- **Paid / Settled:** `bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800`
 - **Pending / Upcoming:** `bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800`
 - **Overdue:** `bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800`
 - **Subscription:** `bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/40 dark:text-violet-400 dark:border-violet-800`
 
-### 5.3 Form Inputs & Validation States
+### 4.3 Form Inputs & Validation States
 - **Standard Input:** Text, number, and date fields render with `h-10 px-3 py-2 border rounded-lg border-border focus:ring-2 focus:ring-primary focus:outline-none`.
 - **OTP 6-Digit Verification Input:** 6 individual centered character blocks with auto-focus forward jumping and backspace retraction.
 - **Error Feedback:** Red input border with an associated `p.text-xs.text-rose-600` validation error message anchored immediately beneath the field.
 
-### 5.4 Modal & Sheet Overlays
-- Powered by **Radix UI Dialog** primitives.
-- Backdrop renders with `bg-black/50 backdrop-blur-sm animate-in fade-in`.
-- Desktop displays centered modal (`max-w-lg rounded-2xl p-6`).
-- Mobile transitions seamlessly to a bottom drawer (`sheet`) with an accessible drag handle.
-
 ---
 
-## 6. Page Layouts & Responsive Navigation
+## 5. Page Layouts & Responsive Navigation
 
 ```mermaid
 flowchart TD
@@ -143,15 +106,8 @@ flowchart TD
     end
 ```
 
-### Navigation Rules
-- On mobile devices, the most frequent action (**Add Transaction / Add Bill**) is surfaced as an elevated central floating action button (FAB) in the fixed bottom navigation bar.
-- On desktop devices, the sidebar remains persistent, while page-level primary actions reside in the top-right header section of each view.
-
----
-
-## 7. Accessibility (a11y) & Usability Standards
-
+### Accessibility (a11y) Standards
 1. **WCAG 2.1 AA Compliance:** Minimum color contrast ratio of 4.5:1 for standard text and 3:1 for large graphical metrics across both light and dark themes.
 2. **Keyboard Navigation:** Complete tab-order indexability for all modals, bill actions, dropdowns, and date pickers with visible focus rings (`ring-2 ring-primary ring-offset-2`).
-3. **Screen Reader Semantic Roles:** Radix UI ARIA labels (`aria-expanded`, `aria-haspopup`, `role="dialog"`, `aria-live="polite"`) attached to all dynamic status alerts and notifications.
+3. **Screen Reader Semantic Roles:** Radix UI ARIA labels attached to all dynamic status alerts and notifications.
 4. **Motion Sensitivity:** Respects user system preference `prefers-reduced-motion: reduce`, disabling smooth transitions and chart entry animations where requested.

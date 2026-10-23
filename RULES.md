@@ -1,6 +1,6 @@
 # Engineering Rules, Standards & Guardrails — BillBuddy
 
-**Document Version:** 1.0.0  
+**Document Version:** 1.1.0  
 **Status:** Living Document / Authoritative  
 **Target Repository:** BillBuddy / Money Mind Frame  
 **Last Updated:** 2026-10-23  
@@ -18,6 +18,7 @@ These rules are non-negotiable. Every developer, automated agent, and contributo
 4. NEVER perform multi-table financial balance mutations directly from the browser client.
 5. ALWAYS write unit tests for financial math, date recurrence logic, and data transformers.
 6. ALWAYS preserve TypeScript strict mode with zero typecheck or build errors.
+7. NEVER weaken RLS policies or bypass authentication to hide errors.
 ```
 
 ---
@@ -44,14 +45,7 @@ The BillBuddy repository is actively synchronized with **Lovable's** deployment 
 ### 3.1 Supabase Configuration Integrity
 - **Authoritative Project Endpoint:** All client and server initialization must target project `xsytaixmyeypoiscfbim` (`https://xsytaixmyeypoiscfbim.supabase.co`).
 - **Zero Ghost Projects:** Any pull request, patch, or configuration containing references to `ocajeaytrcakzoxavvvg`, `ocajeyatrckazoxavvgg`, or other ghost projects will be rejected immediately.
-- **Fail-Fast Environment Loading:**
-  ```typescript
-  // REQUIRED: Fail immediately if required environment variable is missing
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://xsytaixmyeypoiscfbim.supabase.co';
-  if (!supabaseUrl) {
-    throw new Error('[Supabase] Missing critical configuration: VITE_SUPABASE_URL');
-  }
-  ```
+- **Fail-Fast Environment Loading:** Fail immediately if `VITE_SUPABASE_URL` is unconfigured.
 - **Secret Isolation Boundary:**
   - Browser bundles: May consume only `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` (or `VITE_SUPABASE_ANON_KEY`).
   - Server runtime: `SUPABASE_SERVICE_ROLE_KEY` is strictly confined to `src/integrations/supabase/client.server.ts` and Nitro server functions. Never prefix server secret variables with `VITE_`.
@@ -77,56 +71,37 @@ The BillBuddy repository is actively synchronized with **Lovable's** deployment 
 - Keep database types aligned with `src/integrations/supabase/types.ts`.
 
 ### 4.2 TanStack Start & Server Functions
-- Client components should not perform direct multi-table mutations or calculate complex financial run-rates.
-- Use `createServerFn` for operations that:
+- Client components must not perform direct multi-table balance mutations.
+- Use `createServerFn` in `src/lib/*.functions.ts` for operations that:
   1. Modify financial balances or log payment histories across multiple tables.
   2. Require the administrative `SUPABASE_SERVICE_ROLE_KEY`.
   3. Aggregate sensitive user statistics across historical records.
-- Server function inputs must be validated with Zod:
-  ```typescript
-  export const processBillPayment = createServerFn({ method: 'POST' })
-    .validator((data: unknown) => paymentSchema.parse(data))
-    .handler(async ({ data, context }) => {
-      // Authenticated server execution
-    });
-  ```
+- Server function inputs must be validated with Zod schemas.
 
-### 4.3 Financial Math & Floating-Point Discipline
-- JavaScript `Number` types suffer from IEEE 754 floating-point inaccuracies (e.g. `0.1 + 0.2 = 0.30000000000000004`).
-- All currency calculations must either:
-  1. Store monetary values in integer cents (e.g., `$10.50` = `1050`) before summing or splitting.
-  2. Use dedicated rounding helpers (`roundCurrency(amount)`) from `src/lib/currency.ts`.
+### 4.3 Financial Math & Invariants
+- All monetary operations must adhere to the tested financial invariants:
+  1. **Idempotency:** Require a unique `client_request_id` for each financial write.
+  2. **Active Payment Lock:** At most one live `payment_order` per bill occurrence.
+  3. **Reversal Immutability:** Append-only offsetting entries for cancellations or refunds.
+  4. **Net-Neutral Transfers:** Transfers do not alter aggregate net worth.
+- Use dedicated rounding helpers (`roundCurrency(amount)`) from `src/lib/currency.ts`.
 - In UI tables and metrics, always apply the Tailwind CSS class `tabular-nums`.
 
-### 4.4 Date & Recurrence Handling
-- Always store dates in ISO 8601 format (`YYYY-MM-DD` or `YYYY-MM-DDTHH:mm:ss.sssZ`).
-- When computing next recurring due dates (e.g. monthly, bi-weekly), handle edge cases such as leap years, 31st-of-the-month rollovers, and daylight saving shifts using pure utility functions tested with Vitest.
-
 ---
 
-## 5. UI & Styling Rules (Tailwind CSS v4 & Radix)
+## 5. Testing & Quality Assurance Standards
 
-- **Use Design System Tokens:** Never use raw arbitrary hex colors (e.g. `bg-[#123456]`). Always use semantic Tailwind variables (`bg-card`, `text-primary`, `border-border`, `text-muted-foreground`).
-- **Tabular Numbers:** Every visual representation of money, percentages, and counters MUST include `tabular-nums`.
-- **Accessible Primitives:** Modals, tooltips, dropdowns, and sheet drawers must be built using Radix UI primitives (`@radix-ui/react-*`) to ensure keyboard accessibility and correct ARIA attributes.
-- **Loading & Optimistic States:**
-  - Buttons must show an inline spinner (`Loader2`) and maintain consistent width while asynchronous actions are pending.
-  - Queries must leverage TanStack Query optimistic updates when marking items as paid or adding expenses.
-
----
-
-## 6. Testing & Quality Assurance Standards
-
-### 6.1 Unit & Integration Testing (Vitest)
+### 5.1 Unit & Integration Testing (Vitest / Bun Test)
 - Run tests locally using `bun test` or `bun x vitest run`.
 - **Mandatory Test Coverage Areas:**
   - Date and recurrence calculators (`src/lib/dates.test.ts`).
-  - Currency conversion, formatting, and arithmetic utilities (`src/lib/currency.test.ts`).
-  - Financial health score algorithms (`src/lib/health-score.test.ts`).
-  - Auth token input validators and formatters.
-- Every new financial feature or utility function must be accompanied by corresponding Vitest unit tests.
+  - Financial invariants, idempotency, and payment locks (`src/lib/invariants.test.ts`).
+  - Payment state machines (`src/lib/payments/state.test.ts`).
+  - Auth hardening and account gates (`src/lib/auth/hardening.test.ts`).
+  - Role-based permissions (`src/lib/admin/permissions.test.ts`).
+  - Insights, forecasting, and safe-to-spend models (`src/lib/insights.test.ts`).
 
-### 6.2 Pre-Push Verification Checklist
+### 5.2 Pre-Push Verification Checklist
 Before committing or pushing any change to the repository, ensure:
 ```bash
 # 1. Typecheck passes with zero errors

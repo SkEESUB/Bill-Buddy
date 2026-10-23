@@ -81,7 +81,7 @@ export type NotificationPrefsInput = z.infer<typeof notificationPrefsInput>;
 
 export const saveNotificationPreferences = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => notificationPrefsInput.parse(data))
+  .validator((data: unknown) => notificationPrefsInput.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: row, error } = await supabase
@@ -101,7 +101,7 @@ const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
 /** One-time signed upload URL under the caller's own avatar folder. */
 export const createAvatarUpload = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     z
       .object({
         mime_type: z.enum(AVATAR_MIME),
@@ -123,7 +123,7 @@ export const createAvatarUpload = createServerFn({ method: "POST" })
 /** Point the profile at a freshly uploaded avatar and drop the previous file. */
 export const setAvatar = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     z.object({ storage_path: z.string().min(3).max(400).nullable() }).parse(data),
   )
   .handler(async ({ data, context }) => {
@@ -189,7 +189,7 @@ export const listSupportTickets = createServerFn({ method: "GET" })
 
 export const createSupportTicket = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     z
       .object({
         subject: z.string().trim().min(4).max(140),
@@ -274,7 +274,7 @@ export const exportAccountData = createServerFn({ method: "POST" })
  */
 export const deleteAccount = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     z
       .object({
         confirmation: z.string(),

@@ -98,7 +98,7 @@ export const listBudgets = createServerFn({ method: "GET" })
 /** One budget: evaluation, per-cycle history and the rows that fed it. */
 export const getBudgetDetail = createServerFn({ method: "GET" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
+  .validator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const today = todayInTimeZone();
@@ -150,7 +150,7 @@ export const getBudgetDetail = createServerFn({ method: "GET" })
 
 export const createBudget = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => budgetFields.parse(data))
+  .validator((data: unknown) => budgetFields.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     assertThresholds(data.warn_threshold, data.near_limit_threshold);
@@ -189,7 +189,7 @@ export const createBudget = createServerFn({ method: "POST" })
 
 export const updateBudget = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     budgetFields.partial().extend({ id: z.string().uuid() }).parse(data),
   )
   .handler(async ({ data, context }) => {
@@ -215,7 +215,7 @@ export const updateBudget = createServerFn({ method: "POST" })
 /** Pause, resume or archive a budget. Archived budgets stay readable. */
 export const setBudgetState = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     z.object({ id: z.string().uuid(), status: z.enum(BUDGET_STATES) }).parse(data),
   )
   .handler(async ({ data, context }) => {
@@ -238,7 +238,7 @@ export const setBudgetState = createServerFn({ method: "POST" })
 
 export const deleteBudget = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
+  .validator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { error } = await supabase

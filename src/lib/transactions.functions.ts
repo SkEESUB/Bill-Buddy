@@ -54,7 +54,7 @@ export type LedgerPage = {
 /** Paginated, filtered, searchable ledger page. */
 export const listTransactions = createServerFn({ method: "GET" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => listSchema.parse(data ?? {}))
+  .validator((data: unknown) => listSchema.parse(data ?? {}))
   .handler(async ({ data, context }): Promise<LedgerPage> => {
     const { ledgerQuery } = await import("./transactions.server");
     const from = data.page * data.pageSize;
@@ -88,7 +88,7 @@ export type TransactionDetail = {
 /** Everything the detail screen shows. Provider secrets are never returned. */
 export const getTransaction = createServerFn({ method: "GET" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
+  .validator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }): Promise<TransactionDetail> => {
     const { supabase, userId } = context;
     const { data: txn, error } = await supabase
@@ -188,7 +188,7 @@ export type CreateTransactionInput = z.input<typeof createSchema>;
  */
 export const createTransaction = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => createSchema.parse(data))
+  .validator((data: unknown) => createSchema.parse(data))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     if (data.type !== "adjustment" && data.amount <= 0) {
@@ -252,7 +252,7 @@ export type UpdateTransactionInput = z.input<typeof updateSchema>;
 /** Edit a manual entry. Engine/provider records are immutable from the client. */
 export const updateTransaction = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => updateSchema.parse(data))
+  .validator((data: unknown) => updateSchema.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { id, ...patch } = data;
@@ -294,7 +294,7 @@ export const updateTransaction = createServerFn({ method: "POST" })
 /** Delete a manual entry. Settled bill payments and reversals stay auditable. */
 export const deleteTransaction = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
+  .validator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: existing, error: readError } = await supabase
@@ -331,7 +331,7 @@ export const deleteTransaction = createServerFn({ method: "POST" })
  */
 export const reverseTransaction = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     z
       .object({
         id: z.string().uuid(),
@@ -425,7 +425,7 @@ export type ExportInput = z.input<typeof exportSchema>;
  */
 export const exportTransactions = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => exportSchema.parse(data ?? {}))
+  .validator((data: unknown) => exportSchema.parse(data ?? {}))
   .handler(async ({ data, context }) => {
     const { ledgerQuery, billTitlesForOccurrences } = await import("./transactions.server");
     const { data: rows, error } = await ledgerQuery(
@@ -481,7 +481,7 @@ const MAX_FILE_BYTES = 5 * 1024 * 1024;
  */
 export const createAttachmentUpload = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     z
       .object({
         transaction_id: z.string().uuid(),
@@ -515,7 +515,7 @@ export const createAttachmentUpload = createServerFn({ method: "POST" })
 /** Record an uploaded receipt after verifying ownership of the storage path. */
 export const confirmAttachment = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     z
       .object({
         transaction_id: z.string().uuid(),
@@ -559,7 +559,7 @@ export const confirmAttachment = createServerFn({ method: "POST" })
 /** Short-lived signed link for the caller's own receipt. */
 export const getAttachmentUrl = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
+  .validator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: row, error } = await supabase
@@ -581,7 +581,7 @@ export const getAttachmentUrl = createServerFn({ method: "POST" })
 /** Remove a receipt the caller owns, from storage and from the ledger record. */
 export const deleteAttachment = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
+  .validator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: row, error } = await supabase

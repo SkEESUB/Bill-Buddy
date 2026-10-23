@@ -113,7 +113,7 @@ export type BudgetInput = z.input<typeof budgetInput>;
 
 export const saveBudget = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => budgetInput.parse(data))
+  .validator((data: unknown) => budgetInput.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     // Only one active budget may exist per category + period, so update the
@@ -143,7 +143,7 @@ export const saveBudget = createServerFn({ method: "POST" })
 
 export const removeBudget = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
+  .validator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { error } = await supabase
@@ -170,7 +170,7 @@ export type ProfileInput = z.infer<typeof profileInput>;
 
 export const saveProfile = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => profileInput.parse(data))
+  .validator((data: unknown) => profileInput.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: row, error } = await supabase
@@ -206,7 +206,7 @@ export type SettingsInput = z.infer<typeof settingsInput>;
 
 export const saveSettings = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => settingsInput.parse(data))
+  .validator((data: unknown) => settingsInput.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: row, error } = await supabase

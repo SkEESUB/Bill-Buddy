@@ -56,7 +56,7 @@ function toTxns(rows: LedgerRow[]): TxnLike[] {
 
 export const getInsights = createServerFn({ method: "GET" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => inputSchema.parse(data ?? {}))
+  .validator((data: unknown) => inputSchema.parse(data ?? {}))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const today = todayInTimeZone();

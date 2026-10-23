@@ -55,7 +55,7 @@ export type AdminUserRow = {
 
 export const listUsers = createServerFn({ method: "GET" })
   .middleware([requireActiveAccount])
-  .inputValidator((input: { search?: string; page?: number } | undefined) =>
+  .validator((input: { search?: string; page?: number } | undefined) =>
     z
       .object({ search: z.string().max(200).optional(), page: z.number().int().min(1).max(200).optional() })
       .parse(input ?? {}),
@@ -139,7 +139,7 @@ export const listUsers = createServerFn({ method: "GET" })
 
 export const getUserDetail = createServerFn({ method: "GET" })
   .middleware([requireActiveAccount])
-  .inputValidator((input: { userId: string }) => z.object({ userId: z.string().uuid() }).parse(input))
+  .validator((input: { userId: string }) => z.object({ userId: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     const { requireAdmin } = await import("@/lib/admin/guard.server");
     const { writeAudit } = await import("@/lib/admin/audit.server");
@@ -207,7 +207,7 @@ export const getUserDetail = createServerFn({ method: "GET" })
 
 export const setAccountStatus = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((input: { userId: string; status: string; reason: string }) =>
+  .validator((input: { userId: string; status: string; reason: string }) =>
     z
       .object({
         userId: z.string().uuid(),
@@ -275,7 +275,7 @@ export const setAccountStatus = createServerFn({ method: "POST" })
 
 export const listTickets = createServerFn({ method: "GET" })
   .middleware([requireActiveAccount])
-  .inputValidator((input: { status?: string } | undefined) =>
+  .validator((input: { status?: string } | undefined) =>
     z.object({ status: z.string().max(30).optional() }).parse(input ?? {}),
   )
   .handler(async ({ context, data }) => {
@@ -296,7 +296,7 @@ export const listTickets = createServerFn({ method: "GET" })
 
 export const getTicket = createServerFn({ method: "GET" })
   .middleware([requireActiveAccount])
-  .inputValidator((input: { ticketId: string }) => z.object({ ticketId: z.string().uuid() }).parse(input))
+  .validator((input: { ticketId: string }) => z.object({ ticketId: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     const { requireAdmin } = await import("@/lib/admin/guard.server");
     const { writeAudit } = await import("@/lib/admin/audit.server");
@@ -338,7 +338,7 @@ export const getTicket = createServerFn({ method: "GET" })
 
 export const updateTicket = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((input: { ticketId: string; status?: string; priority?: string; assignToMe?: boolean }) =>
+  .validator((input: { ticketId: string; status?: string; priority?: string; assignToMe?: boolean }) =>
     z
       .object({
         ticketId: z.string().uuid(),
@@ -382,7 +382,7 @@ export const updateTicket = createServerFn({ method: "POST" })
 
 export const replyToTicket = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((input: { ticketId: string; body: string; internal: boolean }) =>
+  .validator((input: { ticketId: string; body: string; internal: boolean }) =>
     z
       .object({
         ticketId: z.string().uuid(),
@@ -439,7 +439,7 @@ export const replyToTicket = createServerFn({ method: "POST" })
 
 export const listPaymentOrders = createServerFn({ method: "GET" })
   .middleware([requireActiveAccount])
-  .inputValidator((input: { status?: string } | undefined) =>
+  .validator((input: { status?: string } | undefined) =>
     z.object({ status: z.string().max(40).optional() }).parse(input ?? {}),
   )
   .handler(async ({ context, data }) => {
@@ -479,7 +479,7 @@ export const listWebhookEvents = createServerFn({ method: "GET" })
 
 export const reconcilePayment = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((input: { paymentOrderId: string }) =>
+  .validator((input: { paymentOrderId: string }) =>
     z.object({ paymentOrderId: z.string().uuid() }).parse(input),
   )
   .handler(async ({ context, data }) => {
@@ -536,7 +536,7 @@ export const listJobRunsAdmin = createServerFn({ method: "GET" })
 
 export const retryJob = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((input: { job: string }) =>
+  .validator((input: { job: string }) =>
     z.object({ job: z.enum(["sweep", "retention"]) }).parse(input),
   )
   .handler(async ({ context, data }) => {
@@ -661,7 +661,7 @@ export const getSystemHealth = createServerFn({ method: "GET" })
 
 export const listAuditLogs = createServerFn({ method: "GET" })
   .middleware([requireActiveAccount])
-  .inputValidator((input: { action?: string; actorUserId?: string } | undefined) =>
+  .validator((input: { action?: string; actorUserId?: string } | undefined) =>
     z
       .object({ action: z.string().max(60).optional(), actorUserId: z.string().uuid().optional() })
       .parse(input ?? {}),

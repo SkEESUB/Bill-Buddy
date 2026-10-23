@@ -32,7 +32,7 @@ export type BillInput = z.infer<typeof billInput>;
 /** Create a bill and materialise its schedule. */
 export const createBill = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => billInput.parse(data))
+  .validator((data: unknown) => billInput.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { syncBillOccurrences, audit, privilegedDb } = await import("./bills.server");
@@ -76,7 +76,7 @@ export type BillUpdateInput = z.infer<typeof billUpdate>;
 /** Update a bill and reconcile its future schedule. */
 export const updateBill = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => billUpdate.parse(data))
+  .validator((data: unknown) => billUpdate.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { syncBillOccurrences, audit, privilegedDb } = await import("./bills.server");
@@ -110,7 +110,7 @@ export const updateBill = createServerFn({ method: "POST" })
  */
 export const deleteBill = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
+  .validator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { audit } = await import("./bills.server");
@@ -144,7 +144,7 @@ export const deleteBill = createServerFn({ method: "POST" })
  */
 export const setBillActive = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     z.object({ id: z.string().uuid(), is_active: z.boolean() }).parse(data),
   )
   .handler(async ({ data, context }) => {
@@ -185,7 +185,7 @@ export type PaymentInput = z.infer<typeof paymentInput>;
 
 export const recordOccurrencePayment = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => paymentInput.parse(data))
+  .validator((data: unknown) => paymentInput.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { audit, privilegedDb } = await import("./bills.server");
@@ -272,7 +272,7 @@ export const recordOccurrencePayment = createServerFn({ method: "POST" })
 /** Skip a single instalment without paying it (e.g. a month you were not billed). */
 export const skipOccurrence = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     z.object({ occurrence_id: z.string().uuid() }).parse(data),
   )
   .handler(async ({ data, context }) => {

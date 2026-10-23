@@ -30,7 +30,7 @@ export type { PaymentStatusResult } from "./payments/status";
 
 export const createPaymentOrder = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     z
       .object({
         occurrence_id: z.string().uuid(),
@@ -172,7 +172,7 @@ export const createPaymentOrder = createServerFn({ method: "POST" })
 /** Checkout was handed to the provider; the user is now paying externally. */
 export const markCheckoutOpened = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => z.object({ payment_order_id: z.string().uuid() }).parse(data))
+  .validator((data: unknown) => z.object({ payment_order_id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     const { adminDb, loadOrder, applyOrderState } = await import("./payments/settle.server");
     const db = await adminDb();
@@ -189,7 +189,7 @@ export const markCheckoutOpened = createServerFn({ method: "POST" })
  */
 export const submitCheckoutResult = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     z
       .object({
         payment_order_id: z.string().uuid(),
@@ -271,7 +271,7 @@ export const submitCheckoutResult = createServerFn({ method: "POST" })
 /** The user closed/abandoned the provider checkout. */
 export const cancelPaymentOrder = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => z.object({ payment_order_id: z.string().uuid() }).parse(data))
+  .validator((data: unknown) => z.object({ payment_order_id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }): Promise<PaymentStatusResult> => {
     const { adminDb, loadOrder, reconcileOrderWithProvider, applyOrderState, orderState } =
       await import("./payments/settle.server");
@@ -302,7 +302,7 @@ export const cancelPaymentOrder = createServerFn({ method: "POST" })
 /** Authoritative status check — the "Check status" button and polling use it. */
 export const reconcilePayment = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .inputValidator((data: unknown) => z.object({ payment_order_id: z.string().uuid() }).parse(data))
+  .validator((data: unknown) => z.object({ payment_order_id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }): Promise<PaymentStatusResult> => {
     const { adminDb, loadOrder, reconcileOrderWithProvider, orderState } = await import(
       "./payments/settle.server"
