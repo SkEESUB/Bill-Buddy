@@ -190,12 +190,12 @@ export const createTransaction = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
   .validator((data: unknown) => createSchema.parse(data))
   .handler(async ({ data, context }) => {
-    const { userId } = context;
+    const { userId, supabase } = context;
     if (data.type !== "adjustment" && data.amount <= 0) {
       throw new Error("Enter an amount greater than 0");
     }
     const { privilegedDb, audit } = await import("./bills.server");
-    const db = await privilegedDb();
+    const db = await privilegedDb(supabase as any);
 
     const payload = {
       user_id: userId,
@@ -278,7 +278,7 @@ export const updateTransaction = createServerFn({ method: "POST" })
     }
 
     const { privilegedDb, audit } = await import("./bills.server");
-    const db = await privilegedDb();
+    const db = await privilegedDb(supabase as any);
     const { data: row, error } = await db
       .from("transactions")
       .update(patch as never)
@@ -314,7 +314,7 @@ export const deleteTransaction = createServerFn({ method: "POST" })
     }
 
     const { privilegedDb, audit } = await import("./bills.server");
-    const db = await privilegedDb();
+    const db = await privilegedDb(supabase as any);
     const { error } = await db
       .from("transactions")
       .delete()
@@ -359,7 +359,7 @@ export const reverseTransaction = createServerFn({ method: "POST" })
     if (original.type === "transfer") throw new Error("Transfers can't be reversed.");
 
     const { privilegedDb, audit } = await import("./bills.server");
-    const db = await privilegedDb();
+    const db = await privilegedDb(supabase as any);
     const type = reversalTypeFor(original);
     const amount = Math.abs(Number(original.amount));
 
@@ -527,12 +527,12 @@ export const confirmAttachment = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
-    const { userId } = context;
+    const { userId, supabase } = context;
     if (!data.storage_path.startsWith(`${userId}/${data.transaction_id}/`)) {
       throw new Error("This file does not belong to your account.");
     }
     const { privilegedDb } = await import("./bills.server");
-    const db = await privilegedDb();
+    const db = await privilegedDb(supabase as any);
     const { data: owned } = await db
       .from("transactions")
       .select("id")
@@ -595,7 +595,7 @@ export const deleteAttachment = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.storage.from("receipts").remove([row.storage_path]);
     const { privilegedDb } = await import("./bills.server");
-    const db = await privilegedDb();
+    const db = await privilegedDb(supabase as any);
     const { error: deleteError } = await db
       .from("attachments")
       .delete()

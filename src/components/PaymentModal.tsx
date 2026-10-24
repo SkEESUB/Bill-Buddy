@@ -161,13 +161,30 @@ export function PaymentModal({
       >
         <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-border" aria-hidden="true" />
 
-        {phase === "recorded" ? (
-          <div className="flex flex-col items-center py-12">
-            <span className="animate-scale-in flex h-20 w-20 items-center justify-center rounded-full bg-soft-green">
-              <Check className="h-10 w-10 text-success" strokeWidth={2.5} />
+        {phase === "recorded" || (online.phase as string) === "paid" ? (
+          <div className="flex flex-col items-center py-8 text-center animate-scale-in">
+            <span className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/25 mb-4">
+              <Check className="h-10 w-10 stroke-[3]" />
             </span>
-            <p className="mt-4 text-lg font-semibold text-text-primary">Payment recorded</p>
-            <p className="text-sm text-text-secondary">{formatAmount(amount)} marked as paid</p>
+            <h2 className="text-2xl font-extrabold text-text-primary">Payment Successful!</h2>
+            <div className="mt-4 mb-6 rounded-2xl bg-muted/40 border border-border-light/70 p-4 w-full">
+              <p className="text-3xl font-extrabold text-text-primary tabular-nums">
+                {formatAmount(amount)}
+              </p>
+              <p className="mt-1 text-sm font-semibold text-text-secondary">{occurrence.title}</p>
+              <p className="text-xs text-text-tertiary mt-1">
+                {formatDate(today)}, {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
+            </div>
+            <div className="w-full space-y-2.5">
+              <button
+                type="button"
+                className="btn btn-primary w-full !min-h-12 !rounded-2xl text-sm font-bold shadow-md cursor-pointer"
+                onClick={onClose}
+              >
+                Done
+              </button>
+            </div>
           </div>
         ) : phase === "unknown" ? (
           <div className="py-8 text-center">
@@ -208,7 +225,7 @@ export function PaymentModal({
             </div>
 
             {/* ---------- Real provider checkout ---------- */}
-            {checkout.available && online.phase !== "paid" ? (
+            {checkout.available && (online.phase as string) !== "paid" ? (
               <div className="mt-4 rounded-[20px] border border-border-light bg-elevated p-4">
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-[15px] font-semibold text-text-primary">Pay online</p>
@@ -278,7 +295,7 @@ export function PaymentModal({
               </div>
             ) : null}
 
-            {online.phase === "paid" ? (
+            {(online.phase as string) === "paid" ? (
               <div className="mt-4 flex items-center gap-3 rounded-[20px] bg-soft-green p-4">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-surface">
                   <Check className="h-5 w-5 text-success" strokeWidth={2.5} />

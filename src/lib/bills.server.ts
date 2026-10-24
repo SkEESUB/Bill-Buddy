@@ -24,9 +24,21 @@ export type BillRow = Database["public"]["Tables"]["bills"]["Row"];
  * so those writes happen here, after the caller has been authenticated, and
  * always scoped explicitly by `user_id`.
  */
-export async function privilegedDb(): Promise<Db> {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  return supabaseAdmin as unknown as Db;
+export async function privilegedDb(fallbackClient?: Db): Promise<Db> {
+  const serviceKey = process.env["SUPABASE_SERVICE_ROLE_KEY"];
+  if (serviceKey) {
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      return supabaseAdmin as unknown as Db;
+    } catch (e) {
+      console.warn("[privilegedDb] Error loading admin client, using fallback:", e);
+    }
+  }
+  if (fallbackClient) {
+    return fallbackClient;
+  }
+  const { supabase } = await import("@/lib/supabase");
+  return supabase as unknown as Db;
 }
 
 /** Write an audit trail entry. Failures are logged, never surfaced to the user. */

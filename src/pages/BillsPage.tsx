@@ -21,11 +21,9 @@ type SortKey = "due" | "amount" | "recent";
 
 const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "all", label: "All" },
-  { key: "overdue", label: "Overdue" },
-  { key: "soon", label: "Due Soon" },
   { key: "upcoming", label: "Upcoming" },
+  { key: "overdue", label: "Overdue" },
   { key: "paid", label: "Paid" },
-  { key: "skipped", label: "Skipped" },
 ];
 
 const SORTS: { key: SortKey; label: string }[] = [
@@ -204,20 +202,20 @@ export function BillsPage() {
         ) : null}
       </div>
 
-      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+      <div className="flex rounded-2xl bg-muted/60 p-1 border border-border-light/70 overflow-x-auto">
         {FILTERS.map(({ key, label }) => (
           <button
             key={key}
             type="button"
             aria-pressed={filter === key}
             onClick={() => setFilter(key)}
-            className={`min-h-11 shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition ${
+            className={`flex-1 min-w-[72px] rounded-xl py-2 px-3 text-xs font-bold transition-all ${
               filter === key
-                ? "bg-primary text-white"
-                : "border border-border-light bg-surface text-text-secondary"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-text-secondary hover:text-text-primary"
             }`}
           >
-            {label} · {counts[key]}
+            {label} ({counts[key]})
           </button>
         ))}
       </div>

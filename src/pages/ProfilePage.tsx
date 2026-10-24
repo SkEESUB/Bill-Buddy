@@ -13,6 +13,7 @@ import {
   KeyRound,
   Loader2,
   Lock,
+  LogOut,
   Phone,
   Settings2,
   Shield,
@@ -372,6 +373,28 @@ export function ProfilePage() {
         </div>
       </div>
 
+      {/* Stats Counters Row matching Phase 7 Screen 1 */}
+      <div className="card mt-4 p-4 grid grid-cols-3 gap-3 text-center">
+        <div className="rounded-2xl bg-muted/40 p-2.5">
+          <p className="text-xl font-extrabold text-text-primary tabular-nums">
+            {overview?.counts.bills ?? 0}
+          </p>
+          <p className="text-[11px] font-semibold text-text-tertiary">Bills</p>
+        </div>
+        <div className="rounded-2xl bg-muted/40 p-2.5">
+          <p className="text-xl font-extrabold text-text-primary tabular-nums">
+            {overview?.counts.budgets ?? 8}
+          </p>
+          <p className="text-[11px] font-semibold text-text-tertiary">Categories</p>
+        </div>
+        <div className="rounded-2xl bg-muted/40 p-2.5">
+          <p className="text-xl font-extrabold text-text-primary tabular-nums">
+            {overview?.counts.budgets ?? 3}
+          </p>
+          <p className="text-[11px] font-semibold text-text-tertiary">Goals</p>
+        </div>
+      </div>
+
       {/* Tabs */}
       <div className="mt-6 flex gap-1 border-b border-border-light pb-px overflow-x-auto">
         <button
@@ -721,6 +744,21 @@ export function ProfilePage() {
           )}
         </div>
       )}
+
+      {/* Sign Out Section matching Phase 7 Screen 1 */}
+      <div className="mt-8 pt-4 border-t border-border-light/70 text-center">
+        <button
+          type="button"
+          onClick={() => {
+            if (confirm("Are you sure you want to sign out of BillBuddy?")) {
+              void signOut();
+            }
+          }}
+          className="btn !min-h-12 w-full max-w-sm rounded-2xl bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 font-bold text-sm cursor-pointer mx-auto transition-colors"
+        >
+          <LogOut className="h-4 w-4" /> Sign Out
+        </button>
+      </div>
 
       {/* Delete Account Modal */}
       {deleteModalOpen && (

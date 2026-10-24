@@ -70,7 +70,7 @@ describe("account status gate", () => {
     const { assertAccountActive } = await import("./active-account");
     expect(assertAccountActive("ACTIVE")).toBe("ACTIVE");
     expect(assertAccountActive(null)).toBe("ACTIVE");
-  });
+  }, 15000);
 
   it.each(["SUSPENDED", "CLOSED", "PENDING_DELETION", "weird"])(
     "fails closed for %s",

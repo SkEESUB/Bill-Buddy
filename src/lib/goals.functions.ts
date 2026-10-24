@@ -2,7 +2,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireActiveAccount } from "@/lib/auth/active-account";
-import { getAdminClient } from "@/integrations/supabase/client.server";
 import { classifyError } from "@/lib/errors";
 
 export interface SpendingGoalRow {
@@ -23,7 +22,7 @@ export const listGoals = createServerFn({ method: "GET" })
   .middleware([requireActiveAccount])
   .handler(async ({ context }) => {
     try {
-      const db = getAdminClient();
+      const db = context.supabase;
       const { data, error } = await db
         .from("spending_goals")
         .select("*")
@@ -49,7 +48,7 @@ export const createGoal = createServerFn({ method: "POST" })
   .validator((d: unknown) => createGoalSchema.parse(d))
   .handler(async ({ data, context }) => {
     try {
-      const db = getAdminClient();
+      const db = context.supabase;
       const { data: goal, error } = await db
         .from("spending_goals")
         .insert({ ...data, user_id: context.userId } as never)
@@ -72,7 +71,7 @@ export const contributeToGoal = createServerFn({ method: "POST" })
   .validator((d: unknown) => contributeSchema.parse(d))
   .handler(async ({ data, context }) => {
     try {
-      const db = getAdminClient();
+      const db = context.supabase;
 
       // Get current goal
       const { data: goal, error: fetchError } = await db
@@ -111,7 +110,7 @@ export const deleteGoal = createServerFn({ method: "POST" })
   .validator((d: unknown) => deleteGoalSchema.parse(d))
   .handler(async ({ data, context }) => {
     try {
-      const db = getAdminClient();
+      const db = context.supabase;
       const { error } = await db
         .from("spending_goals")
         .delete()

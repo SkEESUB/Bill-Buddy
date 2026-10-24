@@ -36,7 +36,7 @@ export const createBill = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { syncBillOccurrences, audit, privilegedDb } = await import("./bills.server");
-    const db = await privilegedDb();
+    const db = await privilegedDb(supabase as any);
 
     console.log(`[createBill] Creating bill for user ${userId}:`, data.title);
 
@@ -97,7 +97,7 @@ export const updateBill = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { syncBillOccurrences, audit, privilegedDb } = await import("./bills.server");
-    const db = await privilegedDb();
+    const db = await privilegedDb(supabase as any);
     const { id, ...patch } = data;
 
     const changes: Record<string, unknown> = { ...patch };
@@ -167,7 +167,7 @@ export const setBillActive = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { syncBillOccurrences, audit, privilegedDb } = await import("./bills.server");
-    const db = await privilegedDb();
+    const db = await privilegedDb(supabase as any);
     const { data: bill, error } = await supabase
       .from("bills")
       .update({ is_active: data.is_active } as never)
@@ -206,7 +206,7 @@ export const recordOccurrencePayment = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { audit, privilegedDb } = await import("./bills.server");
-    const db = await privilegedDb();
+    const db = await privilegedDb(supabase as any);
 
     const { data: occurrence, error: readError } = await supabase
       .from("bill_occurrences")
@@ -295,7 +295,7 @@ export const skipOccurrence = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { audit, privilegedDb } = await import("./bills.server");
-    const db = await privilegedDb();
+    const db = await privilegedDb(supabase as any);
     const { data: updated, error } = await db
       .from("bill_occurrences")
       .update({ status: "skipped" } as never)
@@ -318,7 +318,7 @@ export const syncSchedules = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
     const { syncBillOccurrences, privilegedDb } = await import("./bills.server");
-    const db = await privilegedDb();
+    const db = await privilegedDb(supabase as any);
     const { data: bills, error } = await supabase
       .from("bills")
       .select("*")
