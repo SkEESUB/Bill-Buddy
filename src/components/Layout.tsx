@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { TopNav } from "./TopNav";
 import { BottomNav } from "./BottomNav";
 import { DesktopSidebar } from "./DesktopSidebar";
+import { NetworkErrorModal } from "./NetworkErrorModal";
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
@@ -22,6 +23,9 @@ export function Layout({ children }: { children: ReactNode }) {
 
       {/* Mobile Fixed Bottom Navigation (< lg) */}
       <BottomNav />
+
+      {/* Network Error Modal (Phase 8 Screen 5) */}
+      <NetworkErrorModal />
     </div>
   );
 }

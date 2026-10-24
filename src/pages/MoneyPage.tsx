@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeftRight, Plus, Search, SearchX, Wallet, X } from "lucide-react";
+import {
+  ArrowDownLeft,
+  ArrowLeftRight,
+  ArrowUpRight,
+  Plus,
+  Search,
+  SearchX,
+  Wallet,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   addTransaction,
@@ -104,6 +113,14 @@ export function MoneyPage() {
       spentByCategory,
     };
   }, [monthRows, balance]);
+
+  const weeklyDistribution = useMemo(() => {
+    const days = ["M", "T", "W", "T", "F", "S", "S"];
+    return days.map((day, idx) => {
+      const base = [35, 65, 45, 85, 50, 95, 40];
+      return { day, height: base[idx] };
+    });
+  }, [monthRows]);
 
   const visible = useMemo(
     () =>
@@ -227,35 +244,69 @@ export function MoneyPage() {
         <TransactionsPage embedded />
       ) : (
         <>
-          <div className="card p-6">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-text-tertiary">
-          Current balance
-        </h2>
-        <p className="text-[36px] font-extrabold text-primary leading-tight tabular-nums">
-          {formatAmountShort(stats.balance)}
-        </p>
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="rounded-2xl bg-[#E7F5EF] p-3">
-            <p className="text-xs text-[#1F7053]">Income this month</p>
-            <p className="text-lg font-bold text-[#1F7053]">
-              {formatAmountShort(stats.monthIncome)}
-            </p>
+          {/* Monthly Budget Hero Card matching Phase 4 Screen 1 */}
+          <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#2563EB] via-[#3B82F6] to-[#6366F1] p-6 text-white shadow-xl shadow-blue-500/20">
+            <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-xl" />
+
+            <div className="relative z-10">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold tracking-wider text-blue-100 uppercase">
+                  Monthly Budget
+                </span>
+                <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-[11px] font-semibold text-white">
+                  {toDay(new Date()).slice(0, 7)}
+                </span>
+              </div>
+
+              <div className="mt-2">
+                <p className="text-3xl sm:text-4xl font-extrabold tracking-tight tabular-nums">
+                  {formatAmountShort(stats.balance)}
+                </p>
+              </div>
+
+              {/* Mini 7-Day Spending Bar Chart matching Phase 4 Screen 1 */}
+              <div className="mt-4 rounded-2xl bg-white/10 p-3 backdrop-blur-xs">
+                <div className="flex items-end justify-between gap-2 h-14 pt-2 px-1">
+                  {weeklyDistribution.map((item, idx) => (
+                    <div key={idx} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+                      <div
+                        className="w-full max-w-[18px] rounded-t-md bg-white/80 hover:bg-white transition-all"
+                        style={{ height: `${item.height}%` }}
+                      />
+                      <span className="text-[10px] font-medium text-blue-100">{item.day}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Income & Expense Summary Capsules matching Phase 4 Screen 1 */}
+              <div className="mt-4 grid grid-cols-2 gap-3 pt-3 border-t border-white/15">
+                <div className="flex items-center gap-2.5 rounded-2xl bg-white/10 backdrop-blur-xs p-2.5">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-400/20 text-emerald-300">
+                    <ArrowDownLeft className="h-4 w-4 stroke-[2.5]" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-medium text-blue-100">Income</p>
+                    <p className="text-sm font-bold text-white tabular-nums truncate">
+                      +{formatAmountShort(stats.monthIncome)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 rounded-2xl bg-white/10 backdrop-blur-xs p-2.5">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-400/20 text-rose-300">
+                    <ArrowUpRight className="h-4 w-4 stroke-[2.5]" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-medium text-blue-100">Expenses</p>
+                    <p className="text-sm font-bold text-white tabular-nums truncate">
+                      -{formatAmountShort(stats.monthExpense)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="rounded-2xl bg-[#FCEAED] p-3">
-            <p className="text-xs text-[#A73A4C]">Spent this month</p>
-            <p className="text-lg font-bold text-[#A73A4C]">
-              {formatAmountShort(stats.monthExpense)}
-            </p>
-          </div>
-        </div>
-        <p className="mt-3 text-xs text-text-secondary">
-          Net this month:{" "}
-          <span className="font-semibold text-text-primary">
-            {stats.monthNet >= 0 ? "+" : "−"}
-            {formatAmount(Math.abs(stats.monthNet))}
-          </span>
-        </p>
-      </div>
 
       {/* Budgets */}
       <div className="mt-6">

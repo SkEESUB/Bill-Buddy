@@ -30,10 +30,11 @@ export function CategorySettingsPage() {
 
   const [name, setName] = useState("");
   const [icon, setIcon] = useState("🏷️");
+  const [tab, setTab] = useState<"expense" | "income">("expense");
   const [pendingDelete, setPendingDelete] = useState<CategoryRow | null>(null);
 
   const create = useMutation({
-    mutationFn: () => createFn({ data: { name: name.trim(), icon } }),
+    mutationFn: () => createFn({ data: { name: name.trim(), icon, type: tab } }),
     onSuccess: () => {
       setName("");
       invalidate();
@@ -58,12 +59,39 @@ export function CategorySettingsPage() {
     onError: (error) => toast.error(toUserMessage(error)),
   });
 
-  const custom = categories.filter((c) => !c.is_system);
-  const system = categories.filter((c) => c.is_system);
+  const filtered = categories.filter((c) => !c.type || c.type === tab || c.type === "both");
+  const custom = filtered.filter((c) => !c.is_system);
+  const system = filtered.filter((c) => c.is_system);
 
   return (
     <section className="animate-fade-in pb-8">
-      <SettingsHeader title="Categories" subtitle="System labels are shared; yours are private." />
+      <SettingsHeader title="Categories" subtitle="Manage your expense and income categories." />
+
+      {/* Segmented Filter: Expense | Income matching Phase 4 Screen 7 */}
+      <div className="flex gap-2 p-1 bg-muted/60 rounded-2xl w-full max-w-xs mb-5">
+        <button
+          type="button"
+          onClick={() => setTab("expense")}
+          className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+            tab === "expense"
+              ? "bg-surface text-primary shadow-xs"
+              : "text-text-secondary hover:text-text-primary"
+          }`}
+        >
+          Expense
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab("income")}
+          className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+            tab === "income"
+              ? "bg-surface text-primary shadow-xs"
+              : "text-text-secondary hover:text-text-primary"
+          }`}
+        >
+          Income
+        </button>
+      </div>
 
       <Group title="Add a category">
         <div className="flex flex-wrap gap-1.5">

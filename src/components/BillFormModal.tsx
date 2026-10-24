@@ -29,8 +29,8 @@ function validate(values: {
   else if (values.title.trim().length > 100) errors.title = "Keep the name under 100 characters";
 
   const amount = Number(values.amount);
-  if (!values.amount.trim()) errors.amount = "This field is required";
-  else if (!Number.isFinite(amount) || amount <= 0) errors.amount = "Amount must be greater than 0";
+  if (!values.amount.trim()) errors.amount = "Minimum amount is ₹1";
+  else if (!Number.isFinite(amount) || amount < 1) errors.amount = "Minimum amount is ₹1";
 
   if (!values.due_date) errors.due_date = "Please select a valid date";
   if (values.upi_id.trim() && !UPI_RE.test(values.upi_id.trim()))
@@ -250,7 +250,7 @@ export function BillFormModal({
                       inputMode="decimal"
                       step="0.01"
                       min="0"
-                      className="input-field !min-h-[52px] flex-1"
+                      className={`input-field !min-h-[52px] flex-1 ${err("amount") ? "!border-rose-500 !ring-rose-500/20" : ""}`}
                       placeholder="0.00"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
