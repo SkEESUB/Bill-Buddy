@@ -1,7 +1,7 @@
-﻿// src/components/dashboard/QuickAddFAB.tsx
+// src/components/dashboard/QuickAddFAB.tsx
 import { useState } from "react";
 import { Plus, X, TrendingUp, TrendingDown, Receipt } from "lucide-react";
-import { cn } from "@/lib/utils/cn";
+import { cn } from "@/lib/utils";
 
 export interface QuickAddFABProps {
   onAddIncome?: () => void;

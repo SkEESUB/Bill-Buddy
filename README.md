@@ -33,7 +33,7 @@ bills: when they're due, how much they cost, and what you've already paid.
 | Routing | TanStack Router (file-based, `src/routes`) |
 | Build | Vite 7 |
 | Styling | Tailwind CSS v4 with semantic tokens in `src/styles.css` |
-| Backend | Lovable Cloud (Postgres + Auth) with Row Level Security |
+| Backend | Supabase (PostgreSQL + Auth) with Row Level Security |
 | Charts | Recharts |
 | Icons | lucide-react |
 | Toasts | sonner |
@@ -55,7 +55,7 @@ src/
 
 ## Environment variables
 
-Provisioned automatically by Lovable Cloud in `.env`:
+Configured in `.env`:
 
 ```
 VITE_SUPABASE_URL=...

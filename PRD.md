@@ -105,4 +105,4 @@
 The application requires all 22 relational tables, RLS policies, triggers, and the two storage buckets (`avatars`, `receipts`) defined in [`supabase/migrations/001_billbuddy_schema.sql`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/supabase/migrations/001_billbuddy_schema.sql) to be active on project `xsytaixmyeypoiscfbim`.
 
 ### 5.2 External Platform Guardrails
-- **Lovable Sync Guardrail:** Changes pushed to repository branch `main` sync directly to the Lovable deployment engine. Force-pushing, history re-writing, and unverified package upgrades are strictly prohibited.
+- **Production Sync Guardrail:** Changes pushed to repository branch `main` sync directly to continuous deployment (Vercel). Force-pushing, history re-writing, and unverified package upgrades are strictly prohibited.

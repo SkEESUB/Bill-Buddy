@@ -1,6 +1,6 @@
-﻿// src/components/ui/skeleton.tsx
+// src/components/ui/skeleton.tsx
 import * as React from "react";
-import { cn } from "@/lib/utils/cn";
+import { cn } from "@/lib/utils";
 
 export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;

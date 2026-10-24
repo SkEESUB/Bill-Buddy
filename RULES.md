@@ -23,9 +23,9 @@ These rules are non-negotiable. Every developer, automated agent, and contributo
 
 ---
 
-## 2. Git & Version Control Rules (Lovable Sync Protection)
+## 2. Git & Version Control Rules (Production Protection)
 
-The BillBuddy repository is actively synchronized with **Lovable's** deployment infrastructure. Breaking Git history causes catastrophic synchronization failures.
+The BillBuddy repository is actively synchronized with production deployment infrastructure. Breaking Git history causes catastrophic synchronization and deployment failures.
 
 ### 2.1 Git Commands & Behaviors
 - **PROHIBITED:**

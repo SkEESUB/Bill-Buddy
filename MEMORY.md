@@ -10,7 +10,7 @@
 
 ## 1. Project Background & Genesis
 
-BillBuddy was initiated to solve recurring personal expense management, subscription bloat, and cash-flow unpredictability. The codebase evolved from an initial rapid-prototype single-page application (previously branded as *BillBoard* under the Lovable builder environment) into an isomorphic full-stack SSR application on **TanStack Start**, **React 19**, and **Supabase PostgreSQL**.
+BillBuddy was initiated to solve recurring personal expense management, subscription bloat, and cash-flow unpredictability. The codebase evolved from an initial rapid prototype into an isomorphic full-stack SSR application on **TanStack Start**, **React 19**, and **Supabase PostgreSQL**.
 
 ---
 
@@ -70,9 +70,9 @@ BillBuddy was initiated to solve recurring personal expense management, subscrip
 
 ## 4. Third-Party Integrations & Platform Constraints
 
-### 4.1 Lovable Platform Synchronization
-- The repository is connected to Lovable's automated continuous deployment infrastructure.
-- **Hard Rule:** Never force-push (`git push --force`) or rewrite public Git history on `main`. Lovable uses Git commit hashes to reconcile project evolution; rewriting history breaks Lovable's editor sync.
+### 4.1 Production Deployment Guardrail
+- The repository is connected to continuous deployment infrastructure via GitHub and Vercel.
+- **Hard Rule:** Never force-push (`git push --force`) or rewrite public Git history on `main`. Rewriting published history causes deployment discrepancies and risk of lost commits.
 
 ### 4.2 Supabase PostgreSQL RLS Constraints
 - All application queries executed from browser clients are evaluated against PostgreSQL Row-Level Security.

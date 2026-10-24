@@ -28,7 +28,7 @@
 ### Workstream 1: Authentication & Identity Management
 - [x] **TASK-AUTH-01:** Implement 6-digit numeric OTP request flow (`supabase.auth.signInWithOtp`).
 - [x] **TASK-AUTH-02:** Implement 6-digit OTP token verification (`supabase.auth.verifyOtp` with type `email`).
-- [x] **TASK-AUTH-03:** Purge all deprecated magic-link redirects and legacy Lovable URLs from auth callbacks.
+- [x] **TASK-AUTH-03:** Purge all deprecated magic-link redirects and legacy preview URLs from auth callbacks.
 - [x] **TASK-AUTH-04:** Implement 60-second cooldown timer on OTP resend button.
 - [x] **TASK-AUTH-05:** Establish SSR cookie session synchronization for TanStack Start server functions.
 - [x] **TASK-AUTH-06:** Implement clean session invalidation on user logout.
