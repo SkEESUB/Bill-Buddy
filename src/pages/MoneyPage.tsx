@@ -20,6 +20,7 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyState } from "@/components/EmptyState";
 import { BillListSkeleton } from "@/components/Skeletons";
 import { TransactionCard } from "@/components/TransactionCard";
+import { TransactionDetailsModal } from "@/components/TransactionDetailsModal";
 import { TransactionFormModal, type TransactionInput } from "@/components/TransactionFormModal";
 import { TransactionsPage } from "@/pages/TransactionsPage";
 import type { Budget, Transaction } from "@/types/database";
@@ -42,6 +43,7 @@ export function MoneyPage() {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Transaction | null>(null);
+  const [detailsTarget, setDetailsTarget] = useState<Transaction | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Transaction | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [budgetCategory, setBudgetCategory] = useState<string | null>(null);
@@ -202,7 +204,7 @@ export function MoneyPage() {
           onClick={() => setViewMode("overview")}
           className={`flex items-center gap-2 rounded-t-xl px-4 py-2 text-xs font-semibold transition-colors border-b-2 cursor-pointer ${
             viewMode === "overview"
-              ? "border-primary text-primary bg-lilac/20"
+              ? "border-primary text-primary bg-primary/10"
               : "border-transparent text-text-secondary hover:text-text-primary"
           }`}
         >
@@ -213,7 +215,7 @@ export function MoneyPage() {
           onClick={() => setViewMode("ledger")}
           className={`flex items-center gap-2 rounded-t-xl px-4 py-2 text-xs font-semibold transition-colors border-b-2 cursor-pointer ${
             viewMode === "ledger"
-              ? "border-primary text-primary bg-lilac/20"
+              ? "border-primary text-primary bg-primary/10"
               : "border-transparent text-text-secondary hover:text-text-primary"
           }`}
         >
@@ -294,7 +296,7 @@ export function MoneyPage() {
                   </span>
                 </div>
                 <div
-                  className="mt-2 neu-inset h-2.5 w-full overflow-hidden rounded-full bg-lilac/40"
+                  className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-muted"
                   role="progressbar"
                   aria-valuenow={pct}
                   aria-valuemin={0}
@@ -427,6 +429,7 @@ export function MoneyPage() {
                           setFormOpen(true);
                         }}
                         onDelete={setDeleteTarget}
+                        onSelect={setDetailsTarget}
                       />
                     </div>
                   ))}
@@ -448,6 +451,21 @@ export function MoneyPage() {
       >
         <Plus className="h-6 w-6" />
       </button>
+
+      <TransactionDetailsModal
+        open={!!detailsTarget}
+        transaction={detailsTarget}
+        onClose={() => setDetailsTarget(null)}
+        onEdit={(tx) => {
+          setDetailsTarget(null);
+          setEditing(tx);
+          setFormOpen(true);
+        }}
+        onDelete={(tx) => {
+          setDetailsTarget(null);
+          setDeleteTarget(tx);
+        }}
+      />
 
       <TransactionFormModal
         open={formOpen}

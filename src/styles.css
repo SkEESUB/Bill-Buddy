@@ -71,10 +71,10 @@
   --color-ring: var(--primary-from);
   --color-ring-offset-background: var(--background);
 
-  --shadow-card: var(--neu-raised);
-  --shadow-card-hover: var(--neu-raised-lg);
-  --shadow-primary: 0 8px 18px -6px rgba(75, 29, 63, 0.42);
-  --shadow-success: 0 8px 18px -6px rgba(39, 138, 99, 0.32);
+  --shadow-card: var(--shadow-card);
+  --shadow-card-hover: var(--shadow-card-hover);
+  --shadow-primary: var(--shadow-primary);
+  --shadow-success: var(--shadow-success);
 }
 
 :root {

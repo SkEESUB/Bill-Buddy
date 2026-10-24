@@ -8,6 +8,7 @@ import { byUrgency, matchesSearch, type OccurrenceView } from "@/lib/occurrences
 import { useDebounced } from "@/hooks/useDebounced";
 import { useFinance } from "@/hooks/useFinance";
 import { BillCard } from "@/components/BillCard";
+import { BillDetailsModal } from "@/components/BillDetailsModal";
 import { BillFormModal, type BillInput } from "@/components/BillFormModal";
 import { PaymentModal } from "@/components/PaymentModal";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -46,6 +47,7 @@ export function BillsPage() {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Bill | null>(null);
+  const [detailsTarget, setDetailsTarget] = useState<OccurrenceView | null>(null);
   const [payTarget, setPayTarget] = useState<OccurrenceView | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<OccurrenceView | null>(null);
   const [skipTarget, setSkipTarget] = useState<OccurrenceView | null>(null);
@@ -288,6 +290,7 @@ export function BillsPage() {
               onSkip={setSkipTarget}
               onDelete={setDeleteTarget}
               onCopyUpi={copyUpi}
+              onSelect={setDetailsTarget}
             />
           ))}
           {visible.length > shown.length ? (
@@ -301,6 +304,31 @@ export function BillsPage() {
           ) : null}
         </div>
       )}
+
+      <BillDetailsModal
+        open={!!detailsTarget}
+        occurrence={detailsTarget}
+        bill={detailsTarget ? billsById.get(detailsTarget.billId) : null}
+        today={today}
+        onClose={() => setDetailsTarget(null)}
+        onPay={(o) => {
+          setDetailsTarget(null);
+          setPayTarget(o);
+        }}
+        onEdit={(b) => {
+          setDetailsTarget(null);
+          setEditing(b);
+          setFormOpen(true);
+        }}
+        onDelete={(o) => {
+          setDetailsTarget(null);
+          setDeleteTarget(o);
+        }}
+        onSkip={(o) => {
+          setDetailsTarget(null);
+          setSkipTarget(o);
+        }}
+      />
 
       <BillFormModal
         open={formOpen}

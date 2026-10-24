@@ -54,10 +54,10 @@ export function AppearanceSettingsPage() {
                 type="button"
                 aria-pressed={active}
                 onClick={() => void save({ theme: value }, () => prefs.apply({ theme: value }))}
-                className={`flex flex-col items-center gap-2 rounded-2xl border px-3 py-4 text-[13px] font-semibold transition-colors ${
+                className={`flex flex-col items-center gap-2 rounded-2xl border px-3 py-4 text-[13px] font-semibold transition-all cursor-pointer ${
                   active
-                    ? "border-primary bg-lilac/45 text-primary"
-                    : "border-border-light text-text-secondary hover:border-primary"
+                    ? "border-primary bg-primary/10 text-primary shadow-xs"
+                    : "border-border-light text-text-secondary hover:border-primary/50"
                 }`}
               >
                 <Icon className="h-5 w-5" />

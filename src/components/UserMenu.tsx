@@ -86,7 +86,7 @@ export function UserMenu() {
               </div>
             </div>
             {isAdmin && (
-              <span className="mt-2 inline-flex items-center gap-1 rounded-md bg-lilac/50 px-2 py-0.5 text-[11px] font-semibold text-primary">
+              <span className="mt-2 inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
                 <Shield className="h-3 w-3" /> Admin
               </span>
             )}

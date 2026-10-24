@@ -94,34 +94,38 @@ export function BudgetDetailPage({ id }: { id: string }) {
         <ArrowLeft className="h-4 w-4" /> Budgets
       </Link>
 
-      <header className="card p-5">
+      <header className="rounded-3xl border border-border-light/80 bg-surface p-6 shadow-xs">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <category.icon className="h-5 w-5" style={{ color: category.color }} aria-hidden="true" />
+          <div className="flex items-center gap-3">
+            <div
+              className="flex h-12 w-12 items-center justify-center rounded-2xl"
+              style={{ backgroundColor: `${category.color}15`, color: category.color }}
+            >
+              <category.icon className="h-6 w-6" aria-hidden="true" />
+            </div>
             <div>
-              <h1 className="text-lg font-bold text-text-primary">{evaluation.name}</h1>
-              <p className="text-xs text-text-tertiary">
+              <h1 className="text-xl font-bold text-text-primary">{evaluation.name}</h1>
+              <p className="text-xs text-text-secondary">
                 {category.label} · {PERIOD_LABELS[evaluation.period]} ·{" "}
                 {STATE_LABELS[evaluation.state]}
               </p>
             </div>
           </div>
           <span
-            className="rounded-full px-2.5 py-1 text-[11px] font-semibold"
-            style={{ backgroundColor: style.bg, color: style.color }}
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${style.badgeClass}`}
           >
             {style.label}
           </span>
         </div>
 
-        <p className="mt-4 text-[28px] font-extrabold tabular-nums text-text-primary">
+        <p className="mt-5 text-3xl font-extrabold tabular-nums text-text-primary">
           {formatAmount(evaluation.progress.spent)}
-          <span className="text-base text-text-tertiary">
+          <span className="text-sm font-normal text-text-tertiary">
             {" "}
             / {formatAmount(evaluation.progress.budget)}
           </span>
         </p>
-        <p className="text-sm text-text-secondary">
+        <p className="mt-1 text-xs text-text-secondary">
           {over
             ? `${formatAmount(Math.abs(evaluation.progress.remaining))} over budget`
             : `${formatAmount(evaluation.progress.remaining)} remaining`}{" "}
@@ -129,7 +133,7 @@ export function BudgetDetailPage({ id }: { id: string }) {
         </p>
 
         <div
-          className="mt-3 neu-inset h-3 w-full overflow-hidden rounded-full bg-lilac/40"
+          className="mt-3.5 h-3 w-full overflow-hidden rounded-full bg-muted"
           role="progressbar"
           aria-valuenow={evaluation.progress.percentageUsed}
           aria-valuemin={0}
@@ -137,10 +141,9 @@ export function BudgetDetailPage({ id }: { id: string }) {
           aria-label="Budget used"
         >
           <div
-            className="h-full rounded-full"
+            className={`h-full rounded-full transition-all duration-500 ${style.barClass}`}
             style={{
               width: `${Math.min(100, Math.max(0, evaluation.progress.percentageUsed))}%`,
-              backgroundColor: style.color,
             }}
           />
         </div>

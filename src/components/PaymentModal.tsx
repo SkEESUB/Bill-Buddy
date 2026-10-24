@@ -130,7 +130,6 @@ export function PaymentModal({
         external_reference: reference.trim() || null,
       });
       setPhase("recorded");
-      window.setTimeout(onClose, 1200);
     } catch (e) {
       const classified = classifyError(e);
       if (classified.kind === "network") {
@@ -176,7 +175,14 @@ export function PaymentModal({
                 {formatDate(today)}, {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>
             </div>
-            <div className="w-full space-y-2.5">
+            <div className="w-full space-y-2">
+              <button
+                type="button"
+                className="btn btn-secondary w-full !min-h-11 !rounded-2xl text-xs font-semibold cursor-pointer"
+                onClick={onClose}
+              >
+                View Details
+              </button>
               <button
                 type="button"
                 className="btn btn-primary w-full !min-h-12 !rounded-2xl text-sm font-bold shadow-md cursor-pointer"

@@ -74,8 +74,8 @@ export function CategorySettingsPage() {
               aria-label={`Icon ${e}`}
               aria-pressed={icon === e}
               onClick={() => setIcon(e)}
-              className={`h-10 w-10 rounded-xl border text-lg ${
-                icon === e ? "border-primary bg-lilac/45" : "border-border-light"
+              className={`h-10 w-10 rounded-xl border text-lg transition-colors cursor-pointer ${
+                icon === e ? "border-primary bg-primary/15" : "border-border-light hover:border-border-medium"
               }`}
             >
               {e}

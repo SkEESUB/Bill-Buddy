@@ -8,26 +8,32 @@ export function TransactionCard({
   transaction,
   onEdit,
   onDelete,
+  onSelect,
 }: {
   transaction: Transaction;
   onEdit: (t: Transaction) => void;
   onDelete: (t: Transaction) => void;
+  onSelect?: (t: Transaction) => void;
 }) {
   const cat = moneyCategory(transaction.category);
   const Icon = cat.icon;
   const income = transaction.type === "income";
 
   return (
-    <div className="card flex items-center gap-3 rounded-[22px] p-4">
+    <div className="card flex items-center gap-3 rounded-[22px] p-4 transition-all hover:shadow-md">
       <span
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-lilac/50"
-        style={{ color: cat.color }}
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl cursor-pointer"
+        style={{ backgroundColor: `${cat.color}15`, color: cat.color }}
         aria-hidden="true"
+        onClick={() => onSelect?.(transaction)}
       >
         <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
       </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[15px] font-semibold text-text-primary">
+      <div
+        className={`min-w-0 flex-1 ${onSelect ? "cursor-pointer group" : ""}`}
+        onClick={() => onSelect?.(transaction)}
+      >
+        <p className="truncate text-[15px] font-semibold text-text-primary group-hover:text-primary transition-colors">
           {transaction.description || cat.label}
         </p>
         <p className="mt-0.5 truncate text-[13px] text-text-secondary">

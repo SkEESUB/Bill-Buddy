@@ -24,6 +24,7 @@ export function BillCard({
   onSkip,
   onDelete,
   onCopyUpi,
+  onSelect,
 }: {
   occurrence: OccurrenceView;
   today: string;
@@ -32,6 +33,7 @@ export function BillCard({
   onSkip: (occurrence: OccurrenceView) => void;
   onDelete: (occurrence: OccurrenceView) => void;
   onCopyUpi: (upi: string) => void;
+  onSelect?: (occurrence: OccurrenceView) => void;
 }) {
   const cat = category(occurrence.category);
   const Icon = cat.icon;
@@ -61,16 +63,19 @@ export function BillCard({
       <div className="flex items-start gap-3 pl-2">
         <span
           aria-hidden="true"
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-lilac/50"
-          style={{ color: cat.color }}
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
+          style={{ backgroundColor: `${cat.color}15`, color: cat.color }}
         >
           <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
         </span>
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-3">
+          <div
+            className={`flex items-start justify-between gap-3 ${onSelect ? "cursor-pointer group" : ""}`}
+            onClick={() => onSelect?.(occurrence)}
+          >
             <div className="min-w-0">
-              <h3 className="truncate text-[16px] font-semibold leading-tight text-text-primary">
+              <h3 className="truncate text-[16px] font-semibold leading-tight text-text-primary group-hover:text-primary transition-colors">
                 {occurrence.title}
               </h3>
               <p className="mt-0.5 text-[13px] text-text-secondary">{cat.label}</p>

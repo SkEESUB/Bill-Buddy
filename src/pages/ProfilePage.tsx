@@ -402,7 +402,7 @@ export function ProfilePage() {
           onClick={() => setActiveTab("personal")}
           className={`flex items-center gap-2 rounded-t-xl px-4 py-2.5 text-xs font-semibold transition-colors border-b-2 cursor-pointer ${
             activeTab === "personal"
-              ? "border-primary text-primary bg-lilac/20"
+              ? "border-primary text-primary bg-primary/10"
               : "border-transparent text-text-secondary hover:text-text-primary"
           }`}
         >
@@ -414,7 +414,7 @@ export function ProfilePage() {
           onClick={() => setActiveTab("financial")}
           className={`flex items-center gap-2 rounded-t-xl px-4 py-2.5 text-xs font-semibold transition-colors border-b-2 cursor-pointer ${
             activeTab === "financial"
-              ? "border-primary text-primary bg-lilac/20"
+              ? "border-primary text-primary bg-primary/10"
               : "border-transparent text-text-secondary hover:text-text-primary"
           }`}
         >
@@ -426,7 +426,7 @@ export function ProfilePage() {
           onClick={() => setActiveTab("notifications")}
           className={`flex items-center gap-2 rounded-t-xl px-4 py-2.5 text-xs font-semibold transition-colors border-b-2 cursor-pointer ${
             activeTab === "notifications"
-              ? "border-primary text-primary bg-lilac/20"
+              ? "border-primary text-primary bg-primary/10"
               : "border-transparent text-text-secondary hover:text-text-primary"
           }`}
         >
@@ -438,7 +438,7 @@ export function ProfilePage() {
           onClick={() => setActiveTab("security")}
           className={`flex items-center gap-2 rounded-t-xl px-4 py-2.5 text-xs font-semibold transition-colors border-b-2 cursor-pointer ${
             activeTab === "security"
-              ? "border-primary text-primary bg-lilac/20"
+              ? "border-primary text-primary bg-primary/10"
               : "border-transparent text-text-secondary hover:text-text-primary"
           }`}
         >

@@ -11,7 +11,7 @@ export function BottomNav() {
     <>
       <nav
         aria-label="Primary mobile navigation"
-        className="safe-bottom fixed inset-x-0 bottom-0 z-30 sm:hidden border-t border-border-light/80 bg-surface/95 backdrop-blur-md px-2 py-1.5 shadow-lg"
+        className="safe-bottom fixed inset-x-0 bottom-0 z-30 lg:hidden border-t border-border-light/80 bg-surface/95 backdrop-blur-md px-2 py-1.5 shadow-lg"
       >
         <div className="flex items-center justify-around max-w-md mx-auto">
           {/* Left items */}
