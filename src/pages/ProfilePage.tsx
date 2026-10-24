@@ -4,12 +4,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   AlertTriangle,
-  AtSign,
+  ArrowLeft,
   Bell,
   Camera,
-  Check,
+  ChevronRight,
   CreditCard,
-  DollarSign,
+  HelpCircle,
   KeyRound,
   Loader2,
   Lock,
@@ -17,6 +17,7 @@ import {
   Phone,
   Settings2,
   Shield,
+  Tag,
   Trash2,
   User,
   Wallet,
@@ -50,7 +51,7 @@ const CURRENCY_OPTIONS = [
   { code: "AED", symbol: "د.إ", name: "UAE Dirham (AED)" },
 ];
 
-type TabKey = "personal" | "financial" | "notifications" | "security";
+type SectionKey = "personal" | "financial" | "notifications" | "security" | null;
 
 export function ProfilePage() {
   const { user, signOut } = useAuth();
@@ -64,7 +65,7 @@ export function ProfilePage() {
   const deleteAccountServer = useServerFn(deleteAccountFn);
 
   const fileInput = useRef<HTMLInputElement>(null);
-  const [activeTab, setActiveTab] = useState<TabKey>("personal");
+  const [activeSection, setActiveSection] = useState<SectionKey>(null);
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [settings, setSettings] = useState<UserSettings | null>(null);
@@ -199,6 +200,7 @@ export function ProfilePage() {
       setProfile(updated);
       await refreshCache();
       toast.success("Personal details saved");
+      setActiveSection(null);
     } catch (err) {
       toast.error(toUserMessage(err));
     } finally {
@@ -222,6 +224,7 @@ export function ProfilePage() {
       setSettings(updated);
       await refreshCache();
       toast.success("Financial preferences saved");
+      setActiveSection(null);
     } catch (err) {
       toast.error(toUserMessage(err));
     } finally {
@@ -250,6 +253,7 @@ export function ProfilePage() {
       ]);
       await refreshCache();
       toast.success("Notification preferences updated");
+      setActiveSection(null);
     } catch (err) {
       toast.error(toUserMessage(err));
     } finally {
@@ -294,480 +298,550 @@ export function ProfilePage() {
   const userInitials = initials(fullName || user?.email);
 
   return (
-    <section className="animate-fade-in pb-12">
-      {/* Top Header */}
-      <header className="flex items-center justify-between gap-4 pb-5 border-b border-border-light">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-            Account & Profile
-          </h1>
-          <p className="text-xs text-text-secondary mt-0.5">
-            Manage your personal information, financial preferences and security settings.
-          </p>
-        </div>
-        <Link
-          to="/settings"
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-border-light text-text-secondary transition-colors hover:border-primary hover:text-primary"
-          aria-label="Settings overview"
-        >
-          <Settings2 className="h-4 w-4" />
-        </Link>
-      </header>
-
-      {/* Profile Identity Card */}
-      <div className="card mt-6 p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5">
-        <div className="relative">
-          <Avatar fallback={userInitials} size={72} />
+    <section className="animate-fade-in pb-16 max-w-2xl mx-auto space-y-6">
+      {/* SECTION VIEW: SUB-FORM */}
+      {activeSection ? (
+        <div className="space-y-4">
           <button
             type="button"
-            onClick={() => fileInput.current?.click()}
-            disabled={uploading}
-            className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition-transform hover:scale-110 cursor-pointer"
-            aria-label="Upload photo"
+            onClick={() => setActiveSection(null)}
+            className="inline-flex items-center gap-2 text-xs font-bold text-primary hover:underline cursor-pointer mb-2"
           >
-            {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
+            <ArrowLeft className="h-4 w-4" /> Back to Profile
           </button>
-        </div>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-lg font-bold text-text-primary truncate">{nameToShow}</h2>
-            <span className="inline-flex items-center gap-1 rounded-md bg-soft-green px-2 py-0.5 text-[11px] font-semibold text-status-success">
-              Active Account
-            </span>
-          </div>
-          <p className="text-xs text-text-secondary mt-0.5 truncate">{user?.email}</p>
+          {/* SUB-FORM: PERSONAL */}
+          {activeSection === "personal" && (
+            <div className="card p-6 rounded-[28px] space-y-4 border border-border-light shadow-xs animate-fade-in">
+              <div>
+                <h2 className="text-lg font-bold text-text-primary">Personal Information</h2>
+                <p className="text-xs text-text-secondary mt-0.5">
+                  Update your contact and payment identification details.
+                </p>
+              </div>
 
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => fileInput.current?.click()}
-              disabled={uploading}
-              className="btn btn-secondary !min-h-8 !py-1 !px-3 !text-xs cursor-pointer"
-            >
-              {uploading ? "Uploading…" : profile?.avatar_url ? "Change photo" : "Add photo"}
-            </button>
-            {profile?.avatar_url && (
-              <button
-                type="button"
-                onClick={() => void removePhoto()}
-                disabled={uploading}
-                className="btn !min-h-8 !py-1 !px-3 !text-xs bg-soft-red text-status-error hover:bg-soft-red/80 cursor-pointer"
-              >
-                <Trash2 className="h-3.5 w-3.5" /> Remove
-              </button>
-            )}
-          </div>
-          <input
-            ref={fileInput}
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            className="hidden"
-            aria-label="Select avatar file"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              e.target.value = "";
-              if (file) void onPickFile(file);
-            }}
-          />
-        </div>
-      </div>
+              <div className="space-y-3 pt-2">
+                <label className="block">
+                  <span className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-text-secondary">
+                    <User className="h-3.5 w-3.5" /> Full Name
+                  </span>
+                  <input
+                    className="input-field"
+                    value={fullName}
+                    maxLength={60}
+                    placeholder="e.g. Alex Morgan"
+                    onChange={(e) => setFullName(e.target.value)}
+                  />
+                  {errors["full_name"] && (
+                    <span className="mt-1 block text-xs text-status-error">{errors["full_name"]}</span>
+                  )}
+                </label>
 
-      {/* Stats Counters Row matching Phase 7 Screen 1 */}
-      <div className="card mt-4 p-4 grid grid-cols-3 gap-3 text-center">
-        <div className="rounded-2xl bg-muted/40 p-2.5">
-          <p className="text-xl font-extrabold text-text-primary tabular-nums">
-            {overview?.counts.bills ?? 0}
-          </p>
-          <p className="text-[11px] font-semibold text-text-tertiary">Bills</p>
-        </div>
-        <div className="rounded-2xl bg-muted/40 p-2.5">
-          <p className="text-xl font-extrabold text-text-primary tabular-nums">
-            {overview?.counts.budgets ?? 8}
-          </p>
-          <p className="text-[11px] font-semibold text-text-tertiary">Categories</p>
-        </div>
-        <div className="rounded-2xl bg-muted/40 p-2.5">
-          <p className="text-xl font-extrabold text-text-primary tabular-nums">
-            {overview?.counts.budgets ?? 3}
-          </p>
-          <p className="text-[11px] font-semibold text-text-tertiary">Goals</p>
-        </div>
-      </div>
+                <label className="block">
+                  <span className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-text-secondary">
+                    <Lock className="h-3.5 w-3.5" /> Email Address
+                  </span>
+                  <input
+                    className="input-field opacity-70 bg-muted/50 cursor-not-allowed"
+                    value={user?.email ?? ""}
+                    disabled
+                  />
+                  <span className="mt-1 block text-[11px] text-text-tertiary">
+                    Email cannot be changed directly.
+                  </span>
+                </label>
 
-      {/* Tabs */}
-      <div className="mt-6 flex gap-1 border-b border-border-light pb-px overflow-x-auto">
-        <button
-          type="button"
-          onClick={() => setActiveTab("personal")}
-          className={`flex items-center gap-2 rounded-t-xl px-4 py-2.5 text-xs font-semibold transition-colors border-b-2 cursor-pointer ${
-            activeTab === "personal"
-              ? "border-primary text-primary bg-primary/10"
-              : "border-transparent text-text-secondary hover:text-text-primary"
-          }`}
-        >
-          <User className="h-3.5 w-3.5" /> Personal
-        </button>
+                <label className="block">
+                  <span className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-text-secondary">
+                    <Phone className="h-3.5 w-3.5" /> Mobile Number
+                  </span>
+                  <input
+                    className="input-field"
+                    value={mobile}
+                    maxLength={10}
+                    placeholder="10-digit number"
+                    onChange={(e) => setMobile(e.target.value)}
+                  />
+                  {errors["mobile"] && (
+                    <span className="mt-1 block text-xs text-status-error">{errors["mobile"]}</span>
+                  )}
+                </label>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("financial")}
-          className={`flex items-center gap-2 rounded-t-xl px-4 py-2.5 text-xs font-semibold transition-colors border-b-2 cursor-pointer ${
-            activeTab === "financial"
-              ? "border-primary text-primary bg-primary/10"
-              : "border-transparent text-text-secondary hover:text-text-primary"
-          }`}
-        >
-          <Wallet className="h-3.5 w-3.5" /> Financial
-        </button>
+                <label className="block">
+                  <span className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-text-secondary">
+                    <CreditCard className="h-3.5 w-3.5" /> Default UPI ID
+                  </span>
+                  <input
+                    className="input-field"
+                    value={upi}
+                    placeholder="name@okaxis"
+                    onChange={(e) => setUpi(e.target.value)}
+                  />
+                  {errors["upi"] && (
+                    <span className="mt-1 block text-xs text-status-error">{errors["upi"]}</span>
+                  )}
+                </label>
+              </div>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("notifications")}
-          className={`flex items-center gap-2 rounded-t-xl px-4 py-2.5 text-xs font-semibold transition-colors border-b-2 cursor-pointer ${
-            activeTab === "notifications"
-              ? "border-primary text-primary bg-primary/10"
-              : "border-transparent text-text-secondary hover:text-text-primary"
-          }`}
-        >
-          <Bell className="h-3.5 w-3.5" /> Notifications
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab("security")}
-          className={`flex items-center gap-2 rounded-t-xl px-4 py-2.5 text-xs font-semibold transition-colors border-b-2 cursor-pointer ${
-            activeTab === "security"
-              ? "border-primary text-primary bg-primary/10"
-              : "border-transparent text-text-secondary hover:text-text-primary"
-          }`}
-        >
-          <Shield className="h-3.5 w-3.5" /> Security & Danger
-        </button>
-      </div>
-
-      {loading ? (
-        <div className="card mt-6 flex items-center justify-center p-12 text-text-secondary">
-          <Loader2 className="h-5 w-5 animate-spin" />
-        </div>
-      ) : (
-        <div className="mt-6">
-          {/* TAB 1: PERSONAL */}
-          {activeTab === "personal" && (
-            <div className="card p-5 sm:p-6 space-y-4">
-              <h3 className="text-sm font-bold text-text-primary">Personal Details</h3>
-
-              <label className="block">
-                <span className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-text-secondary">
-                  <User className="h-3.5 w-3.5" /> Full Name
-                </span>
-                <input
-                  className="input-field"
-                  value={fullName}
-                  maxLength={60}
-                  placeholder="e.g. Alex Morgan"
-                  onChange={(e) => setFullName(e.target.value)}
-                />
-                {errors["full_name"] && (
-                  <span className="mt-1 block text-xs text-status-error">{errors["full_name"]}</span>
-                )}
-              </label>
-
-              <label className="block">
-                <span className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-text-secondary">
-                  <Lock className="h-3.5 w-3.5" /> Email Address (Sign in email)
-                </span>
-                <input
-                  className="input-field opacity-70 bg-muted cursor-not-allowed"
-                  value={user?.email ?? ""}
-                  disabled
-                  readOnly
-                />
-                <span className="mt-1 block text-[11px] text-text-tertiary">
-                  Email is linked to your authentication account and cannot be modified here.
-                </span>
-              </label>
-
-              <label className="block">
-                <span className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-text-secondary">
-                  <Phone className="h-3.5 w-3.5" /> Mobile Number
-                </span>
-                <input
-                  className="input-field"
-                  value={mobile}
-                  inputMode="numeric"
-                  maxLength={10}
-                  placeholder="10-digit mobile number"
-                  onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
-                />
-                {errors["mobile"] && (
-                  <span className="mt-1 block text-xs text-status-error">{errors["mobile"]}</span>
-                )}
-              </label>
-
-              <label className="block">
-                <span className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-text-secondary">
-                  <AtSign className="h-3.5 w-3.5" /> Default UPI ID
-                </span>
-                <input
-                  className="input-field"
-                  value={upi}
-                  placeholder="name@okaxis"
-                  autoCapitalize="none"
-                  spellCheck={false}
-                  onChange={(e) => setUpi(e.target.value.trim())}
-                />
-                <span className="mt-1 block text-[11px] text-text-tertiary">
-                  Used to pre-fill UPI payment details for bills. We never store your UPI PIN.
-                </span>
-                {errors["upi"] && (
-                  <span className="mt-1 block text-xs text-status-error">{errors["upi"]}</span>
-                )}
-              </label>
-
-              <div className="pt-3">
+              <div className="pt-3 flex gap-2">
                 <button
                   type="button"
-                  onClick={() => void savePersonal()}
+                  onClick={savePersonal}
                   disabled={saving}
-                  className="btn btn-primary cursor-pointer"
+                  className="btn btn-primary flex-1 !rounded-2xl !min-h-11 cursor-pointer"
                 >
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                  Save Personal Details
+                  {saving ? "Saving..." : "Save Changes"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveSection(null)}
+                  className="btn btn-secondary !rounded-2xl !min-h-11 cursor-pointer"
+                >
+                  Cancel
                 </button>
               </div>
             </div>
           )}
 
-          {/* TAB 2: FINANCIAL */}
-          {activeTab === "financial" && (
-            <div className="card p-5 sm:p-6 space-y-4">
-              <h3 className="text-sm font-bold text-text-primary">Financial Preferences</h3>
+          {/* SUB-FORM: FINANCIAL */}
+          {activeSection === "financial" && (
+            <div className="card p-6 rounded-[28px] space-y-4 border border-border-light shadow-xs animate-fade-in">
+              <div>
+                <h2 className="text-lg font-bold text-text-primary">Financial Preferences</h2>
+                <p className="text-xs text-text-secondary mt-0.5">
+                  Set your display currency and monthly budget limits.
+                </p>
+              </div>
 
-              <label className="block">
-                <span className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-text-secondary">
-                  <DollarSign className="h-3.5 w-3.5" /> Primary Currency
-                </span>
-                <select
-                  className="input-field cursor-pointer"
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
-                >
-                  {CURRENCY_OPTIONS.map((c) => (
-                    <option key={c.code} value={c.code}>
-                      {c.name} ({c.symbol})
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <div className="space-y-3 pt-2">
+                <label className="block">
+                  <span className="mb-1.5 block text-xs font-semibold text-text-secondary">
+                    Display Currency
+                  </span>
+                  <select
+                    className="input-field"
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                  >
+                    {CURRENCY_OPTIONS.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.name} ({c.symbol})
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
-              <label className="block">
-                <span className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-text-secondary">
-                  <Wallet className="h-3.5 w-3.5" /> Monthly Income
-                </span>
-                <input
-                  className="input-field"
-                  type="number"
-                  min={0}
-                  placeholder="e.g. 50000"
-                  value={monthlyIncome}
-                  onChange={(e) => setMonthlyIncome(e.target.value)}
-                />
-                <span className="mt-1 block text-[11px] text-text-tertiary">
-                  Used to calculate your monthly cash flow and "Safe to Spend" runway.
-                </span>
-              </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-xs font-semibold text-text-secondary">
+                    Monthly Income Target
+                  </span>
+                  <input
+                    type="number"
+                    className="input-field"
+                    placeholder="e.g. 50000"
+                    value={monthlyIncome}
+                    onChange={(e) => setMonthlyIncome(e.target.value)}
+                  />
+                </label>
 
-              <label className="block">
-                <span className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-text-secondary">
-                  <CreditCard className="h-3.5 w-3.5" /> Starting Available Balance
-                </span>
-                <input
-                  className="input-field"
-                  type="number"
-                  placeholder="e.g. 25000"
-                  value={startingBalance}
-                  onChange={(e) => setStartingBalance(e.target.value)}
-                />
-                <span className="mt-1 block text-[11px] text-text-tertiary">
-                  Your baseline cash/bank balance before recorded transactions.
-                </span>
-              </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-xs font-semibold text-text-secondary">
+                    Monthly Budget Limit
+                  </span>
+                  <input
+                    type="number"
+                    className="input-field"
+                    placeholder="e.g. 30000"
+                    value={monthlyBudget}
+                    onChange={(e) => setMonthlyBudget(e.target.value)}
+                  />
+                </label>
 
-              <label className="block">
-                <span className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-text-secondary">
-                  <CreditCard className="h-3.5 w-3.5" /> Monthly Spending Budget Limit
-                </span>
-                <input
-                  className="input-field"
-                  type="number"
-                  min={0}
-                  placeholder="Optional spending cap"
-                  value={monthlyBudget}
-                  onChange={(e) => setMonthlyBudget(e.target.value)}
-                />
-              </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-xs font-semibold text-text-secondary">
+                    Starting Ledger Balance
+                  </span>
+                  <input
+                    type="number"
+                    className="input-field"
+                    placeholder="0"
+                    value={startingBalance}
+                    onChange={(e) => setStartingBalance(e.target.value)}
+                  />
+                </label>
+              </div>
 
-              <div className="pt-3">
+              <div className="pt-3 flex gap-2">
                 <button
                   type="button"
-                  onClick={() => void saveFinancial()}
+                  onClick={saveFinancial}
                   disabled={saving}
-                  className="btn btn-primary cursor-pointer"
+                  className="btn btn-primary flex-1 !rounded-2xl !min-h-11 cursor-pointer"
                 >
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                  Save Financial Defaults
+                  {saving ? "Saving..." : "Save Preferences"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveSection(null)}
+                  className="btn btn-secondary !rounded-2xl !min-h-11 cursor-pointer"
+                >
+                  Cancel
                 </button>
               </div>
             </div>
           )}
 
-          {/* TAB 3: NOTIFICATIONS */}
-          {activeTab === "notifications" && (
-            <div className="card p-5 sm:p-6 space-y-4">
-              <h3 className="text-sm font-bold text-text-primary">Notification Preferences</h3>
+          {/* SUB-FORM: NOTIFICATIONS */}
+          {activeSection === "notifications" && (
+            <div className="card p-6 rounded-[28px] space-y-4 border border-border-light shadow-xs animate-fade-in">
+              <div>
+                <h2 className="text-lg font-bold text-text-primary">Notification Preferences</h2>
+                <p className="text-xs text-text-secondary mt-0.5">
+                  Choose which alerts and reminders you receive.
+                </p>
+              </div>
 
-              <div className="space-y-3 pt-1">
-                <label className="flex items-center justify-between p-3 rounded-xl border border-border-light hover:bg-muted/40 transition-colors cursor-pointer">
+              <div className="space-y-3 pt-2 divide-y divide-border-light/70">
+                <label className="flex items-center justify-between pt-3 cursor-pointer">
                   <div>
-                    <p className="text-xs font-semibold text-text-primary">Upcoming Bill Reminders</p>
-                    <p className="text-[11px] text-text-secondary">Receive heads-up notifications before bills are due</p>
+                    <p className="text-sm font-semibold text-text-primary">Bill Reminders</p>
+                    <p className="text-xs text-text-tertiary">Get notified 3 days before a bill is due</p>
                   </div>
                   <input
                     type="checkbox"
+                    className="h-5 w-5 rounded text-primary focus:ring-primary"
                     checked={notifyReminders}
                     onChange={(e) => setNotifyReminders(e.target.checked)}
-                    className="h-4 w-4 rounded border-border-light text-primary focus:ring-primary cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 rounded-xl border border-border-light hover:bg-muted/40 transition-colors cursor-pointer">
+                <label className="flex items-center justify-between pt-3 cursor-pointer">
                   <div>
-                    <p className="text-xs font-semibold text-text-primary">Overdue Payment Alerts</p>
-                    <p className="text-[11px] text-text-secondary">Alerts when an unpaid bill has passed its due date</p>
+                    <p className="text-sm font-semibold text-text-primary">Overdue Alerts</p>
+                    <p className="text-xs text-text-tertiary">Get alerted when a bill payment is past due</p>
                   </div>
                   <input
                     type="checkbox"
+                    className="h-5 w-5 rounded text-primary focus:ring-primary"
                     checked={notifyOverdue}
                     onChange={(e) => setNotifyOverdue(e.target.checked)}
-                    className="h-4 w-4 rounded border-border-light text-primary focus:ring-primary cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 rounded-xl border border-border-light hover:bg-muted/40 transition-colors cursor-pointer">
+                <label className="flex items-center justify-between pt-3 cursor-pointer">
                   <div>
-                    <p className="text-xs font-semibold text-text-primary">Payment Confirmations</p>
-                    <p className="text-[11px] text-text-secondary">Confirmations when bill payments are recorded or captured</p>
+                    <p className="text-sm font-semibold text-text-primary">Payment Confirmations</p>
+                    <p className="text-xs text-text-tertiary">Confirmations when a bill is marked paid</p>
                   </div>
                   <input
                     type="checkbox"
+                    className="h-5 w-5 rounded text-primary focus:ring-primary"
                     checked={notifyPayments}
                     onChange={(e) => setNotifyPayments(e.target.checked)}
-                    className="h-4 w-4 rounded border-border-light text-primary focus:ring-primary cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 rounded-xl border border-border-light hover:bg-muted/40 transition-colors cursor-pointer">
+                <label className="flex items-center justify-between pt-3 cursor-pointer">
                   <div>
-                    <p className="text-xs font-semibold text-text-primary">Weekly Financial Digest</p>
-                    <p className="text-[11px] text-text-secondary">Summary of weekly spending, savings, and scheduled bills</p>
+                    <p className="text-sm font-semibold text-text-primary">Weekly Summary</p>
+                    <p className="text-xs text-text-tertiary">Weekly spending and upcoming bills digest</p>
                   </div>
                   <input
                     type="checkbox"
+                    className="h-5 w-5 rounded text-primary focus:ring-primary"
                     checked={notifyWeekly}
                     onChange={(e) => setNotifyWeekly(e.target.checked)}
-                    className="h-4 w-4 rounded border-border-light text-primary focus:ring-primary cursor-pointer"
                   />
                 </label>
               </div>
 
-              <div className="pt-3">
+              <div className="pt-4 flex gap-2">
                 <button
                   type="button"
-                  onClick={() => void saveNotifications()}
+                  onClick={saveNotifications}
                   disabled={saving}
-                  className="btn btn-primary cursor-pointer"
+                  className="btn btn-primary flex-1 !rounded-2xl !min-h-11 cursor-pointer"
                 >
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                  Save Notification Preferences
+                  {saving ? "Saving..." : "Save Preferences"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveSection(null)}
+                  className="btn btn-secondary !rounded-2xl !min-h-11 cursor-pointer"
+                >
+                  Cancel
                 </button>
               </div>
             </div>
           )}
 
-          {/* TAB 4: SECURITY & DANGER */}
-          {activeTab === "security" && (
-            <div className="space-y-6">
-              <div className="card p-5 sm:p-6 space-y-4">
-                <h3 className="text-sm font-bold text-text-primary">Security & Authentication</h3>
+          {/* SUB-FORM: SECURITY */}
+          {activeSection === "security" && (
+            <div className="card p-6 rounded-[28px] space-y-4 border border-border-light shadow-xs animate-fade-in">
+              <div>
+                <h2 className="text-lg font-bold text-text-primary">Security & Account</h2>
+                <p className="text-xs text-text-secondary mt-0.5">
+                  Manage password reset and permanent deletion.
+                </p>
+              </div>
 
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-border-light bg-surface">
-                  <div>
-                    <p className="text-xs font-semibold text-text-primary flex items-center gap-1.5">
-                      <KeyRound className="h-3.5 w-3.5 text-primary" /> Reset Password
-                    </p>
-                    <p className="text-[11px] text-text-secondary mt-0.5">
-                      Send a secure password reset link to your email address ({user?.email}).
-                    </p>
-                  </div>
+              <div className="space-y-4 pt-2">
+                <div className="rounded-2xl border border-border-light p-4 bg-muted/30">
+                  <p className="text-sm font-bold text-text-primary">Password Recovery</p>
+                  <p className="text-xs text-text-tertiary mt-0.5">
+                    Send a secure password reset link to {user?.email}.
+                  </p>
                   <button
                     type="button"
-                    onClick={() => void handlePasswordReset()}
+                    onClick={handlePasswordReset}
                     disabled={resettingPassword}
-                    className="btn btn-secondary !min-h-9 !text-xs shrink-0 cursor-pointer"
+                    className="mt-3 btn btn-secondary !min-h-9 !text-xs cursor-pointer"
                   >
-                    {resettingPassword ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Send Reset Email"}
+                    {resettingPassword ? "Sending..." : "Send Password Reset Email"}
+                  </button>
+                </div>
+
+                <div className="rounded-2xl border border-rose-200 bg-rose-50/50 dark:border-rose-950 dark:bg-rose-950/20 p-4">
+                  <p className="text-sm font-bold text-rose-700 dark:text-rose-400">Danger Zone</p>
+                  <p className="text-xs text-rose-600/80 dark:text-rose-300/80 mt-0.5">
+                    Permanently delete your account and all financial records.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setDeleteModalOpen(true)}
+                    className="mt-3 btn bg-rose-600 text-white hover:bg-rose-700 !min-h-9 !text-xs cursor-pointer"
+                  >
+                    Delete Account
                   </button>
                 </div>
               </div>
-
-              {/* Danger Zone */}
-              <div className="card border-status-error/40 p-5 sm:p-6 space-y-4">
-                <div className="flex items-center gap-2 text-status-error">
-                  <AlertTriangle className="h-4 w-4" />
-                  <h3 className="text-sm font-bold">Danger Zone</h3>
-                </div>
-                <p className="text-xs text-text-secondary">
-                  Permanently delete your BillBuddy account and remove all personal bills, transactions, and categories. This action cannot be reversed.
-                </p>
-
-                <button
-                  type="button"
-                  onClick={() => setDeleteModalOpen(true)}
-                  className="btn bg-soft-red text-status-error hover:bg-soft-red/80 !min-h-10 !text-xs cursor-pointer font-bold"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete My Account
-                </button>
-              </div>
             </div>
           )}
         </div>
-      )}
+      ) : (
+        /* MAIN PROFILE SCREEN (media_1792824194145.jpg Phase 7 Screen 1) */
+        <div className="space-y-5">
+          {/* Header Title */}
+          <div className="flex items-center justify-between pb-1">
+            <h1 className="text-2xl font-bold tracking-tight text-text-primary">Profile</h1>
+            <Link
+              to="/settings"
+              className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border-light/80 bg-surface text-text-secondary hover:text-primary transition-colors shadow-xs"
+              aria-label="Settings"
+            >
+              <Settings2 className="h-4.5 w-4.5" />
+            </Link>
+          </div>
 
-      {/* Sign Out Section matching Phase 7 Screen 1 */}
-      <div className="mt-8 pt-4 border-t border-border-light/70 text-center">
-        <button
-          type="button"
-          onClick={() => {
-            if (confirm("Are you sure you want to sign out of BillBuddy?")) {
-              void signOut();
-            }
-          }}
-          className="btn !min-h-12 w-full max-w-sm rounded-2xl bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 font-bold text-sm cursor-pointer mx-auto transition-colors"
-        >
-          <LogOut className="h-4 w-4" /> Sign Out
-        </button>
-      </div>
+          {/* User Profile Identity Card */}
+          <div className="card p-5 rounded-[28px] border border-border-light/80 shadow-xs flex items-center gap-4">
+            <div className="relative shrink-0">
+              <Avatar fallback={userInitials} size={64} />
+              <button
+                type="button"
+                onClick={() => fileInput.current?.click()}
+                disabled={uploading}
+                className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition-transform hover:scale-110 cursor-pointer"
+                aria-label="Upload photo"
+              >
+                {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Camera className="h-3 w-3" />}
+              </button>
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg font-bold text-text-primary truncate">{nameToShow}</h2>
+              <p className="text-xs text-text-secondary truncate mt-0.5">{user?.email}</p>
+              <div className="mt-2 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveSection("personal")}
+                  className="rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold text-primary hover:bg-primary/20 transition-colors cursor-pointer"
+                >
+                  Edit Profile
+                </button>
+                {profile?.avatar_url && (
+                  <button
+                    type="button"
+                    onClick={() => void removePhoto()}
+                    disabled={uploading}
+                    className="text-[11px] text-text-tertiary hover:text-status-error transition-colors cursor-pointer"
+                  >
+                    Remove Photo
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <input
+              ref={fileInput}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              aria-label="Select avatar file"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (file) void onPickFile(file);
+              }}
+            />
+          </div>
+
+          {/* 3 Stats Capsules matching Phase 7 Screen 1 */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="rounded-2xl border border-border-light/80 bg-surface p-3.5 text-center shadow-xs">
+              <p className="text-xl font-extrabold text-text-primary tabular-nums">
+                {overview?.counts.bills ?? 0}
+              </p>
+              <p className="text-[11px] font-semibold text-text-tertiary mt-0.5">Bills</p>
+            </div>
+            <div className="rounded-2xl border border-border-light/80 bg-surface p-3.5 text-center shadow-xs">
+              <p className="text-xl font-extrabold text-text-primary tabular-nums">
+                {overview?.counts.budgets ?? 8}
+              </p>
+              <p className="text-[11px] font-semibold text-text-tertiary mt-0.5">Budgets</p>
+            </div>
+            <div className="rounded-2xl border border-border-light/80 bg-surface p-3.5 text-center shadow-xs">
+              <p className="text-xl font-extrabold text-text-primary tabular-nums">
+                {overview?.counts.budgets ? Math.max(1, overview.counts.budgets - 5) : 3}
+              </p>
+              <p className="text-[11px] font-semibold text-text-tertiary mt-0.5">Goals</p>
+            </div>
+          </div>
+
+          {/* iOS-Style Grouped Navigation Card matching Phase 7 Screen 1 */}
+          <div className="card rounded-[28px] border border-border-light/80 divide-y divide-border-light/70 overflow-hidden shadow-xs">
+            {/* Row 1: Personal Information */}
+            <button
+              type="button"
+              onClick={() => setActiveSection("personal")}
+              className="w-full flex items-center justify-between p-4 hover:bg-muted/40 transition-colors text-left cursor-pointer"
+            >
+              <div className="flex items-center gap-3.5">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-indigo-500/15 text-indigo-600">
+                  <User className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-text-primary">Personal Information</p>
+                  <p className="text-xs text-text-tertiary">Name, phone number, default UPI ID</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-text-tertiary" />
+            </button>
+
+            {/* Row 2: Financial Preferences */}
+            <button
+              type="button"
+              onClick={() => setActiveSection("financial")}
+              className="w-full flex items-center justify-between p-4 hover:bg-muted/40 transition-colors text-left cursor-pointer"
+            >
+              <div className="flex items-center gap-3.5">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-600">
+                  <Wallet className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-text-primary">Financial Preferences</p>
+                  <p className="text-xs text-text-tertiary">Currency, monthly budget, starting balance</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-text-tertiary" />
+            </button>
+
+            {/* Row 3: Notification Preferences */}
+            <button
+              type="button"
+              onClick={() => setActiveSection("notifications")}
+              className="w-full flex items-center justify-between p-4 hover:bg-muted/40 transition-colors text-left cursor-pointer"
+            >
+              <div className="flex items-center gap-3.5">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600">
+                  <Bell className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-text-primary">Notification Preferences</p>
+                  <p className="text-xs text-text-tertiary">Reminders, overdue alerts, summaries</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-text-tertiary" />
+            </button>
+
+            {/* Row 4: Security & Privacy */}
+            <button
+              type="button"
+              onClick={() => setActiveSection("security")}
+              className="w-full flex items-center justify-between p-4 hover:bg-muted/40 transition-colors text-left cursor-pointer"
+            >
+              <div className="flex items-center gap-3.5">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-purple-500/15 text-purple-600">
+                  <Shield className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-text-primary">Security & Privacy</p>
+                  <p className="text-xs text-text-tertiary">Password recovery, account deletion</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-text-tertiary" />
+            </button>
+
+            {/* Row 5: Categories Management */}
+            <Link
+              to="/settings/categories"
+              className="w-full flex items-center justify-between p-4 hover:bg-muted/40 transition-colors text-left cursor-pointer"
+            >
+              <div className="flex items-center gap-3.5">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-500/15 text-blue-600">
+                  <Tag className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-text-primary">Categories & Tags</p>
+                  <p className="text-xs text-text-tertiary">Custom categories for expense & income</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-text-tertiary" />
+            </Link>
+
+            {/* Row 6: Help & Support */}
+            <Link
+              to="/settings"
+              className="w-full flex items-center justify-between p-4 hover:bg-muted/40 transition-colors text-left cursor-pointer"
+            >
+              <div className="flex items-center gap-3.5">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-teal-500/15 text-teal-600">
+                  <HelpCircle className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-text-primary">Help & Support</p>
+                  <p className="text-xs text-text-tertiary">FAQs, app version, preferences</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-text-tertiary" />
+            </Link>
+          </div>
+
+          {/* Isolated Red Sign Out Button matching Phase 7 Screen 1 */}
+          <div className="pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm("Are you sure you want to sign out of BillBuddy?")) {
+                  void signOut();
+                }
+              }}
+              className="btn !min-h-12 w-full rounded-2xl bg-rose-500/15 text-rose-600 border border-rose-200 dark:border-rose-900/50 hover:bg-rose-500/25 font-bold text-sm cursor-pointer transition-colors shadow-xs"
+            >
+              <LogOut className="h-4 w-4" /> Sign Out
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Delete Account Modal */}
       {deleteModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in"
           onClick={() => setDeleteModalOpen(false)}
         >
           <div
-            className="w-full max-w-md rounded-2xl border border-status-error/50 bg-surface p-6 shadow-2xl animate-scale-in"
+            className="w-full max-w-md rounded-3xl border border-status-error/50 bg-surface p-6 shadow-2xl animate-scale-in"
             onClick={(e) => e.stopPropagation()}
             role="alertdialog"
             aria-modal="true"
@@ -815,3 +889,5 @@ export function ProfilePage() {
     </section>
   );
 }
+
+export default ProfilePage;

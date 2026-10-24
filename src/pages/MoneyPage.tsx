@@ -405,16 +405,11 @@ export function MoneyPage() {
               type="button"
               onClick={() => setFilter(key)}
               aria-pressed={filter === key}
-              className="min-h-11 rounded-full border px-4 text-xs font-semibold capitalize transition-colors"
-              style={
+              className={`min-h-10 rounded-full border px-4 text-xs font-semibold capitalize transition-all cursor-pointer ${
                 filter === key
-                  ? { backgroundColor: "#EEE5F5", borderColor: "#4B1D3F", color: "#4B1D3F" }
-                  : {
-                      backgroundColor: "var(--surface)",
-                      borderColor: "var(--border-light)",
-                      color: "var(--text-secondary)",
-                    }
-              }
+                  ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                  : "bg-surface border-border-light text-text-secondary hover:text-text-primary hover:border-primary/40"
+              }`}
             >
               {key}
             </button>

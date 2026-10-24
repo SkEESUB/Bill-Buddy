@@ -1,13 +1,28 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Check, Loader2, Mail, Shield, ShieldCheck, Sparkles, Wallet } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  ChevronRight,
+  Loader2,
+  Mail,
+  Shield,
+  ShieldCheck,
+  Sparkles,
+  Wallet,
+  PieChart,
+  BellRing,
+} from "lucide-react";
 import { supabase } from "@/lib/supabase";
+
+type AuthStep = "welcome" | "email" | "otp";
 
 export function LoginPage() {
   const navigate = useNavigate();
 
+  const [step, setStep] = useState<AuthStep>("welcome");
   const [email, setEmail] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -17,7 +32,7 @@ export function LoginPage() {
 
   const otpRefs = useRef<Array<HTMLInputElement | null>>([]);
 
-  // Already signed in? redirect to home.
+  // Already signed in? Redirect to home.
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session?.user) {
@@ -52,16 +67,16 @@ export function LoginPage() {
     const target = email.trim().toLowerCase();
 
     try {
-      const { data, error: otpError } = await supabase.auth.signInWithOtp({
+      const { error: otpError } = await supabase.auth.signInWithOtp({
         email: target,
       });
       if (otpError) throw otpError;
 
-      setOtpSent(true);
+      setStep("otp");
       setSuccess("Verification code sent! Check your inbox.");
       setResendCooldown(60);
       setExpirySeconds(300);
-      setTimeout(() => otpRefs.current[0]?.focus(), 100);
+      setTimeout(() => otpRefs.current[0]?.focus(), 150);
     } catch (err) {
       console.error("[LoginPage] Send OTP failed:", err);
       const message = err instanceof Error ? err.message : "";
@@ -95,7 +110,7 @@ export function LoginPage() {
       if (!data.session) throw new Error("No session created. Please try again.");
 
       setSuccess("Verified! Welcome to BillBuddy.");
-      setTimeout(() => navigate({ to: "/", replace: true }), 700);
+      setTimeout(() => navigate({ to: "/", replace: true }), 600);
     } catch (err) {
       console.error("[LoginPage] Verify OTP failed:", err);
       const message = (err instanceof Error ? err.message : "").toLowerCase();
@@ -146,15 +161,6 @@ export function LoginPage() {
     await sendOTP();
   };
 
-  const handleChangeEmail = () => {
-    setOtpSent(false);
-    setOtp(["", "", "", "", "", ""]);
-    setError("");
-    setSuccess("");
-    setResendCooldown(0);
-    setExpirySeconds(0);
-  };
-
   const mmss = `${String(Math.floor(resendCooldown / 60)).padStart(2, "0")}:${String(
     resendCooldown % 60,
   ).padStart(2, "0")}`;
@@ -162,23 +168,84 @@ export function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4 sm:p-6">
       <div className="w-full max-w-md">
-        {/* Welcome Hero Illustration matching Phase 2 Screen 1 */}
-        {!otpSent ? (
-          <div className="card p-7 sm:p-8 rounded-[32px] shadow-2xl border border-border-light animate-fade-in">
-            {/* Visual Icon Header */}
-            <div className="text-center pb-4">
-              <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-tr from-primary to-indigo-400 text-white shadow-xl shadow-primary/30">
-                <Wallet className="h-10 w-10 stroke-[2]" />
+        {/* STEP 1: WELCOME SCREEN (media_1792824194145.jpg Phase 2 Screen 1) */}
+        {step === "welcome" && (
+          <div className="card p-7 sm:p-8 rounded-[36px] shadow-2xl border border-border-light/80 animate-fade-in flex flex-col items-center text-center">
+            {/* 3D Fintech Graphic Container */}
+            <div className="relative my-4 flex h-36 w-36 items-center justify-center rounded-full bg-gradient-to-tr from-indigo-600 via-primary to-purple-500 shadow-2xl shadow-primary/40">
+              <div className="absolute inset-2 rounded-full border border-white/20 backdrop-blur-xs flex items-center justify-center">
+                <Wallet className="h-16 w-16 text-white stroke-[1.8]" />
               </div>
-              <h1 className="text-2xl sm:text-[26px] font-extrabold tracking-tight text-text-primary">
-                Take Control of Your Money
-              </h1>
-              <p className="mt-2 text-sm text-text-secondary leading-relaxed">
-                Track bills, manage expenses and achieve your goals effortlessly.
+              {/* Floating feature pills */}
+              <span className="absolute -top-1 -right-2 flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-400 text-slate-950 shadow-md">
+                <Sparkles className="h-5 w-5" />
+              </span>
+              <span className="absolute -bottom-1 -left-2 flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-400 text-slate-950 shadow-md">
+                <PieChart className="h-5 w-5" />
+              </span>
+            </div>
+
+            <h1 className="mt-4 text-2xl sm:text-[28px] font-extrabold tracking-tight text-text-primary leading-tight">
+              Take Control of Your Money
+            </h1>
+            <p className="mt-2.5 text-sm text-text-secondary leading-relaxed max-w-xs">
+              Track bills, manage budgets and achieve your financial goals effortlessly.
+            </p>
+
+            {/* Pagination Carousel Dots */}
+            <div className="mt-6 flex items-center gap-2" aria-hidden="true">
+              <span className="h-2 w-7 rounded-full bg-primary" />
+              <span className="h-2 w-2 rounded-full bg-muted-foreground/30" />
+              <span className="h-2 w-2 rounded-full bg-muted-foreground/30" />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="mt-8 w-full space-y-3">
+              <button
+                type="button"
+                onClick={() => setStep("email")}
+                className="btn btn-primary w-full !min-h-12 !rounded-2xl text-sm font-bold shadow-lg shadow-primary/25 cursor-pointer flex items-center justify-center gap-2"
+              >
+                Get Started <ArrowRight className="h-4 w-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStep("email")}
+                className="w-full py-2 text-xs font-semibold text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+              >
+                Already have an account? <span className="text-primary font-bold">Sign In</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 2: EMAIL ENTRY SCREEN (Phase 2 Screen 2) */}
+        {step === "email" && (
+          <div className="card p-7 sm:p-8 rounded-[36px] shadow-2xl border border-border-light/80 animate-fade-in">
+            {/* Top Back Navigation */}
+            <div className="flex items-center justify-between pb-3">
+              <button
+                type="button"
+                onClick={() => setStep("welcome")}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+                aria-label="Back to welcome"
+              >
+                <ArrowLeft className="h-4.5 w-4.5" />
+              </button>
+              <span className="text-xs font-bold text-text-tertiary">Step 1 of 2</span>
+            </div>
+
+            <div className="pt-2 pb-4">
+              <h2 className="text-2xl font-extrabold tracking-tight text-text-primary">
+                Enter Your Email
+              </h2>
+              <p className="mt-1.5 text-xs text-text-secondary leading-relaxed">
+                We'll send a 6-digit verification code to your inbox to sign you in securely.
               </p>
             </div>
 
-            <form onSubmit={sendOTP} className="mt-4 space-y-4">
+            <form onSubmit={sendOTP} className="mt-2 space-y-4">
               <div>
                 <label
                   htmlFor="email"
@@ -199,9 +266,6 @@ export function LoginPage() {
                     autoFocus
                   />
                 </div>
-                <p className="mt-1.5 text-[11px] text-text-tertiary">
-                  We'll send a 6-digit verification code to your inbox
-                </p>
               </div>
 
               {error && (
@@ -229,24 +293,41 @@ export function LoginPage() {
                   </>
                 ) : (
                   <>
-                    Get Started <ArrowRight className="h-4 w-4" />
+                    Continue <ArrowRight className="h-4 w-4" />
                   </>
                 )}
               </button>
             </form>
 
             <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-xs text-text-tertiary">
-              <ShieldCheck className="h-4 w-4 text-emerald-600" /> Secure OTP sign-in · No password needed
+              <ShieldCheck className="h-4 w-4 text-emerald-600" /> Passwordless OTP · No password required
             </p>
           </div>
-        ) : (
-          /* OTP Screen matching Phase 2 Screen 3 */
-          <div className="card p-7 sm:p-8 rounded-[32px] shadow-2xl border border-border-light animate-scale-in">
-            <div className="text-center pb-4">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/10 text-primary">
+        )}
+
+        {/* STEP 3: OTP VERIFICATION SCREEN (Phase 2 Screen 3) */}
+        {step === "otp" && (
+          <div className="card p-7 sm:p-8 rounded-[36px] shadow-2xl border border-border-light/80 animate-scale-in">
+            {/* Top Back Navigation */}
+            <div className="flex items-center justify-between pb-3">
+              <button
+                type="button"
+                onClick={() => setStep("email")}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+                aria-label="Back to email"
+              >
+                <ArrowLeft className="h-4.5 w-4.5" />
+              </button>
+              <span className="text-xs font-bold text-text-tertiary">Step 2 of 2</span>
+            </div>
+
+            <div className="text-center pt-2 pb-4">
+              <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/10 text-primary">
                 <Shield className="h-8 w-8 stroke-[2]" />
               </div>
-              <h2 className="text-2xl font-bold text-text-primary">Enter OTP</h2>
+              <h2 className="text-2xl font-extrabold tracking-tight text-text-primary">
+                Enter OTP
+              </h2>
               <p className="mt-1.5 text-xs text-text-secondary">
                 We've sent a 6-digit code to
                 <br />
@@ -316,13 +397,16 @@ export function LoginPage() {
                   className="text-xs font-semibold text-primary hover:underline disabled:text-text-tertiary disabled:no-underline cursor-pointer"
                 >
                   {resendCooldown > 0
-                    ? `Resend OTP (${mmss})`
+                    ? `Resend OTP in ${mmss}`
                     : "Didn't receive code? Resend OTP"}
                 </button>
                 <div>
                   <button
                     type="button"
-                    onClick={handleChangeEmail}
+                    onClick={() => {
+                      setStep("email");
+                      setOtp(["", "", "", "", "", ""]);
+                    }}
                     className="text-xs text-text-secondary hover:text-text-primary cursor-pointer"
                   >
                     Change email address
