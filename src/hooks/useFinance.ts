@@ -76,10 +76,15 @@ export function useFinance() {
   const syncFn = useServerFn(syncSchedulesFn);
 
   const [snapshot, setSnapshot] = useState<Snapshot>(EMPTY);
+  const snapshotRef = useRef<Snapshot>(snapshot);
+  snapshotRef.current = snapshot;
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const mounted = useRef(true);
+  const instanceIdRef = useRef(Math.random().toString(36).slice(2));
+  const instanceId = instanceIdRef.current;
 
   useEffect(() => {
     mounted.current = true;
@@ -136,17 +141,17 @@ export function useFinance() {
   }, [load]);
 
   const reload = useCallback(() => load("refresh"), [load]);
-  useFinanceSync(reload);
+  useFinanceSync(reload, instanceId);
 
   /** Run a server mutation, then refresh authoritative data before resolving. */
   const mutate = useCallback(
     async <T>(action: () => Promise<T>): Promise<T> => {
       const result = await action();
       await load("refresh");
-      bumpFinance();
+      bumpFinance(instanceId);
       return result;
     },
-    [load],
+    [load, instanceId],
   );
 
   const createBill = useServerFn(createBillFn);
@@ -166,10 +171,74 @@ export function useFinance() {
     () => ({
       createBill: (data: BillInput) => mutate(() => createBill({ data })),
       updateBill: (data: BillUpdateInput) => mutate(() => updateBill({ data })),
-      deleteBill: (id: string) => mutate(() => deleteBill({ data: { id } })),
-      setBillActive: (id: string, isActive: boolean) =>
-        mutate(() => setBillActive({ data: { id, is_active: isActive } })),
-      recordPayment: (data: PaymentInput) => mutate(() => recordPayment({ data })),
+      deleteBill: async (id: string) => {
+        const prev = snapshotRef.current;
+        // Optimistically remove bill and future occurrences
+        setSnapshot((current) => ({
+          ...current,
+          bills: current.bills.filter((b) => b.id !== id),
+          occurrences: current.occurrences.filter((o) => o.bill_id !== id || o.status === "paid"),
+        }));
+        try {
+          const result = await deleteBill({ data: { id } });
+          await load("refresh");
+          bumpFinance(instanceId);
+          return result;
+        } catch (err) {
+          setSnapshot(prev);
+          throw err;
+        }
+      },
+      setBillActive: async (id: string, isActive: boolean) => {
+        const prev = snapshotRef.current;
+        setSnapshot((current) => ({
+          ...current,
+          bills: current.bills.map((b) => (b.id === id ? { ...b, is_active: isActive } : b)),
+        }));
+        try {
+          const result = await setBillActive({ data: { id, is_active: isActive } });
+          await load("refresh");
+          bumpFinance(instanceId);
+          return result;
+        } catch (err) {
+          setSnapshot(prev);
+          throw err;
+        }
+      },
+      recordPayment: async (data: PaymentInput) => {
+        const prev = snapshotRef.current;
+        // Optimistically mark occurrence as settled and paid immediately
+        setSnapshot((current) => {
+          const idx = current.occurrences.findIndex((o) => o.id === data.occurrence_id);
+          if (idx === -1) return current;
+          const target = current.occurrences[idx];
+          if (!target) return current;
+          const updatedOcc: OccurrenceWithBill = {
+            ...target,
+            status: "paid",
+            actual_amount: data.amount,
+            paid_at: new Date().toISOString(),
+          };
+          const nextOccurrences = [...current.occurrences];
+          nextOccurrences[idx] = updatedOcc;
+
+          return {
+            ...current,
+            occurrences: nextOccurrences,
+            ledgerDelta: round2(Number(current.ledgerDelta ?? 0) - data.amount),
+          };
+        });
+        try {
+          const result = await recordPayment({ data });
+          await load("refresh");
+          bumpFinance(instanceId);
+          return result;
+        } catch (err) {
+          // Cleanly roll back to previous state if settlement call fails
+          setSnapshot(prev);
+          throw err;
+        }
+      },
       skipOccurrence: (occurrenceId: string) =>
         mutate(() => skip({ data: { occurrence_id: occurrenceId } })),
       createTransaction: (data: CreateTransactionInput) =>
@@ -188,6 +257,8 @@ export function useFinance() {
     }),
     [
       mutate,
+      load,
+      instanceId,
       createBill,
       updateBill,
       deleteBill,

@@ -119,7 +119,6 @@ export function HomePage() {
       }
       setEditing(null);
       setFormOpen(false);
-      await reload();
     } catch (e) {
       toast.error(toUserMessage(e));
       throw e;
@@ -127,8 +126,11 @@ export function HomePage() {
   };
 
   const handleMarkCompleted = async (occurrence: OccurrenceView) => {
+    if (working) return;
     try {
       setWorking(true);
+      // Close details modal right away for instant feedback
+      setDetailsTarget(null);
       await actions.recordPayment({
         occurrence_id: occurrence.id,
         amount: occurrence.amount,
@@ -136,8 +138,6 @@ export function HomePage() {
         payment_method: "other",
       });
       toast.success(`${occurrence.title} marked as completed`);
-      setDetailsTarget(null);
-      await reload();
     } catch (e) {
       toast.error(toUserMessage(e));
     } finally {
@@ -146,7 +146,7 @@ export function HomePage() {
   };
 
   const handleDeleteBill = async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget || working) return;
     setWorking(true);
     try {
       await actions.deleteBill(deleteTarget.billId);
@@ -155,7 +155,6 @@ export function HomePage() {
       if (detailsTarget?.id === deleteTarget.id) {
         setDetailsTarget(null);
       }
-      await reload();
     } catch (e) {
       toast.error(toUserMessage(e));
     } finally {
@@ -381,6 +380,7 @@ export function HomePage() {
         occurrence={detailsTarget}
         bill={detailsTarget ? billsById.get(detailsTarget.billId) : null}
         today={today}
+        working={working}
         onClose={() => setDetailsTarget(null)}
         onPay={(o) => void handleMarkCompleted(o)}
         onEdit={(b) => {

@@ -1,16 +1,18 @@
-/** Signed-URL avatar with initials fallback. */
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getAvatarUrl } from "@/lib/account.functions";
+import { getPresetAvatar } from "@/components/ProfileAvatars";
 
 export const AVATAR_QUERY_KEY = ["account", "avatar"] as const;
 
 export function Avatar({
   fallback,
+  avatarId,
   size = 64,
-  alt = "Your profile photo",
+  alt = "Your profile avatar",
 }: {
   fallback: string;
+  avatarId?: string | null;
   size?: number;
   alt?: string;
 }) {
@@ -21,15 +23,40 @@ export function Avatar({
     staleTime: 10 * 60_000,
   });
 
-  const style = { height: size, width: size, borderRadius: size / 3.2 } as const;
+  const effectiveId = avatarId ?? data?.url;
 
-  if (data?.url) {
-    return <img src={data.url} alt={alt} style={style} className="shrink-0 object-cover" />;
+  // 1. Check if user selected one of the preset illustrated avatars
+  if (effectiveId && effectiveId.startsWith("avatar:")) {
+    const preset = getPresetAvatar(effectiveId);
+    if (preset) {
+      return (
+        <span
+          style={{ width: size, height: size }}
+          className="inline-flex shrink-0 items-center justify-center rounded-full overflow-hidden shadow-sm ring-1 ring-slate-200/60 dark:ring-slate-700/60 transition-transform"
+        >
+          {preset.svg(size)}
+        </span>
+      );
+    }
   }
+
+  // 2. Custom uploaded photo URL
+  if (data?.url && !data.url.startsWith("avatar:")) {
+    return (
+      <img
+        src={data.url}
+        alt={alt}
+        style={{ height: size, width: size, borderRadius: "9999px" }}
+        className="shrink-0 object-cover rounded-full shadow-sm ring-1 ring-slate-200/60"
+      />
+    );
+  }
+
+  // 3. Attractive default fallback badge with coordinated blue/violet gradient
   return (
     <span
-      style={style}
-      className="flex shrink-0 items-center justify-center bg-primary font-semibold text-primary-foreground"
+      style={{ height: size, width: size, borderRadius: "9999px" }}
+      className="flex shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 font-bold text-white shadow-sm ring-1 ring-white/30 text-xs sm:text-sm select-none"
     >
       {fallback}
     </span>

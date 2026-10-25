@@ -10,42 +10,47 @@ interface BottomNavProps {
 
 /**
  * Fixed Bottom Navigation for BillBuddy.
- * Exactly three primary actions in mandatory order:
- *  1. LEFT: Completed (Checkmark icon, opens completed overlay/view)
- *  2. CENTER: Add Bill (Prominent plus pill button, opens Add Bill form)
- *  3. RIGHT: Remaining (Clock icon, filters to outstanding bills)
+ * Exactly three primary actions:
+ *  1. LEFT: Completed (Premium pill control, soft blue/lavender gradient, toggle view)
+ *  2. CENTER: Add Bill (Prominent plus pill button, opens Add Bill modal)
+ *  3. RIGHT: Remaining (Premium pill control, soft blue/lavender gradient, filter view)
  *
- * NOTE: Completed and Remaining buttons do NOT display counts or amounts.
+ * NOTE: Completed and Remaining buttons do NOT display numbers or balances.
  */
 export function BottomNav({ activeView = "home", onSelectView, onAddBill }: BottomNavProps) {
+  const isCompleted = activeView === "completed";
+  const isRemaining = activeView === "remaining";
+
   return (
     <nav
       aria-label="BillBuddy navigation"
-      className="fixed bottom-4 inset-x-0 z-40 flex justify-center px-4 pointer-events-none safe-bottom"
+      className="fixed bottom-3 sm:bottom-4 inset-x-0 z-40 flex justify-center px-3 sm:px-4 pointer-events-none safe-bottom"
     >
-      <div className="pointer-events-auto flex items-center justify-between w-full max-w-sm px-3 py-2 rounded-full glass-nav border border-white/70 shadow-[0_12px_36px_-6px_rgba(15,35,75,0.14)]">
-        {/* LEFT: Completed */}
+      <div className="pointer-events-auto flex items-center justify-between gap-1 sm:gap-1.5 w-full max-w-[390px] p-1.5 rounded-full glass-nav border border-white/80 dark:border-slate-800/80 shadow-[0_12px_36px_-6px_rgba(15,35,75,0.14)]">
+        {/* LEFT: Completed Button */}
         <button
           type="button"
-          onClick={() => onSelectView?.(activeView === "completed" ? "home" : "completed")}
-          className={`flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-full transition-all duration-200 cursor-pointer ${
-            activeView === "completed"
-              ? "bg-blue-600/10 text-blue-700 font-semibold"
-              : "text-slate-500 hover:text-slate-800 hover:bg-slate-100/60"
-          }`}
+          onClick={() => onSelectView?.(isCompleted ? "home" : "completed")}
+          className={`nav-pill-btn flex-1 ${isCompleted ? "active" : ""}`}
           aria-label="View Completed Bills"
-          aria-pressed={activeView === "completed"}
+          aria-pressed={isCompleted}
         >
-          <CheckCircle2 className="w-5 h-5 mb-0.5 stroke-[2.2]" />
-          <span className="text-[11px] tracking-tight">Completed</span>
+          <CheckCircle2
+            className={`w-4 h-4 transition-transform duration-200 stroke-[2.3] ${
+              isCompleted
+                ? "scale-110 text-indigo-600 dark:text-indigo-400"
+                : "text-slate-500 dark:text-slate-400"
+            }`}
+          />
+          <span className="truncate">Completed</span>
         </button>
 
-        {/* CENTER: Add Bill (Prominent pill treatment) */}
-        <div className="px-1.5">
+        {/* CENTER: Add Bill (Prominent action pill with comfortable surrounding space) */}
+        <div className="px-1 sm:px-1.5 shrink-0">
           <button
             type="button"
             onClick={onAddBill}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium text-xs shadow-md shadow-blue-500/25 transition-all duration-200 active:scale-95 hover:shadow-lg hover:shadow-blue-500/35 hover:brightness-105 cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 text-white font-semibold text-xs shadow-md shadow-blue-500/25 transition-all duration-200 active:scale-95 hover:shadow-lg hover:shadow-blue-500/35 hover:brightness-105 cursor-pointer"
             aria-label="Add a new bill"
           >
             <Plus className="w-4 h-4 stroke-[2.8]" />
@@ -53,20 +58,22 @@ export function BottomNav({ activeView = "home", onSelectView, onAddBill }: Bott
           </button>
         </div>
 
-        {/* RIGHT: Remaining */}
+        {/* RIGHT: Remaining Button */}
         <button
           type="button"
-          onClick={() => onSelectView?.(activeView === "remaining" ? "home" : "remaining")}
-          className={`flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-full transition-all duration-200 cursor-pointer ${
-            activeView === "remaining"
-              ? "bg-blue-600/10 text-blue-700 font-semibold"
-              : "text-slate-500 hover:text-slate-800 hover:bg-slate-100/60"
-          }`}
+          onClick={() => onSelectView?.(isRemaining ? "home" : "remaining")}
+          className={`nav-pill-btn flex-1 ${isRemaining ? "active" : ""}`}
           aria-label="View Remaining Bills"
-          aria-pressed={activeView === "remaining"}
+          aria-pressed={isRemaining}
         >
-          <Clock className="w-5 h-5 mb-0.5 stroke-[2.2]" />
-          <span className="text-[11px] tracking-tight">Remaining</span>
+          <Clock
+            className={`w-4 h-4 transition-transform duration-200 stroke-[2.3] ${
+              isRemaining
+                ? "scale-110 text-indigo-600 dark:text-indigo-400"
+                : "text-slate-500 dark:text-slate-400"
+            }`}
+          />
+          <span className="truncate">Remaining</span>
         </button>
       </div>
     </nav>

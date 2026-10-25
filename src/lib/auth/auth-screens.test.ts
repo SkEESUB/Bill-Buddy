@@ -55,4 +55,18 @@ describe("Phase 1: Auth Screen Rebuild", () => {
     expect(stylesSrc).toContain(".auth-otp-input");
     expect(stylesSrc).toContain(".auth-social-btn");
   });
+
+  it("handles mobile responsive viewports, safe areas, and keyboard centering", () => {
+    // Safe areas in styles
+    expect(stylesSrc).toContain("safe-area-inset-top");
+    expect(stylesSrc).toContain("safe-area-inset-bottom");
+    expect(stylesSrc).toContain("max-height: 680px");
+
+    // Responsive OTP input sizing to prevent horizontal overflow on narrow screens
+    expect(stylesSrc).toContain("clamp(38px");
+
+    // Keyboard centering via handleInputFocus
+    expect(loginSrc).toContain("handleInputFocus");
+    expect(loginSrc).toContain("scrollIntoView");
+  });
 });

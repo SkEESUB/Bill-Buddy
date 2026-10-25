@@ -460,7 +460,7 @@ export async function processDueEmailReminders(
         expected_amount,
         actual_amount,
         status,
-        bill:bills(id, title, reminder_email, is_active, notes)
+        bill:bills(id, title, reminder_email, is_active, notes, upi_id)
       )
     `,
     )
@@ -478,79 +478,96 @@ export async function processDueEmailReminders(
   let failed = 0;
 
   for (const reminder of dueReminders) {
-    const occ = reminder.occurrence as any;
-    if (!occ || occ.status === "paid" || occ.status === "cancelled" || occ.status === "skipped") {
-      await db
-        .from("bill_reminders")
-        .update({ status: "cancelled" } as never)
-        .eq("id", reminder.id);
-      continue;
-    }
-
-    const bill = occ.bill;
-    if (bill && bill.is_active === false) {
-      await db
-        .from("bill_reminders")
-        .update({ status: "cancelled" } as never)
-        .eq("id", reminder.id);
-      continue;
-    }
-
-    let recipientEmail = bill?.reminder_email?.trim();
-    if (!recipientEmail) {
-      try {
-        const { data: userAuth } = await db.auth.admin.getUserById(reminder.user_id);
-        recipientEmail = userAuth?.user?.email?.trim();
-      } catch {
-        // Fallback
+    try {
+      const occ = reminder.occurrence as any;
+      if (!occ || occ.status === "paid" || occ.status === "cancelled" || occ.status === "skipped") {
+        await db
+          .from("bill_reminders")
+          .update({ status: "cancelled" } as never)
+          .eq("id", reminder.id);
+        continue;
       }
-    }
 
-    if (!recipientEmail) {
-      console.warn(`[jobs:email_reminders] No destination email for reminder ${reminder.id}`);
-      await db
-        .from("bill_reminders")
-        .update({ status: "failed" } as never)
-        .eq("id", reminder.id);
-      failed += 1;
-      continue;
-    }
+      const bill = occ.bill;
+      if (bill && bill.is_active === false) {
+        await db
+          .from("bill_reminders")
+          .update({ status: "cancelled" } as never)
+          .eq("id", reminder.id);
+        continue;
+      }
 
-    const amount = Number(occ.actual_amount ?? occ.expected_amount);
-    const { sendReminderEmail } = await import("./email.server");
-    const result = await sendReminderEmail({
-      to: recipientEmail,
-      billTitle: bill?.title ?? "Bill",
-      amount,
-      dueDate: occ.scheduled_date,
-      notes: bill?.notes,
-    });
+      let recipientEmail = bill?.reminder_email?.trim();
+      if (!recipientEmail) {
+        try {
+          const { data: userAuth } = await db.auth.admin.getUserById(reminder.user_id);
+          recipientEmail = userAuth?.user?.email?.trim();
+        } catch {
+          // Fallback
+        }
+      }
 
-    if (result.delivered) {
-      sent += 1;
-      await db
-        .from("bill_reminders")
-        .update({
-          status: "sent",
-          sent_at: new Date().toISOString(),
-        } as never)
-        .eq("id", reminder.id);
+      if (!recipientEmail) {
+        console.warn(`[jobs:email_reminders] No destination email for reminder ${reminder.id}`);
+        await db
+          .from("bill_reminders")
+          .update({ status: "failed" } as never)
+          .eq("id", reminder.id);
+        failed += 1;
+        continue;
+      }
 
-      await insertDraft(db, reminder.user_id, {
-        type: "bill_due",
-        title: `${bill?.title ?? "Bill"} reminder sent`,
-        body: `Email reminder sent to ${recipientEmail} for ₹${amount} due on ${occ.scheduled_date}.`,
-        dedupeKey: `email_sent:${reminder.id}`,
-        billId: bill?.id,
+      const amount = Number(occ.actual_amount ?? occ.expected_amount);
+      const { sendReminderEmail } = await import("./email.server");
+      const result = await sendReminderEmail({
+        to: recipientEmail,
+        billTitle: bill?.title ?? "Bill",
+        amount,
+        dueDate: occ.scheduled_date,
+        notes: bill?.notes,
+        upiId: bill?.upi_id,
       });
-    } else {
+
+      if (result.delivered) {
+        sent += 1;
+        await db
+          .from("bill_reminders")
+          .update({
+            status: "sent",
+            sent_at: new Date().toISOString(),
+          } as never)
+          .eq("id", reminder.id);
+
+        await insertDraft(db, reminder.user_id, {
+          type: "bill_due",
+          title: `${bill?.title ?? "Bill"} reminder sent`,
+          body: `Email reminder sent to ${recipientEmail} for ₹${amount} due on ${occ.scheduled_date}.`,
+          dedupeKey: `email_sent:${reminder.id}`,
+          billId: bill?.id,
+        });
+      } else {
+        failed += 1;
+        await db
+          .from("bill_reminders")
+          .update({
+            status: "failed",
+          } as never)
+          .eq("id", reminder.id);
+      }
+    } catch (reminderErr) {
+      console.error(
+        `[jobs:email_reminders] Error processing reminder ${reminder.id}:`,
+        reminderErr,
+      );
       failed += 1;
-      await db
-        .from("bill_reminders")
-        .update({
-          status: "failed",
-        } as never)
-        .eq("id", reminder.id);
+      try {
+        await db
+          .from("bill_reminders")
+          .update({ status: "failed" } as never)
+          .eq("id", reminder.id);
+      } catch {
+        // Safe ignore
+      }
     }
   }
 

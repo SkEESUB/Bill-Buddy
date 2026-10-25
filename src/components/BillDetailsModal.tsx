@@ -4,6 +4,7 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
+  Loader2,
   Mail,
   Pencil,
   Repeat,
@@ -29,6 +30,7 @@ export function BillDetailsModal({
   occurrence,
   bill,
   today,
+  working = false,
   onClose,
   onPay,
   onEdit,
@@ -38,6 +40,7 @@ export function BillDetailsModal({
   occurrence: OccurrenceView | null;
   bill?: Bill | null | undefined;
   today: string;
+  working?: boolean;
   onClose: () => void;
   onPay: (occurrence: OccurrenceView) => void;
   onEdit: (bill: Bill) => void;
@@ -145,7 +148,7 @@ export function BillDetailsModal({
               <Bell className="h-4 w-4 text-slate-400" /> Reminder Notice
             </span>
             <span className="font-semibold text-slate-900">
-              {reminderDays === 0 ? "On due date" : `${reminderDays} days before`} at {reminderTime}
+              {reminderDays === 0 ? "On due date" : `${reminderDays} days before & on due date`}
             </span>
           </div>
 
@@ -178,11 +181,21 @@ export function BillDetailsModal({
           {!isCompleted ? (
             <button
               type="button"
+              disabled={working}
               onClick={() => onPay(occurrence)}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 py-3 text-sm font-semibold text-white shadow-md shadow-emerald-600/20 hover:brightness-105 active:scale-[0.99] transition-all cursor-pointer"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 py-3 text-sm font-semibold text-white shadow-md shadow-emerald-600/20 hover:brightness-105 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <CheckCircle2 className="h-4 w-4 stroke-[2.5]" />
-              <span>Mark as Completed</span>
+              {working ? (
+                <>
+                  <Loader2 className="h-4 w-4 stroke-[2.5] animate-spin" />
+                  <span>Completing...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-4 w-4 stroke-[2.5]" />
+                  <span>Mark as Completed</span>
+                </>
+              )}
             </button>
           ) : (
             <div className="flex items-center justify-center gap-2 rounded-full bg-emerald-50 border border-emerald-200 py-2.5 text-xs font-semibold text-emerald-700">

@@ -26,7 +26,7 @@ function WalletIllustration() {
         viewBox="0 0 380 320"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full max-w-[200px] sm:max-w-[270px] max-h-[125px] sm:max-h-[180px] h-auto object-contain"
+        className="w-full max-w-[190px] xs:max-w-[210px] sm:max-w-[260px] max-h-[115px] sm:max-h-[165px] h-auto object-contain transition-all duration-200"
         aria-hidden="true"
       >
         {/* Ambient glow ring */}
@@ -223,7 +223,7 @@ function EmailIllustration() {
         viewBox="0 0 380 260"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full max-w-[190px] sm:max-w-[250px] max-h-[110px] sm:max-h-[160px] h-auto object-contain"
+        className="w-full max-w-[170px] xs:max-w-[190px] sm:max-w-[240px] max-h-[95px] sm:max-h-[145px] h-auto object-contain transition-all duration-200"
         aria-hidden="true"
       >
         {/* Ambient glow ring */}
@@ -395,7 +395,7 @@ function OTPIllustration() {
         viewBox="0 0 380 260"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full max-w-[190px] sm:max-w-[250px] max-h-[110px] sm:max-h-[160px] h-auto object-contain"
+        className="w-full max-w-[170px] xs:max-w-[190px] sm:max-w-[240px] max-h-[95px] sm:max-h-[145px] h-auto object-contain transition-all duration-200"
         aria-hidden="true"
       >
         {/* Ambient glow */}
@@ -717,14 +717,21 @@ export function LoginPage() {
     resendCooldown % 60,
   ).padStart(2, "0")}`;
 
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Delay slightly to let virtual keyboard complete transition on mobile devices
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 280);
+  };
+
   return (
-    <div className="auth-root relative min-h-dvh flex flex-col justify-center overflow-x-hidden overflow-y-auto px-4 py-3 sm:px-6 sm:py-6">
+    <div className="auth-root relative flex flex-col items-center justify-start sm:justify-center">
       {/* Ambient background gradients */}
       <div className="auth-bg-glow auth-bg-glow-1" />
       <div className="auth-bg-glow auth-bg-glow-2" />
       <div className="auth-bg-glow auth-bg-glow-3" />
 
-      <div className="relative z-10 flex flex-1 flex-col items-center justify-center w-full max-w-[420px] mx-auto py-1 sm:py-3">
+      <div className="relative z-10 flex flex-col items-center w-full max-w-[420px] mx-auto my-auto py-1 sm:py-3">
         <div className="w-full">
           {/* ============================================================ */}
           {/* SCREEN 1: ONBOARDING / WELCOME                               */}
@@ -765,7 +772,7 @@ export function LoginPage() {
               <WalletIllustration />
 
               {/* Heading */}
-              <h1 className="mt-1 sm:mt-2 text-center text-[22px] sm:text-[28px] font-extrabold leading-[1.18] tracking-tight text-slate-900">
+              <h1 className="mt-1 sm:mt-2 text-center text-[20px] xs:text-[22px] sm:text-[28px] font-extrabold leading-[1.18] tracking-tight text-slate-900">
                 Take Control of
                 <br />
                 <span className="auth-gradient-text">Your Money</span>
@@ -777,8 +784,8 @@ export function LoginPage() {
               </p>
 
               {/* Feature row */}
-              <div className="mt-2.5 sm:mt-4 flex w-full items-start justify-center gap-4 sm:gap-7">
-                <div className="flex flex-col items-center text-center max-w-[80px] sm:max-w-[90px]">
+              <div className="mt-2 sm:mt-3.5 flex w-full items-start justify-center gap-2 xs:gap-3.5 sm:gap-6 px-1">
+                <div className="flex flex-col items-center text-center max-w-[78px] xs:max-w-[86px] sm:max-w-[92px]">
                   <FeatureIcon
                     bgColor="#EDE9FE"
                     iconColor="#7C3AED"
@@ -797,14 +804,14 @@ export function LoginPage() {
                       </svg>
                     }
                   />
-                  <span className="mt-1.5 text-[11px] sm:text-xs font-bold text-slate-800">
+                  <span className="mt-1.5 text-[10px] xs:text-[11px] sm:text-xs font-bold text-slate-800">
                     Track Bills
                   </span>
-                  <span className="text-[9px] sm:text-[10px] text-slate-500 leading-tight">
+                  <span className="text-[8.5px] xs:text-[9.5px] sm:text-[10px] text-slate-500 leading-tight">
                     Never miss a payment
                   </span>
                 </div>
-                <div className="flex flex-col items-center text-center max-w-[80px] sm:max-w-[90px]">
+                <div className="flex flex-col items-center text-center max-w-[78px] xs:max-w-[86px] sm:max-w-[92px]">
                   <FeatureIcon
                     bgColor="#FEE2E2"
                     iconColor="#EF4444"
@@ -822,14 +829,14 @@ export function LoginPage() {
                       </svg>
                     }
                   />
-                  <span className="mt-1.5 text-[11px] sm:text-xs font-bold text-slate-800">
+                  <span className="mt-1.5 text-[10px] xs:text-[11px] sm:text-xs font-bold text-slate-800">
                     Manage Budgets
                   </span>
-                  <span className="text-[9px] sm:text-[10px] text-slate-500 leading-tight">
+                  <span className="text-[8.5px] xs:text-[9.5px] sm:text-[10px] text-slate-500 leading-tight">
                     Stay on top of spending
                   </span>
                 </div>
-                <div className="flex flex-col items-center text-center max-w-[80px] sm:max-w-[90px]">
+                <div className="flex flex-col items-center text-center max-w-[78px] xs:max-w-[86px] sm:max-w-[92px]">
                   <FeatureIcon
                     bgColor="#DCFCE7"
                     iconColor="#16A34A"
@@ -848,10 +855,10 @@ export function LoginPage() {
                       </svg>
                     }
                   />
-                  <span className="mt-1.5 text-[11px] sm:text-xs font-bold text-slate-800">
+                  <span className="mt-1.5 text-[10px] xs:text-[11px] sm:text-xs font-bold text-slate-800">
                     Achieve Goals
                   </span>
-                  <span className="text-[9px] sm:text-[10px] text-slate-500 leading-tight">
+                  <span className="text-[8.5px] xs:text-[9.5px] sm:text-[10px] text-slate-500 leading-tight">
                     Build a better future
                   </span>
                 </div>
@@ -918,7 +925,7 @@ export function LoginPage() {
               <EmailIllustration />
 
               {/* Heading */}
-              <h2 className="mt-1 sm:mt-2 text-center text-[22px] sm:text-[28px] font-extrabold leading-[1.18] tracking-tight text-slate-900">
+              <h2 className="mt-1 sm:mt-2 text-center text-[20px] xs:text-[22px] sm:text-[28px] font-extrabold leading-[1.18] tracking-tight text-slate-900">
                 Enter Your <span className="auth-gradient-text">Email</span>
               </h2>
 
@@ -943,6 +950,7 @@ export function LoginPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      onFocus={handleInputFocus}
                       placeholder="name@example.com"
                       disabled={loading}
                       className="auth-input pl-10 text-xs sm:text-sm min-h-[44px] sm:min-h-[50px]"
@@ -1072,7 +1080,7 @@ export function LoginPage() {
               <OTPIllustration />
 
               {/* Heading */}
-              <h2 className="mt-1 sm:mt-2 text-center text-[22px] sm:text-[28px] font-extrabold leading-[1.18] tracking-tight text-slate-900">
+              <h2 className="mt-1 sm:mt-2 text-center text-[20px] xs:text-[22px] sm:text-[28px] font-extrabold leading-[1.18] tracking-tight text-slate-900">
                 Enter <span className="auth-gradient-text">OTP</span>
               </h2>
 
@@ -1090,7 +1098,7 @@ export function LoginPage() {
                 }}
                 className="mt-3 sm:mt-4 w-full"
               >
-                <div className="flex justify-center gap-2 sm:gap-2.5" onPaste={handlePaste}>
+                <div className="flex justify-center gap-1.5 xs:gap-2 sm:gap-2.5" onPaste={handlePaste}>
                   {otp.map((digit, index) => (
                     <input
                       key={index}
@@ -1103,6 +1111,7 @@ export function LoginPage() {
                       value={digit}
                       onChange={(e) => handleOtpChange(index, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                      onFocus={handleInputFocus}
                       disabled={loading}
                       className="auth-otp-input"
                       aria-label={`Digit ${index + 1}`}

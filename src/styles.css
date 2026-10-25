@@ -320,6 +320,73 @@
       0 2px 8px 0 rgba(15, 39, 66, 0.04);
   }
 
+  /* Premium Bottom Navigation Pill Controls */
+  .nav-pill-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: #64748b;
+    border: 1px solid transparent;
+    transition: all 220ms cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .nav-pill-btn:hover:not(.active) {
+    color: #1e293b;
+    background: rgba(241, 245, 249, 0.75);
+  }
+
+  .nav-pill-btn.active {
+    color: #4338ca;
+    background: linear-gradient(
+      135deg,
+      rgba(224, 231, 255, 0.88) 0%,
+      rgba(238, 242, 255, 0.96) 50%,
+      rgba(243, 232, 255, 0.88) 100%
+    );
+    border-color: rgba(199, 210, 254, 0.85);
+    box-shadow:
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.9),
+      0 4px 14px -2px rgba(99, 102, 241, 0.2),
+      0 1px 3px 0 rgba(99, 102, 241, 0.1);
+  }
+
+  .nav-pill-btn:active {
+    transform: scale(0.97);
+  }
+
+  .dark .nav-pill-btn {
+    color: #94a3b8;
+  }
+
+  .dark .nav-pill-btn:hover:not(.active) {
+    color: #f1f5f9;
+    background: rgba(30, 41, 59, 0.6);
+  }
+
+  .dark .nav-pill-btn.active {
+    color: #c7d2fe;
+    background: linear-gradient(
+      135deg,
+      rgba(49, 46, 129, 0.55) 0%,
+      rgba(67, 56, 202, 0.45) 50%,
+      rgba(88, 28, 135, 0.45) 100%
+    );
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow:
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.15),
+      0 4px 16px -2px rgba(99, 102, 241, 0.35);
+  }
+
   .neu-sunken {
     background: rgba(238, 245, 253, 0.65);
     box-shadow: inset 0 2px 4px 0 rgba(15, 39, 66, 0.04);
@@ -438,6 +505,16 @@
 
   .auth-root {
     background-color: #fafbfc;
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
   }
 
   .dark .auth-root {
@@ -539,13 +616,13 @@
   }
 
   .auth-otp-input {
-    width: 48px;
-    height: 56px;
-    border-radius: 16px;
+    width: clamp(38px, 11vw, 48px);
+    height: clamp(48px, 13vw, 56px);
+    border-radius: clamp(10px, 3vw, 16px);
     border: 1.5px solid #e2e8f0;
     background-color: #ffffff;
     color: #0f172a;
-    font-size: 1.5rem;
+    font-size: clamp(1.2rem, 4.5vw, 1.5rem);
     font-weight: 700;
     text-align: center;
     outline: none;
@@ -557,6 +634,8 @@
     .auth-otp-input {
       width: 52px;
       height: 60px;
+      font-size: 1.5rem;
+      border-radius: 16px;
     }
   }
 
@@ -584,6 +663,23 @@
 
   .auth-illustration-container {
     user-select: none;
+  }
+
+  /* Responsive height adaptation for short mobile screens and keyboards */
+  @media (max-height: 680px) {
+    .auth-illustration-container svg {
+      max-height: 90px !important;
+    }
+    .auth-illustration-container {
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+    }
+  }
+
+  @media (max-height: 540px) {
+    .auth-illustration-container svg {
+      max-height: 65px !important;
+    }
   }
 
   /* ---------------------------------------------------------------- *

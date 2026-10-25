@@ -165,6 +165,9 @@ export const getAvatarUrl = createServerFn({ method: "GET" })
       .maybeSingle();
     const path = (data as { avatar_url: string | null } | null)?.avatar_url ?? null;
     if (!path) return { url: null as string | null };
+    if (path.startsWith("avatar:")) {
+      return { url: path };
+    }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: signed, error } = await supabaseAdmin.storage
       .from("avatars")

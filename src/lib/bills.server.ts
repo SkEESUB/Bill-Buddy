@@ -157,9 +157,44 @@ export async function syncBillOccurrences(
 }
 
 /**
+ * Helper to compute an ISO timestamp for a local date and wall-clock time in a target timezone.
+ * Defaults to Asia/Kolkata (IST) and 09:00:00 without assuming browser clock or simple UTC.
+ */
+function toUtcIso(dayStr: string, timeStr = "09:00", timeZone = "Asia/Kolkata"): string {
+  try {
+    const [y, m, d] = dayStr.split("-").map(Number);
+    const [h = 9, min = 0] = timeStr.split(":").map(Number);
+    if (!y || !m || !d) return new Date().toISOString();
+
+    const targetUtcMs = Date.UTC(y, m - 1, d, h, min, 0);
+    const dateObj = new Date(targetUtcMs);
+
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: timeZone || "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+
+    const parts = formatter.formatToParts(dateObj);
+    const p = (type: string) => Number(parts.find((x) => x.type === type)?.value ?? 0);
+    const asInTzMs = Date.UTC(p("year"), p("month") - 1, p("day"), p("hour") % 24, p("minute"), p("second"));
+    const offsetMs = asInTzMs - targetUtcMs;
+    return new Date(targetUtcMs - offsetMs).toISOString();
+  } catch {
+    return `${dayStr}T${timeStr.slice(0, 5)}:00.000Z`;
+  }
+}
+
+/**
  * Synchronize email reminder records in bill_reminders for every open occurrence.
- * Reschedules pending reminders when the bill's reminder_time or reminder_days_before change,
- * and cancels pending reminders if the bill is deactivated.
+ * By default schedules a reminder on the bill's due date. If an advance reminder
+ * is requested (e.g. 1, 3, or 7 days before), that preference is also scheduled alongside.
+ * Uses the user's configured profile timezone (defaulting to Asia/Kolkata).
  */
 export async function syncBillReminders(
   db: Db,
@@ -188,38 +223,134 @@ export async function syncBillReminders(
     return { scheduled: 0, cancelled: pendingOccIds.length };
   }
 
-  const leadDays = Math.max(0, Math.floor(bill.reminder_days_before ?? 3));
-  const timeStr = ((bill as any).reminder_time ?? "09:00:00").slice(0, 5);
-
-  let scheduled = 0;
-  for (const occ of pendingOccurrences) {
-    const reminderDate = addDays(occ.scheduled_date, -leadDays);
-    const scheduledFor = new Date(`${reminderDate}T${timeStr}:00Z`).toISOString();
-
-    const { data: existing } = await db
-      .from("bill_reminders")
-      .select("id, status")
-      .eq("bill_occurrence_id", occ.id)
-      .eq("status", "pending")
+  // Look up user's stored timezone from user_settings (defaulting to Asia/Kolkata)
+  let userTimezone = "Asia/Kolkata";
+  try {
+    const { data: settings } = await db
+      .from("user_settings")
+      .select("timezone")
+      .eq("user_id", userId)
       .maybeSingle();
+    if (settings?.timezone) {
+      userTimezone = settings.timezone;
+    }
+  } catch {
+    // Keep Asia/Kolkata default
+  }
 
-    if (existing) {
-      await db
-        .from("bill_reminders")
-        .update({ scheduled_for: scheduledFor } as never)
-        .eq("id", existing.id);
-      scheduled += 1;
-    } else {
-      const { error: insErr } = await db.from("bill_reminders").insert({
-        user_id: userId,
-        bill_occurrence_id: occ.id,
-        reminder_type: "email",
-        scheduled_for: scheduledFor,
-        status: "pending",
-      } as never);
-      if (!insErr) scheduled += 1;
+  const leadDays = Math.max(0, Math.floor(bill.reminder_days_before ?? 0));
+  const timeStr = ((bill as any).reminder_time ?? "09:00:00").slice(0, 5) || "09:00";
+
+  // 1. Fetch ALL existing pending reminders for all pending occurrences of this bill in a SINGLE query
+  const { data: existingList } = await db
+    .from("bill_reminders")
+    .select("id, bill_occurrence_id, scheduled_for, status")
+    .eq("user_id", userId)
+    .in("bill_occurrence_id", pendingOccIds)
+    .eq("status", "pending");
+
+  const existingReminders = existingList ?? [];
+  const remindersByOccId = new Map<string, Array<{ id: string; scheduled_for: string; status: string }>>();
+  for (const r of existingReminders) {
+    const list = remindersByOccId.get(r.bill_occurrence_id) ?? [];
+    list.push(r);
+    remindersByOccId.set(r.bill_occurrence_id, list);
+  }
+
+  const toInsert: Array<{
+    user_id: string;
+    bill_occurrence_id: string;
+    reminder_type: string;
+    scheduled_for: string;
+    status: string;
+  }> = [];
+  const toUpdate: Array<{ id: string; scheduled_for: string }> = [];
+  const obsoleteIds: string[] = [];
+  let scheduled = 0;
+
+  for (const occ of pendingOccurrences) {
+    // Due date reminder is always scheduled by default
+    const targetDates = [occ.scheduled_date];
+
+    // If user selected an additional advance reminder, preserve that preference
+    if (leadDays > 0) {
+      const advanceDate = addDays(occ.scheduled_date, -leadDays);
+      if (advanceDate !== occ.scheduled_date) {
+        targetDates.push(advanceDate);
+      }
+    }
+
+    const targetIsoDates = targetDates.map((d) => toUtcIso(d, timeStr, userTimezone));
+    const occExisting = remindersByOccId.get(occ.id) ?? [];
+
+    for (const targetIso of targetIsoDates) {
+      // Find matching existing reminder within 1 hour
+      const matching = occExisting.find((r) => {
+        const diffMs = Math.abs(new Date(r.scheduled_for).getTime() - new Date(targetIso).getTime());
+        return diffMs < 3600 * 1000;
+      });
+
+      if (matching) {
+        if (matching.scheduled_for !== targetIso) {
+          toUpdate.push({ id: matching.id, scheduled_for: targetIso });
+        }
+        scheduled += 1;
+      } else {
+        toInsert.push({
+          user_id: userId,
+          bill_occurrence_id: occ.id,
+          reminder_type: "email",
+          scheduled_for: targetIso,
+          status: "pending",
+        });
+        scheduled += 1;
+      }
+    }
+
+    // Identify obsolete pending reminders for this occurrence
+    for (const r of occExisting) {
+      const rTime = new Date(r.scheduled_for).getTime();
+      const hasMatch = targetIsoDates.some(
+        (targetIso) => Math.abs(rTime - new Date(targetIso).getTime()) < 3600 * 1000,
+      );
+      if (!hasMatch) {
+        obsoleteIds.push(r.id);
+      }
     }
   }
 
-  return { scheduled, cancelled: 0 };
+  // 2. Perform batched mutations in parallel rather than sequential per-row queries
+  const ops: Promise<unknown>[] = [];
+
+  if (toInsert.length > 0) {
+    ops.push(Promise.resolve(db.from("bill_reminders").insert(toInsert as never)));
+  }
+
+  if (obsoleteIds.length > 0) {
+    ops.push(
+      Promise.resolve(
+        db
+          .from("bill_reminders")
+          .update({ status: "cancelled" } as never)
+          .in("id", obsoleteIds),
+      ),
+    );
+  }
+
+  for (const u of toUpdate) {
+    ops.push(
+      Promise.resolve(
+        db
+          .from("bill_reminders")
+          .update({ scheduled_for: u.scheduled_for } as never)
+          .eq("id", u.id),
+      ),
+    );
+  }
+
+  if (ops.length > 0) {
+    await Promise.all(ops);
+  }
+
+  return { scheduled, cancelled: obsoleteIds.length };
 }

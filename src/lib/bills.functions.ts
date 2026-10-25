@@ -370,34 +370,47 @@ export const recordOccurrencePayment = createServerFn({ method: "POST" })
       throw new Error(updateError.message);
     }
 
-    // Cancel future pending reminders for this completed occurrence
-    await db
+    // Parallelize non-blocking post-settlement operations (cancel reminders, audit, notification)
+    const cancelRemindersPromise = db
       .from("bill_reminders")
       .update({ status: "cancelled" } as never)
       .eq("bill_occurrence_id", occurrence.id)
       .eq("status", "pending");
 
-    await audit(supabase, userId, "bill.payment_recorded", "bill_occurrence", occurrence.id, {
-      amount: data.amount,
-      payment_method: data.payment_method,
-    });
-
-    // Confirmation for a payment the user recorded themselves. Preference
-    // aware, and keyed on the instalment so it can never duplicate.
-    const { notifyUser } = await import("./notify.server");
-    await notifyUser(
-      db as never,
+    const auditPromise = audit(
+      supabase,
       userId,
+      "bill.payment_recorded",
+      "bill_occurrence",
+      occurrence.id,
       {
-        type: "payment_success",
-        title: "Payment recorded",
-        body: `${bill?.title ?? "Bill"} — ${data.amount.toFixed(2)} marked as paid.`,
-        dedupeKey: `payment_recorded:${occurrence.id}`,
-        billId: occurrence.bill_id,
-        transactionId: txn.id,
+        amount: data.amount,
+        payment_method: data.payment_method,
       },
-      { channel: "payment_confirmations", schedule: "notify_payment_recorded" },
     );
+
+    const notifyPromise = (async () => {
+      try {
+        const { notifyUser } = await import("./notify.server");
+        await notifyUser(
+          db as never,
+          userId,
+          {
+            type: "payment_success",
+            title: "Payment recorded",
+            body: `${bill?.title ?? "Bill"} — ${data.amount.toFixed(2)} marked as paid.`,
+            dedupeKey: `payment_recorded:${occurrence.id}`,
+            billId: occurrence.bill_id,
+            transactionId: txn.id,
+          },
+          { channel: "payment_confirmations", schedule: "notify_payment_recorded" },
+        );
+      } catch (notifyErr) {
+        console.warn("[recordOccurrencePayment] Notification notice:", notifyErr);
+      }
+    })();
+
+    await Promise.allSettled([cancelRemindersPromise, auditPromise, notifyPromise]);
 
     return { occurrence: updated, transaction: txn };
   });

@@ -4,21 +4,24 @@
  */
 import { useEffect } from "react";
 
-type Listener = () => void;
-const listeners = new Set<Listener>();
+type Listener = (sourceId?: string) => void;
+const listeners = new Map<string, Listener>();
 
-/** Notify all subscribers that server-side financial state changed. */
-export function bumpFinance(): void {
-  for (const listener of [...listeners]) listener();
+/** Notify subscribers that server-side financial state changed. */
+export function bumpFinance(sourceId?: string): void {
+  for (const [id, listener] of listeners) {
+    if (sourceId && id === sourceId) continue;
+    listener(sourceId);
+  }
 }
 
 /** Subscribe a refresh callback for the lifetime of the component. */
-export function useFinanceSync(onChange: () => void): void {
+export function useFinanceSync(onChange: () => void, subscriberId?: string): void {
   useEffect(() => {
-    const listener = () => onChange();
-    listeners.add(listener);
+    const id = subscriberId || Math.random().toString(36).slice(2);
+    listeners.set(id, () => onChange());
     return () => {
-      listeners.delete(listener);
+      listeners.delete(id);
     };
-  }, [onChange]);
+  }, [onChange, subscriberId]);
 }

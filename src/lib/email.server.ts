@@ -14,6 +14,7 @@ export interface ReminderEmailPayload {
   reminderNotice?: string;
   notes?: string | null;
   currency?: string;
+  upiId?: string | null;
 }
 
 export interface EmailDeliveryResult {
@@ -27,9 +28,13 @@ export interface EmailDeliveryResult {
  * Generates responsive HTML email content matching the BillBuddy Smart Home design direction.
  */
 export function buildReminderEmailHtml(payload: ReminderEmailPayload): string {
-  const { billTitle, amount, dueDate, notes, currency = "INR" } = payload;
+  const { billTitle, amount, dueDate, notes, currency = "INR", upiId } = payload;
   const symbol = currency === "INR" ? "₹" : currency;
   const formattedAmount = `${symbol}${amount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const cleanUpi = upiId?.trim();
+  const upiPayLink = cleanUpi
+    ? `upi://pay?pa=${encodeURIComponent(cleanUpi)}&pn=${encodeURIComponent(billTitle)}&am=${amount}&cu=INR`
+    : null;
 
   return `
 <!DOCTYPE html>
@@ -158,8 +163,28 @@ export function buildReminderEmailHtml(payload: ReminderEmailPayload): string {
           <span class="label">Bill Title</span>
           <span class="value">${billTitle}</span>
         </div>
+        ${
+          cleanUpi
+            ? `
+        <div class="row">
+          <span class="label">UPI ID</span>
+          <span class="value" style="color: #4f46e5; font-family: monospace;">${cleanUpi}</span>
+        </div>`
+            : ""
+        }
         ${notes ? `<div class="notes-box"><strong>Note:</strong> ${notes}</div>` : ""}
       </div>
+
+      ${
+        upiPayLink
+          ? `
+      <div style="text-align: center; margin: 20px 0 10px 0;">
+        <a href="${upiPayLink}" style="display: inline-block; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: #ffffff; text-decoration: none; font-weight: 600; font-size: 14px; padding: 12px 28px; border-radius: 9999px; box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);">
+          Pay ${formattedAmount} via UPI
+        </a>
+      </div>`
+          : ""
+      }
 
       <div class="footer">
         This automated payment reminder was scheduled in BillBuddy.<br>
@@ -178,10 +203,13 @@ export function buildReminderEmailHtml(payload: ReminderEmailPayload): string {
 export async function sendReminderEmail(
   payload: ReminderEmailPayload,
 ): Promise<EmailDeliveryResult> {
-  const { to, billTitle, amount, dueDate } = payload;
+  const { to, billTitle, amount, dueDate, upiId } = payload;
   const subject = `BillBuddy reminder: ${billTitle} of ₹${amount} is due on ${dueDate}`;
   const html = buildReminderEmailHtml(payload);
-  const text = `BillBuddy Reminder\n\nYour bill "${billTitle}" of ₹${amount} is due on ${dueDate}.\n\nPlease mark it as completed in BillBuddy once paid.`;
+  const upiText = upiId?.trim()
+    ? `\nUPI ID: ${upiId.trim()}\nUPI Pay Link: upi://pay?pa=${encodeURIComponent(upiId.trim())}&pn=${encodeURIComponent(billTitle)}&am=${amount}&cu=INR`
+    : "";
+  const text = `BillBuddy Reminder\n\nYour bill "${billTitle}" of ₹${amount} is due on ${dueDate}.${upiText}\n\nPlease mark it as completed in BillBuddy once paid.`;
 
   // 1. Resend API Provider
   const resendApiKey = process.env["RESEND_API_KEY"];

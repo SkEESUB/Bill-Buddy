@@ -1,14 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Bell,
   Calendar,
-  Check,
   ChevronDown,
-  Clock,
-  IndianRupee,
   Loader2,
   Mail,
-  Repeat,
   X,
 } from "lucide-react";
 import { addDays, toDay } from "@/lib/format";
@@ -29,7 +24,7 @@ const REPEAT_OPTIONS: { label: string; value: RepeatOption }[] = [
 ];
 
 const REMINDER_BEFORE_OPTIONS = [
-  { label: "On due date", days: 0 },
+  { label: "Due date only", days: 0 },
   { label: "1 day before", days: 1 },
   { label: "3 days before", days: 3 },
   { label: "7 days before", days: 7 },
@@ -63,7 +58,6 @@ export function BillFormModal({
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [dueDate, setDueDate] = useState(tomorrow);
-  const [reminderTime, setReminderTime] = useState("09:00");
   const [reminderEmail, setReminderEmail] = useState("");
   const [repeat, setRepeat] = useState<RepeatOption>("none");
   const [reminderDaysBefore, setReminderDaysBefore] = useState(3);
@@ -74,14 +68,13 @@ export function BillFormModal({
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
 
-  // Initialize or reset when modal opens or bill changes
+  // Initialize or reset only when modal opens or target bill changes
   useEffect(() => {
     if (!open) return;
     if (bill) {
       setTitle(bill.title ?? "");
       setAmount(bill.amount ? String(bill.amount) : "");
       setDueDate(bill.due_date ?? tomorrow);
-      setReminderTime(bill.reminder_time ? bill.reminder_time.slice(0, 5) : "09:00");
       setReminderEmail(bill.reminder_email ?? user?.email ?? "");
 
       // Determine repeat option
@@ -105,7 +98,6 @@ export function BillFormModal({
       setTitle("");
       setAmount("");
       setDueDate(tomorrow);
-      setReminderTime("09:00");
       setReminderEmail(user?.email ?? "");
       setRepeat("none");
       setReminderDaysBefore(3);
@@ -131,7 +123,7 @@ export function BillFormModal({
       !Number.isFinite(numAmount) ||
       numAmount <= 0
     ) {
-      errs.amount = "Enter a valid amount greater than ₹0";
+      errs.amount = "Enter a valid amount > ₹0";
     }
 
     if (!dueDate) {
@@ -154,7 +146,6 @@ export function BillFormModal({
 
     setSubmitting(true);
     try {
-      // Map recurrence option to backend repeat_type & repeat_interval
       let repeatType: "none" | "weekly" | "monthly" | "yearly" | "custom" = "none";
       let repeatInterval = 1;
 
@@ -165,12 +156,15 @@ export function BillFormModal({
         repeatType = repeat;
       }
 
+      // Preserve existing reminder_time or pass server default 09:00
+      const preservedReminderTime = bill?.reminder_time?.slice(0, 5) ?? "09:00";
+
       await onSubmit({
         title: title.trim(),
         amount: Number(amount),
         category: "general",
         due_date: dueDate,
-        reminder_time: reminderTime,
+        reminder_time: preservedReminderTime,
         reminder_email: reminderEmail.trim() || null,
         repeat_type: repeatType,
         repeat_interval: repeatInterval,
@@ -180,7 +174,7 @@ export function BillFormModal({
       });
       onClose();
     } catch {
-      // Errors handled by parent with toast
+      // Values in state remain preserved for user retry
     } finally {
       setSubmitting(false);
     }
@@ -188,33 +182,31 @@ export function BillFormModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm p-3 pb-6 sm:items-center sm:pb-3 animate-fade-in"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm p-3 pb-safe sm:items-center animate-fade-in"
       onClick={onClose}
       role="presentation"
     >
       <div
-        className="w-full max-w-md rounded-3xl glass-panel bg-white/95 border border-white/90 p-5 sm:p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto animate-scale-in"
+        className="w-full max-w-md rounded-3xl glass-panel bg-white/95 border border-white/90 p-4 sm:p-5 shadow-2xl relative max-h-[90vh] overflow-y-auto animate-scale-in"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-labelledby="modal-title"
         aria-modal="true"
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
           <div>
-            <h2 id="modal-title" className="text-lg font-bold text-slate-900 leading-tight">
+            <h2 id="modal-title" className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
               {isEdit ? "Edit Bill" : "Add Bill"}
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              {isEdit
-                ? "Update your bill details and reminder schedule"
-                : "Set up a due date and automated email reminder"}
+            <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">
+              {isEdit ? "Update your bill details" : "Schedule your bill and reminders"}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors cursor-pointer"
+            className="flex h-7.5 w-7.5 items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors cursor-pointer"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -222,7 +214,7 @@ export function BillFormModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="mt-3 flex flex-col gap-3">
           {/* 1. Bill Name */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -232,45 +224,44 @@ export function BillFormModal({
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Electricity Bill, Internet, College Fee"
-              className={`w-full h-11 px-3.5 rounded-xl border text-sm font-medium bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
+              placeholder="e.g. Electricity, WiFi, Rent, College Fee"
+              className={`w-full h-10 px-3 rounded-xl border text-xs sm:text-sm font-medium bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
                 errors.title ? "border-rose-400 ring-rose-200" : "border-slate-200"
               }`}
               autoFocus
             />
             {errors.title && (
-              <p className="text-[11px] text-rose-600 font-medium mt-1">{errors.title}</p>
+              <p className="text-[11px] text-rose-600 font-medium mt-0.5">{errors.title}</p>
             )}
           </div>
 
-          {/* 2. Amount (in Indian Rupees) */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Amount (₹) <span className="text-rose-500">*</span>
-            </label>
-            <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-sm">
-                ₹
-              </span>
-              <input
-                type="number"
-                step="any"
-                min="0"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
-                className={`w-full h-11 pl-8 pr-3.5 rounded-xl border text-sm font-semibold tabular-nums bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-                  errors.amount ? "border-rose-400 ring-rose-200" : "border-slate-200"
-                }`}
-              />
+          {/* 2. Amount & Due Date (Side by Side in 2 Columns) */}
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Amount (₹) <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-xs sm:text-sm">
+                  ₹
+                </span>
+                <input
+                  type="number"
+                  step="any"
+                  min="0"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0.00"
+                  className={`w-full h-10 pl-7 pr-2.5 rounded-xl border text-xs sm:text-sm font-semibold tabular-nums bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
+                    errors.amount ? "border-rose-400 ring-rose-200" : "border-slate-200"
+                  }`}
+                />
+              </div>
+              {errors.amount && (
+                <p className="text-[11px] text-rose-600 font-medium mt-0.5">{errors.amount}</p>
+              )}
             </div>
-            {errors.amount && (
-              <p className="text-[11px] text-rose-600 font-medium mt-1">{errors.amount}</p>
-            )}
-          </div>
 
-          {/* 3. Due Date & Reminder Time (Side by Side) */}
-          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
                 Due Date <span className="text-rose-500">*</span>
@@ -280,54 +271,40 @@ export function BillFormModal({
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className={`w-full h-11 px-3 rounded-xl border text-xs sm:text-sm font-medium bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
+                  className={`w-full h-10 px-2.5 rounded-xl border text-xs sm:text-sm font-medium bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
                     errors.dueDate ? "border-rose-400" : "border-slate-200"
                   }`}
                 />
               </div>
               {errors.dueDate && (
-                <p className="text-[11px] text-rose-600 font-medium mt-1">{errors.dueDate}</p>
+                <p className="text-[11px] text-rose-600 font-medium mt-0.5">{errors.dueDate}</p>
               )}
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Reminder Time
-              </label>
-              <div className="relative">
-                <input
-                  type="time"
-                  value={reminderTime}
-                  onChange={(e) => setReminderTime(e.target.value)}
-                  className="w-full h-11 px-3 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                />
-              </div>
             </div>
           </div>
 
-          {/* 4. Reminder Email */}
+          {/* 3. Reminder Email */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
               Reminder Email
             </label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
                 type="email"
                 value={reminderEmail}
                 onChange={(e) => setReminderEmail(e.target.value)}
                 placeholder="Where should reminders be sent?"
-                className={`w-full h-11 pl-10 pr-3.5 rounded-xl border text-sm font-medium bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
+                className={`w-full h-10 pl-9 pr-3 rounded-xl border text-xs sm:text-sm font-medium bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
                   errors.reminderEmail ? "border-rose-400" : "border-slate-200"
                 }`}
               />
             </div>
             {errors.reminderEmail && (
-              <p className="text-[11px] text-rose-600 font-medium mt-1">{errors.reminderEmail}</p>
+              <p className="text-[11px] text-rose-600 font-medium mt-0.5">{errors.reminderEmail}</p>
             )}
           </div>
 
-          {/* 5. Repeat Recurrence */}
+          {/* 4. Repeat Recurrence */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">Repeat</label>
             <div className="flex flex-wrap gap-1.5">
@@ -336,7 +313,7 @@ export function BillFormModal({
                   key={opt.value}
                   type="button"
                   onClick={() => setRepeat(opt.value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                     repeat === opt.value
                       ? "bg-blue-600 text-white shadow-sm"
                       : "bg-slate-100 hover:bg-slate-200 text-slate-600"
@@ -348,11 +325,16 @@ export function BillFormModal({
             </div>
           </div>
 
-          {/* 6. Reminder Before Due Date */}
+          {/* 5. Additional Advance Reminder */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Reminder Notification
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-semibold text-slate-700">
+                Advance Reminder
+              </label>
+              <span className="text-[10px] text-slate-400 font-medium">
+                Due-date reminder is always sent
+              </span>
+            </div>
             <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
               {REMINDER_BEFORE_OPTIONS.map((opt) => (
                 <button
@@ -371,7 +353,7 @@ export function BillFormModal({
             </div>
           </div>
 
-          {/* 7. Collapsible Notes */}
+          {/* 6. Collapsible Notes */}
           <div>
             <button
               type="button"
@@ -387,19 +369,19 @@ export function BillFormModal({
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Optional payment link, account ID, or reminder notes..."
+                placeholder="Optional payment reference, customer ID, or notes..."
                 rows={2}
-                className="mt-2 w-full p-2.5 rounded-xl border border-slate-200 text-xs font-medium bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
+                className="mt-1.5 w-full p-2.5 rounded-xl border border-slate-200 text-xs font-medium bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
               />
             )}
           </div>
 
           {/* Primary Submit Button */}
-          <div className="pt-2">
+          <div className="pt-1">
             <button
               type="submit"
               disabled={submitting}
-              className="w-full h-11 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm shadow-md shadow-blue-500/25 transition-all hover:brightness-105 active:scale-[0.99] disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+              className="w-full h-10.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm shadow-md shadow-blue-500/25 transition-all hover:brightness-105 active:scale-[0.99] disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
             >
               {submitting ? (
                 <>
