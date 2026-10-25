@@ -25,26 +25,27 @@ export type OccurrenceView = {
   upiId: string | null;
   notes: string | null;
   paidAt: string | null;
+  reminderDaysBefore?: number;
+  reminderTime?: string | null;
+  reminderEmail?: string | null;
   isActive: boolean;
   isSettled: boolean;
   createdAt: string;
 };
 
-export const STATUS_BADGES: Record<
-  OccurrenceStatus,
-  { label: string; bg: string; color: string }
-> = {
-  overdue: { label: "Overdue", bg: "#FCEAED", color: "#A73A4C" },
-  due_today: { label: "Due today", bg: "#FFF3DF", color: "#9C6318" },
-  due_soon: { label: "Due soon", bg: "#FFF3DF", color: "#9C6318" },
-  upcoming: { label: "Upcoming", bg: "#EEE5F5", color: "#4B1D3F" },
-  pending: { label: "Pending", bg: "#EEE5F5", color: "#4B1D3F" },
-  payment_pending: { label: "Payment pending", bg: "#E6EEFA", color: "#2C4E86" },
-  payment_failed: { label: "Payment failed", bg: "#FCEAED", color: "#A73A4C" },
-  paid: { label: "Paid", bg: "#E7F5EF", color: "#1F7053" },
-  skipped: { label: "Skipped", bg: "#EDEAEF", color: "#6E5B69" },
-  cancelled: { label: "Cancelled", bg: "#EDEAEF", color: "#6E5B69" },
-};
+export const STATUS_BADGES: Record<OccurrenceStatus, { label: string; bg: string; color: string }> =
+  {
+    overdue: { label: "Overdue", bg: "#FCEAED", color: "#A73A4C" },
+    due_today: { label: "Due today", bg: "#FFF3DF", color: "#9C6318" },
+    due_soon: { label: "Due soon", bg: "#FFF3DF", color: "#9C6318" },
+    upcoming: { label: "Upcoming", bg: "#EEE5F5", color: "#4B1D3F" },
+    pending: { label: "Pending", bg: "#EEE5F5", color: "#4B1D3F" },
+    payment_pending: { label: "Payment pending", bg: "#E6EEFA", color: "#2C4E86" },
+    payment_failed: { label: "Payment failed", bg: "#FCEAED", color: "#A73A4C" },
+    paid: { label: "Paid", bg: "#E7F5EF", color: "#1F7053" },
+    skipped: { label: "Skipped", bg: "#EDEAEF", color: "#6E5B69" },
+    cancelled: { label: "Cancelled", bg: "#EDEAEF", color: "#6E5B69" },
+  };
 
 /** Map one occurrence row into its rendered view for `today`. */
 export function toView(row: OccurrenceWithBill, today: string): OccurrenceView {
@@ -65,6 +66,9 @@ export function toView(row: OccurrenceWithBill, today: string): OccurrenceView {
     upiId: row.bill?.upi_id ?? null,
     notes: row.bill?.notes ?? null,
     paidAt: row.paid_at,
+    reminderDaysBefore: row.bill?.reminder_days_before ?? 3,
+    reminderTime: row.bill?.reminder_time ?? "09:00",
+    reminderEmail: row.bill?.reminder_email ?? null,
     isActive: row.bill?.is_active ?? true,
     isSettled: TERMINAL_STATUSES.includes(stored),
     createdAt: row.bill?.created_at ?? row.scheduled_date,

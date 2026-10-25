@@ -42,7 +42,13 @@ function assertThresholds(warn?: number, near?: number) {
   if (w >= n) throw new Error("The warning threshold must be lower than the near-limit threshold.");
 }
 
-type LedgerRow = { type: string; status: string; amount: number | string; date: string; category: string };
+type LedgerRow = {
+  type: string;
+  status: string;
+  amount: number | string;
+  date: string;
+  category: string;
+};
 
 function toTxns(rows: LedgerRow[]): TxnLike[] {
   return rows.map((r) => ({
@@ -74,9 +80,7 @@ export const listBudgets = createServerFn({ method: "GET" })
     }
 
     // One windowed query covering every budget cycle — never one per budget.
-    const earliest = budgets
-      .map((b) => currentCycle(b, today).start)
-      .sort()[0] as string;
+    const earliest = budgets.map((b) => currentCycle(b, today).start).sort()[0] as string;
 
     const txnRows = await fetchAllRows<LedgerRow>((from, to) =>
       supabase

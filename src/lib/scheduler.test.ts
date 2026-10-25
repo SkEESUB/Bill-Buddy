@@ -111,7 +111,9 @@ describe("bill reminders", () => {
   it("produces identical dedupe keys across repeated runs", () => {
     const bill = occ();
     const keys = Array.from({ length: 5 }, () =>
-      occurrenceDrafts(bill, ctx("morning")).map((d) => d.dedupeKey).join(),
+      occurrenceDrafts(bill, ctx("morning"))
+        .map((d) => d.dedupeKey)
+        .join(),
     );
     expect(new Set(keys).size).toBe(1);
   });
@@ -123,16 +125,16 @@ describe("bill reminders", () => {
     expect(occurrenceDrafts(occ(), ctx("morning", { channels: noChannel }))).toHaveLength(0);
     const noOverdue = { ...channels, overdue_alerts: false };
     expect(
-      occurrenceDrafts(occ({ scheduled_date: "2026-08-01" }), ctx("morning", { channels: noOverdue })),
+      occurrenceDrafts(
+        occ({ scheduled_date: "2026-08-01" }),
+        ctx("morning", { channels: noOverdue }),
+      ),
     ).toHaveLength(0);
   });
 
   it("orders a whole schedule by due date", () => {
     const drafts = reminderDrafts(
-      [
-        occ({ id: "b", scheduled_date: TODAY }),
-        occ({ id: "a", scheduled_date: "2026-08-10" }),
-      ],
+      [occ({ id: "b", scheduled_date: TODAY }), occ({ id: "a", scheduled_date: "2026-08-10" })],
       ctx("morning"),
     );
     expect(drafts.map((d) => d.type)).toEqual(["bill_overdue", "bill_due"]);
@@ -347,23 +349,39 @@ describe("job identity, retries and failures", () => {
   it("uses one claim key per hour", () => {
     expect(runKey(new Date("2026-08-19T09:00:00Z"))).toBe("2026-08-19T09:00Z");
     expect(runKey(new Date("2026-08-19T09:59:59Z"))).toBe("2026-08-19T09:00Z");
-    expect(runKey(new Date("2026-08-19T10:00:00Z"))).not.toBe(runKey(new Date("2026-08-19T09:00:00Z")));
+    expect(runKey(new Date("2026-08-19T10:00:00Z"))).not.toBe(
+      runKey(new Date("2026-08-19T09:00:00Z")),
+    );
   });
 
   it("treats transient infrastructure errors as retryable", () => {
-    for (const message of ["Connection timeout", "fetch failed", "ECONNRESET", "503 Service Unavailable", "deadlock detected"]) {
+    for (const message of [
+      "Connection timeout",
+      "fetch failed",
+      "ECONNRESET",
+      "503 Service Unavailable",
+      "deadlock detected",
+    ]) {
       expect(classifyFailure(new Error(message))).toBe("retryable");
     }
   });
 
   it("treats data and constraint errors as permanent", () => {
-    for (const message of ["invalid input syntax for type uuid", "violates check constraint", "row not found"]) {
+    for (const message of [
+      "invalid input syntax for type uuid",
+      "violates check constraint",
+      "row not found",
+    ]) {
       expect(classifyFailure(new Error(message))).toBe("permanent");
     }
   });
 
   it("recognises a duplicate key as an already-done outcome", () => {
-    expect(isDuplicateKey(new Error('duplicate key value violates unique constraint "notifications_dedupe_idx"'))).toBe(true);
+    expect(
+      isDuplicateKey(
+        new Error('duplicate key value violates unique constraint "notifications_dedupe_idx"'),
+      ),
+    ).toBe(true);
     expect(isDuplicateKey(new Error("connection timeout"))).toBe(false);
   });
 });
@@ -378,8 +396,12 @@ describe("presentation", () => {
   });
 
   it("deep links each notification to the screen that owns it", () => {
-    expect(notificationLink({ type: "payment_success", related_transaction_id: "t1" })).toBe("/transactions/t1");
-    expect(notificationLink({ type: "budget_warning", related_budget_id: "b1" })).toBe("/money/budgets/b1");
+    expect(notificationLink({ type: "payment_success", related_transaction_id: "t1" })).toBe(
+      "/transactions/t1",
+    );
+    expect(notificationLink({ type: "budget_warning", related_budget_id: "b1" })).toBe(
+      "/money/budgets/b1",
+    );
     expect(notificationLink({ type: "bill_due", related_bill_id: "x" })).toBe("/bills");
     expect(notificationLink({ type: "weekly_summary" })).toBe("/insights");
     expect(notificationLink({ type: "security" })).toBe("/settings/security");

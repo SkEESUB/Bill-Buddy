@@ -10,40 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as OnboardingRouteImport } from './routes/onboarding'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
-import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
-import { Route as AuthenticatedBillsRouteImport } from './routes/_authenticated/bills'
-import { Route as AuthenticatedGoalsRouteImport } from './routes/_authenticated/goals'
-import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
-import { Route as AuthenticatedInsightsRouteImport } from './routes/_authenticated/insights'
-import { Route as AuthenticatedMoneyRouteImport } from './routes/_authenticated/money'
-import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
-import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
-import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
-import { Route as AuthenticatedAdminAuditRouteImport } from './routes/_authenticated/admin.audit'
-import { Route as AuthenticatedAdminPaymentsRouteImport } from './routes/_authenticated/admin.payments'
-import { Route as AuthenticatedAdminSystemRouteImport } from './routes/_authenticated/admin.system'
-import { Route as AuthenticatedMoneyIndexRouteImport } from './routes/_authenticated/money.index'
-import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings.index'
-import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings.appearance'
-import { Route as AuthenticatedSettingsCategoriesRouteImport } from './routes/_authenticated/settings.categories'
-import { Route as AuthenticatedSettingsDataRouteImport } from './routes/_authenticated/settings.data'
-import { Route as AuthenticatedSettingsHelpRouteImport } from './routes/_authenticated/settings.help'
-import { Route as AuthenticatedSettingsMoneyRouteImport } from './routes/_authenticated/settings.money'
-import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings.notifications'
-import { Route as AuthenticatedSettingsPaymentsRouteImport } from './routes/_authenticated/settings.payments'
-import { Route as AuthenticatedSettingsSecurityRouteImport } from './routes/_authenticated/settings.security'
-import { Route as AuthenticatedTransactionsIndexRouteImport } from './routes/_authenticated/transactions.index'
-import { Route as AuthenticatedTransactionsIdRouteImport } from './routes/_authenticated/transactions.$id'
-import { Route as AuthenticatedAdminSupportIndexRouteImport } from './routes/_authenticated/admin.support.index'
-import { Route as AuthenticatedAdminSupportIdRouteImport } from './routes/_authenticated/admin.support.$id'
-import { Route as AuthenticatedAdminUsersIndexRouteImport } from './routes/_authenticated/admin.users.index'
-import { Route as AuthenticatedAdminUsersIdRouteImport } from './routes/_authenticated/admin.users.$id'
-import { Route as AuthenticatedMoneyBudgetsIndexRouteImport } from './routes/_authenticated/money.budgets.index'
-import { Route as AuthenticatedMoneyBudgetsIdRouteImport } from './routes/_authenticated/money.budgets.$id'
 import { Route as ApiPublicHooksSchedulerRouteImport } from './routes/api/public/hooks/scheduler'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
@@ -52,195 +19,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OnboardingRoute = OnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
-  id: '/analytics',
-  path: '/analytics',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedBillsRoute = AuthenticatedBillsRouteImport.update({
-  id: '/bills',
-  path: '/bills',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedGoalsRoute = AuthenticatedGoalsRouteImport.update({
-  id: '/goals',
-  path: '/goals',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
-  id: '/history',
-  path: '/history',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedInsightsRoute = AuthenticatedInsightsRouteImport.update({
-  id: '/insights',
-  path: '/insights',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedMoneyRoute = AuthenticatedMoneyRouteImport.update({
-  id: '/money',
-  path: '/money',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedNotificationsRoute =
-  AuthenticatedNotificationsRouteImport.update({
-    id: '/notifications',
-    path: '/notifications',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const AuthenticatedAdminAuditRoute = AuthenticatedAdminAuditRouteImport.update({
-  id: '/audit',
-  path: '/audit',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const AuthenticatedAdminPaymentsRoute =
-  AuthenticatedAdminPaymentsRouteImport.update({
-    id: '/payments',
-    path: '/payments',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminSystemRoute =
-  AuthenticatedAdminSystemRouteImport.update({
-    id: '/system',
-    path: '/system',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedMoneyIndexRoute = AuthenticatedMoneyIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AuthenticatedMoneyRoute,
-} as any)
-const AuthenticatedSettingsIndexRoute =
-  AuthenticatedSettingsIndexRouteImport.update({
-    id: '/settings/',
-    path: '/settings/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedSettingsAppearanceRoute =
-  AuthenticatedSettingsAppearanceRouteImport.update({
-    id: '/settings/appearance',
-    path: '/settings/appearance',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedSettingsCategoriesRoute =
-  AuthenticatedSettingsCategoriesRouteImport.update({
-    id: '/settings/categories',
-    path: '/settings/categories',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedSettingsDataRoute =
-  AuthenticatedSettingsDataRouteImport.update({
-    id: '/settings/data',
-    path: '/settings/data',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedSettingsHelpRoute =
-  AuthenticatedSettingsHelpRouteImport.update({
-    id: '/settings/help',
-    path: '/settings/help',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedSettingsMoneyRoute =
-  AuthenticatedSettingsMoneyRouteImport.update({
-    id: '/settings/money',
-    path: '/settings/money',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedSettingsNotificationsRoute =
-  AuthenticatedSettingsNotificationsRouteImport.update({
-    id: '/settings/notifications',
-    path: '/settings/notifications',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedSettingsPaymentsRoute =
-  AuthenticatedSettingsPaymentsRouteImport.update({
-    id: '/settings/payments',
-    path: '/settings/payments',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedSettingsSecurityRoute =
-  AuthenticatedSettingsSecurityRouteImport.update({
-    id: '/settings/security',
-    path: '/settings/security',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedTransactionsIndexRoute =
-  AuthenticatedTransactionsIndexRouteImport.update({
-    id: '/transactions/',
-    path: '/transactions/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedTransactionsIdRoute =
-  AuthenticatedTransactionsIdRouteImport.update({
-    id: '/transactions/$id',
-    path: '/transactions/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdminSupportIndexRoute =
-  AuthenticatedAdminSupportIndexRouteImport.update({
-    id: '/support/',
-    path: '/support/',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminSupportIdRoute =
-  AuthenticatedAdminSupportIdRouteImport.update({
-    id: '/support/$id',
-    path: '/support/$id',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminUsersIndexRoute =
-  AuthenticatedAdminUsersIndexRouteImport.update({
-    id: '/users/',
-    path: '/users/',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminUsersIdRoute =
-  AuthenticatedAdminUsersIdRouteImport.update({
-    id: '/users/$id',
-    path: '/users/$id',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedMoneyBudgetsIndexRoute =
-  AuthenticatedMoneyBudgetsIndexRouteImport.update({
-    id: '/budgets/',
-    path: '/budgets/',
-    getParentRoute: () => AuthenticatedMoneyRoute,
-  } as any)
-const AuthenticatedMoneyBudgetsIdRoute =
-  AuthenticatedMoneyBudgetsIdRouteImport.update({
-    id: '/budgets/$id',
-    path: '/budgets/$id',
-    getParentRoute: () => AuthenticatedMoneyRoute,
-  } as any)
 const ApiPublicHooksSchedulerRoute = ApiPublicHooksSchedulerRouteImport.update({
   id: '/api/public/hooks/scheduler',
   path: '/api/public/hooks/scheduler',
@@ -256,238 +39,46 @@ const ApiPublicPaymentsWebhookRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/onboarding': typeof OnboardingRoute
-  '/admin': typeof AuthenticatedAdminRouteWithChildren
-  '/analytics': typeof AuthenticatedAnalyticsRoute
-  '/bills': typeof AuthenticatedBillsRoute
-  '/goals': typeof AuthenticatedGoalsRoute
-  '/history': typeof AuthenticatedHistoryRoute
-  '/insights': typeof AuthenticatedInsightsRoute
-  '/money': typeof AuthenticatedMoneyRouteWithChildren
-  '/notifications': typeof AuthenticatedNotificationsRoute
-  '/profile': typeof AuthenticatedProfileRoute
-  '/admin/audit': typeof AuthenticatedAdminAuditRoute
-  '/admin/payments': typeof AuthenticatedAdminPaymentsRoute
-  '/admin/system': typeof AuthenticatedAdminSystemRoute
-  '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
-  '/settings/categories': typeof AuthenticatedSettingsCategoriesRoute
-  '/settings/data': typeof AuthenticatedSettingsDataRoute
-  '/settings/help': typeof AuthenticatedSettingsHelpRoute
-  '/settings/money': typeof AuthenticatedSettingsMoneyRoute
-  '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
-  '/settings/payments': typeof AuthenticatedSettingsPaymentsRoute
-  '/settings/security': typeof AuthenticatedSettingsSecurityRoute
-  '/transactions/$id': typeof AuthenticatedTransactionsIdRoute
-  '/admin/': typeof AuthenticatedAdminIndexRoute
-  '/money/': typeof AuthenticatedMoneyIndexRoute
-  '/settings/': typeof AuthenticatedSettingsIndexRoute
-  '/transactions/': typeof AuthenticatedTransactionsIndexRoute
-  '/admin/support/$id': typeof AuthenticatedAdminSupportIdRoute
-  '/admin/users/$id': typeof AuthenticatedAdminUsersIdRoute
-  '/money/budgets/$id': typeof AuthenticatedMoneyBudgetsIdRoute
   '/api/public/hooks/scheduler': typeof ApiPublicHooksSchedulerRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
-  '/admin/support/': typeof AuthenticatedAdminSupportIndexRoute
-  '/admin/users/': typeof AuthenticatedAdminUsersIndexRoute
-  '/money/budgets/': typeof AuthenticatedMoneyBudgetsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/onboarding': typeof OnboardingRoute
-  '/analytics': typeof AuthenticatedAnalyticsRoute
-  '/bills': typeof AuthenticatedBillsRoute
-  '/goals': typeof AuthenticatedGoalsRoute
-  '/history': typeof AuthenticatedHistoryRoute
-  '/insights': typeof AuthenticatedInsightsRoute
-  '/notifications': typeof AuthenticatedNotificationsRoute
-  '/profile': typeof AuthenticatedProfileRoute
-  '/admin/audit': typeof AuthenticatedAdminAuditRoute
-  '/admin/payments': typeof AuthenticatedAdminPaymentsRoute
-  '/admin/system': typeof AuthenticatedAdminSystemRoute
-  '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
-  '/settings/categories': typeof AuthenticatedSettingsCategoriesRoute
-  '/settings/data': typeof AuthenticatedSettingsDataRoute
-  '/settings/help': typeof AuthenticatedSettingsHelpRoute
-  '/settings/money': typeof AuthenticatedSettingsMoneyRoute
-  '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
-  '/settings/payments': typeof AuthenticatedSettingsPaymentsRoute
-  '/settings/security': typeof AuthenticatedSettingsSecurityRoute
-  '/transactions/$id': typeof AuthenticatedTransactionsIdRoute
-  '/admin': typeof AuthenticatedAdminIndexRoute
-  '/money': typeof AuthenticatedMoneyIndexRoute
-  '/settings': typeof AuthenticatedSettingsIndexRoute
-  '/transactions': typeof AuthenticatedTransactionsIndexRoute
-  '/admin/support/$id': typeof AuthenticatedAdminSupportIdRoute
-  '/admin/users/$id': typeof AuthenticatedAdminUsersIdRoute
-  '/money/budgets/$id': typeof AuthenticatedMoneyBudgetsIdRoute
   '/api/public/hooks/scheduler': typeof ApiPublicHooksSchedulerRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
-  '/admin/support': typeof AuthenticatedAdminSupportIndexRoute
-  '/admin/users': typeof AuthenticatedAdminUsersIndexRoute
-  '/money/budgets': typeof AuthenticatedMoneyBudgetsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/login': typeof LoginRoute
-  '/onboarding': typeof OnboardingRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
-  '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
-  '/_authenticated/bills': typeof AuthenticatedBillsRoute
-  '/_authenticated/goals': typeof AuthenticatedGoalsRoute
-  '/_authenticated/history': typeof AuthenticatedHistoryRoute
-  '/_authenticated/insights': typeof AuthenticatedInsightsRoute
-  '/_authenticated/money': typeof AuthenticatedMoneyRouteWithChildren
-  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
-  '/_authenticated/profile': typeof AuthenticatedProfileRoute
-  '/_authenticated/admin/audit': typeof AuthenticatedAdminAuditRoute
-  '/_authenticated/admin/payments': typeof AuthenticatedAdminPaymentsRoute
-  '/_authenticated/admin/system': typeof AuthenticatedAdminSystemRoute
-  '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
-  '/_authenticated/settings/categories': typeof AuthenticatedSettingsCategoriesRoute
-  '/_authenticated/settings/data': typeof AuthenticatedSettingsDataRoute
-  '/_authenticated/settings/help': typeof AuthenticatedSettingsHelpRoute
-  '/_authenticated/settings/money': typeof AuthenticatedSettingsMoneyRoute
-  '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
-  '/_authenticated/settings/payments': typeof AuthenticatedSettingsPaymentsRoute
-  '/_authenticated/settings/security': typeof AuthenticatedSettingsSecurityRoute
-  '/_authenticated/transactions/$id': typeof AuthenticatedTransactionsIdRoute
-  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
-  '/_authenticated/money/': typeof AuthenticatedMoneyIndexRoute
-  '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
-  '/_authenticated/transactions/': typeof AuthenticatedTransactionsIndexRoute
-  '/_authenticated/admin/support/$id': typeof AuthenticatedAdminSupportIdRoute
-  '/_authenticated/admin/users/$id': typeof AuthenticatedAdminUsersIdRoute
-  '/_authenticated/money/budgets/$id': typeof AuthenticatedMoneyBudgetsIdRoute
   '/api/public/hooks/scheduler': typeof ApiPublicHooksSchedulerRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
-  '/_authenticated/admin/support/': typeof AuthenticatedAdminSupportIndexRoute
-  '/_authenticated/admin/users/': typeof AuthenticatedAdminUsersIndexRoute
-  '/_authenticated/money/budgets/': typeof AuthenticatedMoneyBudgetsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/login'
-    | '/onboarding'
-    | '/admin'
-    | '/analytics'
-    | '/bills'
-    | '/goals'
-    | '/history'
-    | '/insights'
-    | '/money'
-    | '/notifications'
-    | '/profile'
-    | '/admin/audit'
-    | '/admin/payments'
-    | '/admin/system'
-    | '/settings/appearance'
-    | '/settings/categories'
-    | '/settings/data'
-    | '/settings/help'
-    | '/settings/money'
-    | '/settings/notifications'
-    | '/settings/payments'
-    | '/settings/security'
-    | '/transactions/$id'
-    | '/admin/'
-    | '/money/'
-    | '/settings/'
-    | '/transactions/'
-    | '/admin/support/$id'
-    | '/admin/users/$id'
-    | '/money/budgets/$id'
     | '/api/public/hooks/scheduler'
     | '/api/public/payments/webhook'
-    | '/admin/support/'
-    | '/admin/users/'
-    | '/money/budgets/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
-    | '/onboarding'
-    | '/analytics'
-    | '/bills'
-    | '/goals'
-    | '/history'
-    | '/insights'
-    | '/notifications'
-    | '/profile'
-    | '/admin/audit'
-    | '/admin/payments'
-    | '/admin/system'
-    | '/settings/appearance'
-    | '/settings/categories'
-    | '/settings/data'
-    | '/settings/help'
-    | '/settings/money'
-    | '/settings/notifications'
-    | '/settings/payments'
-    | '/settings/security'
-    | '/transactions/$id'
-    | '/admin'
-    | '/money'
-    | '/settings'
-    | '/transactions'
-    | '/admin/support/$id'
-    | '/admin/users/$id'
-    | '/money/budgets/$id'
     | '/api/public/hooks/scheduler'
     | '/api/public/payments/webhook'
-    | '/admin/support'
-    | '/admin/users'
-    | '/money/budgets'
   id:
     | '__root__'
     | '/'
-    | '/_authenticated'
     | '/login'
-    | '/onboarding'
-    | '/_authenticated/admin'
-    | '/_authenticated/analytics'
-    | '/_authenticated/bills'
-    | '/_authenticated/goals'
-    | '/_authenticated/history'
-    | '/_authenticated/insights'
-    | '/_authenticated/money'
-    | '/_authenticated/notifications'
-    | '/_authenticated/profile'
-    | '/_authenticated/admin/audit'
-    | '/_authenticated/admin/payments'
-    | '/_authenticated/admin/system'
-    | '/_authenticated/settings/appearance'
-    | '/_authenticated/settings/categories'
-    | '/_authenticated/settings/data'
-    | '/_authenticated/settings/help'
-    | '/_authenticated/settings/money'
-    | '/_authenticated/settings/notifications'
-    | '/_authenticated/settings/payments'
-    | '/_authenticated/settings/security'
-    | '/_authenticated/transactions/$id'
-    | '/_authenticated/admin/'
-    | '/_authenticated/money/'
-    | '/_authenticated/settings/'
-    | '/_authenticated/transactions/'
-    | '/_authenticated/admin/support/$id'
-    | '/_authenticated/admin/users/$id'
-    | '/_authenticated/money/budgets/$id'
     | '/api/public/hooks/scheduler'
     | '/api/public/payments/webhook'
-    | '/_authenticated/admin/support/'
-    | '/_authenticated/admin/users/'
-    | '/_authenticated/money/budgets/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
-  OnboardingRoute: typeof OnboardingRoute
   ApiPublicHooksSchedulerRoute: typeof ApiPublicHooksSchedulerRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
@@ -501,243 +92,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/onboarding': {
-      id: '/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof OnboardingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/analytics': {
-      id: '/_authenticated/analytics'
-      path: '/analytics'
-      fullPath: '/analytics'
-      preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/bills': {
-      id: '/_authenticated/bills'
-      path: '/bills'
-      fullPath: '/bills'
-      preLoaderRoute: typeof AuthenticatedBillsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/goals': {
-      id: '/_authenticated/goals'
-      path: '/goals'
-      fullPath: '/goals'
-      preLoaderRoute: typeof AuthenticatedGoalsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/history': {
-      id: '/_authenticated/history'
-      path: '/history'
-      fullPath: '/history'
-      preLoaderRoute: typeof AuthenticatedHistoryRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/insights': {
-      id: '/_authenticated/insights'
-      path: '/insights'
-      fullPath: '/insights'
-      preLoaderRoute: typeof AuthenticatedInsightsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/money': {
-      id: '/_authenticated/money'
-      path: '/money'
-      fullPath: '/money'
-      preLoaderRoute: typeof AuthenticatedMoneyRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/notifications': {
-      id: '/_authenticated/notifications'
-      path: '/notifications'
-      fullPath: '/notifications'
-      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/profile': {
-      id: '/_authenticated/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof AuthenticatedProfileRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/': {
-      id: '/_authenticated/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/audit': {
-      id: '/_authenticated/admin/audit'
-      path: '/audit'
-      fullPath: '/admin/audit'
-      preLoaderRoute: typeof AuthenticatedAdminAuditRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/payments': {
-      id: '/_authenticated/admin/payments'
-      path: '/payments'
-      fullPath: '/admin/payments'
-      preLoaderRoute: typeof AuthenticatedAdminPaymentsRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/system': {
-      id: '/_authenticated/admin/system'
-      path: '/system'
-      fullPath: '/admin/system'
-      preLoaderRoute: typeof AuthenticatedAdminSystemRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/money/': {
-      id: '/_authenticated/money/'
-      path: '/'
-      fullPath: '/money/'
-      preLoaderRoute: typeof AuthenticatedMoneyIndexRouteImport
-      parentRoute: typeof AuthenticatedMoneyRoute
-    }
-    '/_authenticated/settings/': {
-      id: '/_authenticated/settings/'
-      path: '/settings'
-      fullPath: '/settings/'
-      preLoaderRoute: typeof AuthenticatedSettingsIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/settings/appearance': {
-      id: '/_authenticated/settings/appearance'
-      path: '/settings/appearance'
-      fullPath: '/settings/appearance'
-      preLoaderRoute: typeof AuthenticatedSettingsAppearanceRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/settings/categories': {
-      id: '/_authenticated/settings/categories'
-      path: '/settings/categories'
-      fullPath: '/settings/categories'
-      preLoaderRoute: typeof AuthenticatedSettingsCategoriesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/settings/data': {
-      id: '/_authenticated/settings/data'
-      path: '/settings/data'
-      fullPath: '/settings/data'
-      preLoaderRoute: typeof AuthenticatedSettingsDataRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/settings/help': {
-      id: '/_authenticated/settings/help'
-      path: '/settings/help'
-      fullPath: '/settings/help'
-      preLoaderRoute: typeof AuthenticatedSettingsHelpRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/settings/money': {
-      id: '/_authenticated/settings/money'
-      path: '/settings/money'
-      fullPath: '/settings/money'
-      preLoaderRoute: typeof AuthenticatedSettingsMoneyRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/settings/notifications': {
-      id: '/_authenticated/settings/notifications'
-      path: '/settings/notifications'
-      fullPath: '/settings/notifications'
-      preLoaderRoute: typeof AuthenticatedSettingsNotificationsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/settings/payments': {
-      id: '/_authenticated/settings/payments'
-      path: '/settings/payments'
-      fullPath: '/settings/payments'
-      preLoaderRoute: typeof AuthenticatedSettingsPaymentsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/settings/security': {
-      id: '/_authenticated/settings/security'
-      path: '/settings/security'
-      fullPath: '/settings/security'
-      preLoaderRoute: typeof AuthenticatedSettingsSecurityRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/transactions/': {
-      id: '/_authenticated/transactions/'
-      path: '/transactions'
-      fullPath: '/transactions/'
-      preLoaderRoute: typeof AuthenticatedTransactionsIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/transactions/$id': {
-      id: '/_authenticated/transactions/$id'
-      path: '/transactions/$id'
-      fullPath: '/transactions/$id'
-      preLoaderRoute: typeof AuthenticatedTransactionsIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/support/': {
-      id: '/_authenticated/admin/support/'
-      path: '/support'
-      fullPath: '/admin/support/'
-      preLoaderRoute: typeof AuthenticatedAdminSupportIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/support/$id': {
-      id: '/_authenticated/admin/support/$id'
-      path: '/support/$id'
-      fullPath: '/admin/support/$id'
-      preLoaderRoute: typeof AuthenticatedAdminSupportIdRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/users/': {
-      id: '/_authenticated/admin/users/'
-      path: '/users'
-      fullPath: '/admin/users/'
-      preLoaderRoute: typeof AuthenticatedAdminUsersIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/users/$id': {
-      id: '/_authenticated/admin/users/$id'
-      path: '/users/$id'
-      fullPath: '/admin/users/$id'
-      preLoaderRoute: typeof AuthenticatedAdminUsersIdRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/money/budgets/': {
-      id: '/_authenticated/money/budgets/'
-      path: '/budgets'
-      fullPath: '/money/budgets/'
-      preLoaderRoute: typeof AuthenticatedMoneyBudgetsIndexRouteImport
-      parentRoute: typeof AuthenticatedMoneyRoute
-    }
-    '/_authenticated/money/budgets/$id': {
-      id: '/_authenticated/money/budgets/$id'
-      path: '/budgets/$id'
-      fullPath: '/money/budgets/$id'
-      preLoaderRoute: typeof AuthenticatedMoneyBudgetsIdRouteImport
-      parentRoute: typeof AuthenticatedMoneyRoute
     }
     '/api/public/hooks/scheduler': {
       id: '/api/public/hooks/scheduler'
@@ -756,101 +116,9 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthenticatedAdminRouteChildren {
-  AuthenticatedAdminAuditRoute: typeof AuthenticatedAdminAuditRoute
-  AuthenticatedAdminPaymentsRoute: typeof AuthenticatedAdminPaymentsRoute
-  AuthenticatedAdminSystemRoute: typeof AuthenticatedAdminSystemRoute
-  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
-  AuthenticatedAdminSupportIdRoute: typeof AuthenticatedAdminSupportIdRoute
-  AuthenticatedAdminUsersIdRoute: typeof AuthenticatedAdminUsersIdRoute
-  AuthenticatedAdminSupportIndexRoute: typeof AuthenticatedAdminSupportIndexRoute
-  AuthenticatedAdminUsersIndexRoute: typeof AuthenticatedAdminUsersIndexRoute
-}
-
-const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
-  AuthenticatedAdminAuditRoute: AuthenticatedAdminAuditRoute,
-  AuthenticatedAdminPaymentsRoute: AuthenticatedAdminPaymentsRoute,
-  AuthenticatedAdminSystemRoute: AuthenticatedAdminSystemRoute,
-  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
-  AuthenticatedAdminSupportIdRoute: AuthenticatedAdminSupportIdRoute,
-  AuthenticatedAdminUsersIdRoute: AuthenticatedAdminUsersIdRoute,
-  AuthenticatedAdminSupportIndexRoute: AuthenticatedAdminSupportIndexRoute,
-  AuthenticatedAdminUsersIndexRoute: AuthenticatedAdminUsersIndexRoute,
-}
-
-const AuthenticatedAdminRouteWithChildren =
-  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
-
-interface AuthenticatedMoneyRouteChildren {
-  AuthenticatedMoneyIndexRoute: typeof AuthenticatedMoneyIndexRoute
-  AuthenticatedMoneyBudgetsIdRoute: typeof AuthenticatedMoneyBudgetsIdRoute
-  AuthenticatedMoneyBudgetsIndexRoute: typeof AuthenticatedMoneyBudgetsIndexRoute
-}
-
-const AuthenticatedMoneyRouteChildren: AuthenticatedMoneyRouteChildren = {
-  AuthenticatedMoneyIndexRoute: AuthenticatedMoneyIndexRoute,
-  AuthenticatedMoneyBudgetsIdRoute: AuthenticatedMoneyBudgetsIdRoute,
-  AuthenticatedMoneyBudgetsIndexRoute: AuthenticatedMoneyBudgetsIndexRoute,
-}
-
-const AuthenticatedMoneyRouteWithChildren =
-  AuthenticatedMoneyRoute._addFileChildren(AuthenticatedMoneyRouteChildren)
-
-interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
-  AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
-  AuthenticatedBillsRoute: typeof AuthenticatedBillsRoute
-  AuthenticatedGoalsRoute: typeof AuthenticatedGoalsRoute
-  AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
-  AuthenticatedInsightsRoute: typeof AuthenticatedInsightsRoute
-  AuthenticatedMoneyRoute: typeof AuthenticatedMoneyRouteWithChildren
-  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
-  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
-  AuthenticatedSettingsAppearanceRoute: typeof AuthenticatedSettingsAppearanceRoute
-  AuthenticatedSettingsCategoriesRoute: typeof AuthenticatedSettingsCategoriesRoute
-  AuthenticatedSettingsDataRoute: typeof AuthenticatedSettingsDataRoute
-  AuthenticatedSettingsHelpRoute: typeof AuthenticatedSettingsHelpRoute
-  AuthenticatedSettingsMoneyRoute: typeof AuthenticatedSettingsMoneyRoute
-  AuthenticatedSettingsNotificationsRoute: typeof AuthenticatedSettingsNotificationsRoute
-  AuthenticatedSettingsPaymentsRoute: typeof AuthenticatedSettingsPaymentsRoute
-  AuthenticatedSettingsSecurityRoute: typeof AuthenticatedSettingsSecurityRoute
-  AuthenticatedTransactionsIdRoute: typeof AuthenticatedTransactionsIdRoute
-  AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
-  AuthenticatedTransactionsIndexRoute: typeof AuthenticatedTransactionsIndexRoute
-}
-
-const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
-  AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
-  AuthenticatedBillsRoute: AuthenticatedBillsRoute,
-  AuthenticatedGoalsRoute: AuthenticatedGoalsRoute,
-  AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
-  AuthenticatedInsightsRoute: AuthenticatedInsightsRoute,
-  AuthenticatedMoneyRoute: AuthenticatedMoneyRouteWithChildren,
-  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
-  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
-  AuthenticatedSettingsAppearanceRoute: AuthenticatedSettingsAppearanceRoute,
-  AuthenticatedSettingsCategoriesRoute: AuthenticatedSettingsCategoriesRoute,
-  AuthenticatedSettingsDataRoute: AuthenticatedSettingsDataRoute,
-  AuthenticatedSettingsHelpRoute: AuthenticatedSettingsHelpRoute,
-  AuthenticatedSettingsMoneyRoute: AuthenticatedSettingsMoneyRoute,
-  AuthenticatedSettingsNotificationsRoute:
-    AuthenticatedSettingsNotificationsRoute,
-  AuthenticatedSettingsPaymentsRoute: AuthenticatedSettingsPaymentsRoute,
-  AuthenticatedSettingsSecurityRoute: AuthenticatedSettingsSecurityRoute,
-  AuthenticatedTransactionsIdRoute: AuthenticatedTransactionsIdRoute,
-  AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
-  AuthenticatedTransactionsIndexRoute: AuthenticatedTransactionsIndexRoute,
-}
-
-const AuthenticatedRouteRouteWithChildren =
-  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   LoginRoute: LoginRoute,
-  OnboardingRoute: OnboardingRoute,
   ApiPublicHooksSchedulerRoute: ApiPublicHooksSchedulerRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }

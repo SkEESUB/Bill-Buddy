@@ -1,30 +1,36 @@
 import type { ReactNode } from "react";
-import { TopNav } from "./TopNav";
-import { BottomNav } from "./BottomNav";
-import { DesktopSidebar } from "./DesktopSidebar";
 import { NetworkErrorModal } from "./NetworkErrorModal";
 
+/**
+ * Single-Screen Application Shell for BillBuddy.
+ *
+ * Provides the soft icy-blue Smart Home ambient background,
+ * centered responsive column (optimized for 360px-430px mobile,
+ * beautifully centered on desktop viewports), and mobile safe area insets.
+ */
 export function Layout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-background text-text-primary flex flex-col lg:flex-row">
-      {/* Desktop Persistent Sidebar (>= lg) */}
-      <DesktopSidebar />
+    <div className="min-h-screen bg-gradient-to-b from-[#f2f7fd] via-[#ebf3fc] to-[#e2edf9] text-text-primary antialiased relative overflow-x-hidden flex flex-col items-center selection:bg-blue-200">
+      {/* Ambient background glowing accents */}
+      <div
+        className="pointer-events-none fixed -top-40 left-1/2 -translate-x-1/2 w-[720px] h-[480px] rounded-full ambient-glow opacity-80 blur-3xl z-0"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none fixed top-1/3 -right-40 w-96 h-96 rounded-full bg-sky-200/30 blur-3xl z-0"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none fixed bottom-10 -left-40 w-96 h-96 rounded-full bg-blue-100/40 blur-3xl z-0"
+        aria-hidden="true"
+      />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-64 xl:pl-72">
-        {/* Top Header (Adapts on mobile vs desktop) */}
-        <TopNav />
-
-        {/* Fluid Page Body with Responsive Padding */}
-        <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 pb-28 pt-4 sm:pt-6 lg:pb-12">
-          {children}
-        </main>
+      {/* Main Centered Application Frame */}
+      <div className="relative z-10 w-full max-w-lg min-h-screen flex flex-col px-4 sm:px-6 pt-3 pb-28">
+        {children}
       </div>
 
-      {/* Mobile Fixed Bottom Navigation (< lg) */}
-      <BottomNav />
-
-      {/* Network Error Modal (Phase 8 Screen 5) */}
+      {/* Network Error Modal */}
       <NetworkErrorModal />
     </div>
   );

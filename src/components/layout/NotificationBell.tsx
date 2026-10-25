@@ -1,10 +1,9 @@
-﻿// src/components/layout/NotificationBell.tsx
+// src/components/layout/NotificationBell.tsx
 import { Bell } from "lucide-react";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { listNotifications, markAllNotificationsRead } from "@/lib/notifications.functions";
 import { formatRelativeDate } from "@/lib/utils/format-date";
-import { Link } from "@tanstack/react-router";
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
@@ -16,7 +15,7 @@ export function NotificationBell() {
     refetchInterval: 60_000, // poll every 60 seconds
   });
 
-  const notifications = (Array.isArray(data) ? data : data?.rows ?? []) as Array<{
+  const notifications = (Array.isArray(data) ? data : (data?.rows ?? [])) as Array<{
     id: string;
     title: string;
     body?: string | null;
@@ -111,14 +110,14 @@ export function NotificationBell() {
             )}
 
             {/* Footer */}
-            <div className="p-3 border-t border-gray-100 dark:border-gray-800">
-              <Link
-                to="/notifications"
+            <div className="p-2 border-t border-gray-100 dark:border-gray-800">
+              <button
+                type="button"
                 onClick={() => setOpen(false)}
-                className="block text-center text-sm text-indigo-600 dark:text-indigo-400 font-medium hover:underline"
+                className="w-full py-1.5 text-center text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 font-medium"
               >
-                View all notifications →
-              </Link>
+                Close
+              </button>
             </div>
           </div>
         </>

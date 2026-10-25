@@ -359,7 +359,8 @@ export function weeklySummaryDraft(
   if (!ctx.schedule.notify_weekly_summary)
     return { draft: null, skipped: true, reason: "schedule_off" };
 
-  const hasActivity = input.transactionCount > 0 && input.income + input.spent + input.billsPaid > 0;
+  const hasActivity =
+    input.transactionCount > 0 && input.income + input.spent + input.billsPaid > 0;
   if (!hasActivity) return { draft: null, skipped: true, reason: "insufficient_data" };
 
   const currency = ctx.currency ?? "INR";
@@ -417,9 +418,7 @@ export type FailureCategory = "retryable" | "permanent";
  * rejected constraints are not, and must be recorded instead of retried.
  */
 export function classifyFailure(error: unknown): FailureCategory {
-  const message = (
-    error instanceof Error ? error.message : String(error ?? "")
-  ).toLowerCase();
+  const message = (error instanceof Error ? error.message : String(error ?? "")).toLowerCase();
   const retryable = [
     "timeout",
     "timed out",

@@ -179,12 +179,7 @@ export function safeMetadata(input: Record<string, unknown>): Record<string, unk
 
 /* ----------------------------- account status ----------------------------- */
 
-export const ACCOUNT_STATUSES = [
-  "ACTIVE",
-  "SUSPENDED",
-  "DEACTIVATED",
-  "DELETION_PENDING",
-] as const;
+export const ACCOUNT_STATUSES = ["ACTIVE", "SUSPENDED", "DEACTIVATED", "DELETION_PENDING"] as const;
 
 export type AccountStatus = (typeof ACCOUNT_STATUSES)[number];
 

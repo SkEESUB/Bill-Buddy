@@ -58,12 +58,14 @@ export const listTransactions = createServerFn({ method: "GET" })
   .handler(async ({ data, context }): Promise<LedgerPage> => {
     const { ledgerQuery } = await import("./transactions.server");
     const from = data.page * data.pageSize;
-    const { data: rows, count, error } = await ledgerQuery(
-      context.supabase as never,
-      context.userId,
-      data,
-      true,
-    ).range(from, from + data.pageSize - 1);
+    const {
+      data: rows,
+      count,
+      error,
+    } = await ledgerQuery(context.supabase as never, context.userId, data, true).range(
+      from,
+      from + data.pageSize - 1,
+    );
     if (error) throw new Error(error.message);
     const total = count ?? 0;
     return {
@@ -78,11 +80,22 @@ export const listTransactions = createServerFn({ method: "GET" })
 export type TransactionDetail = {
   transaction: LedgerRow & { updated_at?: string };
   bill: { id: string; title: string; category: string } | null;
-  occurrence: { id: string; scheduled_date: string; status: string; expected_amount: number } | null;
+  occurrence: {
+    id: string;
+    scheduled_date: string;
+    status: string;
+    expected_amount: number;
+  } | null;
   providerReference: string | null;
   reversal: { id: string; date: string; amount: number; type: string } | null;
   original: { id: string; date: string; amount: number; type: string } | null;
-  attachments: { id: string; file_name: string; mime_type: string; file_size: number; created_at: string }[];
+  attachments: {
+    id: string;
+    file_name: string;
+    mime_type: string;
+    file_size: number;
+    created_at: string;
+  }[];
 };
 
 /** Everything the detail screen shows. Provider secrets are never returned. */
@@ -110,15 +123,13 @@ export const getTransaction = createServerFn({ method: "GET" })
         .eq("id", row.bill_occurrence_id)
         .eq("user_id", userId)
         .maybeSingle();
-      const record = occ as unknown as
-        | {
-            id: string;
-            scheduled_date: string;
-            status: string;
-            expected_amount: number;
-            bill: { id: string; title: string; category: string } | null;
-          }
-        | null;
+      const record = occ as unknown as {
+        id: string;
+        scheduled_date: string;
+        status: string;
+        expected_amount: number;
+        bill: { id: string; title: string; category: string } | null;
+      } | null;
       if (record) {
         occurrence = {
           id: record.id,
@@ -167,9 +178,12 @@ export const getTransaction = createServerFn({ method: "GET" })
 
 const createSchema = z.object({
   type: z.enum(MANUAL_TYPES),
-  amount: z.number().finite().refine((v) => Math.abs(v) > 0 && Math.abs(v) <= 1_000_000_000, {
-    message: "Enter an amount greater than 0",
-  }),
+  amount: z
+    .number()
+    .finite()
+    .refine((v) => Math.abs(v) > 0 && Math.abs(v) <= 1_000_000_000, {
+      message: "Enter an amount greater than 0",
+    }),
   category: z.string().trim().min(1).max(60),
   description: optionalText(200),
   date: day,
@@ -443,7 +457,7 @@ export const exportTransactions = createServerFn({ method: "POST" })
     );
     const enriched: ExportRow[] = list.map((row) => ({
       ...row,
-      bill_title: row.bill_occurrence_id ? titles.get(row.bill_occurrence_id) ?? null : null,
+      bill_title: row.bill_occurrence_id ? (titles.get(row.bill_occurrence_id) ?? null) : null,
     }));
 
     const stamp = new Date().toISOString().slice(0, 10);
@@ -503,7 +517,7 @@ export const createAttachmentUpload = createServerFn({ method: "POST" })
     if (!owned) throw new Error("Transaction not found.");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const safeName = data.file_name.replace(/[^\w.\-]+/g, "_").slice(-80);
+    const safeName = data.file_name.replace(/[^\w.-]+/g, "_").slice(-80);
     const path = `${userId}/${data.transaction_id}/${crypto.randomUUID()}-${safeName}`;
     const { data: signed, error: signError } = await supabaseAdmin.storage
       .from("receipts")

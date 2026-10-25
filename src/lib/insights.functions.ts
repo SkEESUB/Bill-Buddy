@@ -42,7 +42,13 @@ const inputSchema = z.object({
 
 export type InsightsInput = z.input<typeof inputSchema>;
 
-type LedgerRow = { type: string; status: string; amount: number | string; date: string; category: string };
+type LedgerRow = {
+  type: string;
+  status: string;
+  amount: number | string;
+  date: string;
+  category: string;
+};
 
 function toTxns(rows: LedgerRow[]): TxnLike[] {
   return rows.map((r) => ({
@@ -72,54 +78,56 @@ export const getInsights = createServerFn({ method: "GET" })
 
     const [detail, balanceRows, billRows, occurrenceRows, budgetRows, settings, txnCount] =
       await Promise.all([
-      fetchAllRows<LedgerRow>((from, to) =>
+        fetchAllRows<LedgerRow>((from, to) =>
+          supabase
+            .from("transactions")
+            .select("type, status, amount, date, category")
+            .eq("user_id", userId)
+            .gte("date", windowStart)
+            .lte("date", windowEnd)
+            .order("date")
+            .range(from, to),
+        ),
+        // All-time balance is aggregated in SQL; row reads cap at 1,000.
+        supabase.rpc("ledger_balance_delta"),
+        supabase
+          .from("bills")
+          .select(
+            "id, title, category, amount, repeat_type, repeat_interval, repeat_end_date, is_active",
+          )
+          .eq("user_id", userId),
+        fetchAllRows<{
+          scheduled_date: string;
+          expected_amount: number | string;
+          actual_amount: number | string | null;
+          status: string;
+        }>((from, to) =>
+          supabase
+            .from("bill_occurrences")
+            .select("scheduled_date, expected_amount, actual_amount, status")
+            .eq("user_id", userId)
+            .order("scheduled_date")
+            .range(from, to),
+        ),
+        supabase
+          .from("budgets")
+          .select(
+            "id, name, category, amount, period, start_date, end_date, is_active, status, warn_threshold, near_limit_threshold, created_at",
+          )
+          .eq("user_id", userId)
+          .eq("status", "active"),
+        supabase
+          .from("user_settings")
+          .select("starting_balance, currency")
+          .eq("user_id", userId)
+          .maybeSingle(),
         supabase
           .from("transactions")
-          .select("type, status, amount, date, category")
-          .eq("user_id", userId)
-          .gte("date", windowStart)
-          .lte("date", windowEnd)
-          .order("date")
-          .range(from, to),
-      ),
-      // All-time balance is aggregated in SQL; row reads cap at 1,000.
-      supabase.rpc("ledger_balance_delta"),
-      supabase
-        .from("bills")
-        .select("id, title, category, amount, repeat_type, repeat_interval, repeat_end_date, is_active")
-        .eq("user_id", userId),
-      fetchAllRows<{
-        scheduled_date: string;
-        expected_amount: number | string;
-        actual_amount: number | string | null;
-        status: string;
-      }>((from, to) =>
-        supabase
-          .from("bill_occurrences")
-          .select("scheduled_date, expected_amount, actual_amount, status")
-          .eq("user_id", userId)
-          .order("scheduled_date")
-          .range(from, to),
-      ),
-      supabase
-        .from("budgets")
-        .select(
-          "id, name, category, amount, period, start_date, end_date, is_active, status, warn_threshold, near_limit_threshold, created_at",
-        )
-        .eq("user_id", userId)
-        .eq("status", "active"),
-      supabase.from("user_settings").select("starting_balance, currency").eq("user_id", userId).maybeSingle(),
-      supabase
-        .from("transactions")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", userId),
-    ]);
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId),
+      ]);
 
-    const firstError =
-      balanceRows.error ??
-      billRows.error ??
-      budgetRows.error ??
-      settings.error;
+    const firstError = balanceRows.error ?? billRows.error ?? budgetRows.error ?? settings.error;
     if (firstError) throw new Error(firstError.message);
 
     const windowed = toTxns(detail);

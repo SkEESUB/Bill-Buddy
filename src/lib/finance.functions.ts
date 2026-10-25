@@ -30,6 +30,8 @@ export type OccurrenceWithBill = {
     repeat_interval: number;
     repeat_end_date: string | null;
     reminder_days_before: number;
+    reminder_time?: string | null;
+    reminder_email?: string | null;
     is_active: boolean;
     due_date: string;
     created_at: string;
@@ -60,7 +62,7 @@ export const getFinanceSnapshot = createServerFn({ method: "GET" })
           supabase
             .from("bill_occurrences")
             .select(
-              "id, bill_id, scheduled_date, expected_amount, actual_amount, status, paid_at, transaction_id, bill:bills(id, title, category, amount, upi_id, notes, repeat_type, repeat_interval, repeat_end_date, reminder_days_before, is_active, due_date, created_at)",
+              "id, bill_id, scheduled_date, expected_amount, actual_amount, status, paid_at, transaction_id, bill:bills(id, title, category, amount, upi_id, notes, repeat_type, repeat_interval, repeat_end_date, reminder_days_before, reminder_time, reminder_email, is_active, due_date, created_at)",
             )
             .eq("user_id", userId)
             .gte("scheduled_date", occFrom)
@@ -84,7 +86,8 @@ export const getFinanceSnapshot = createServerFn({ method: "GET" })
         supabase.rpc("ledger_balance_delta"),
       ]);
 
-    const firstError = bills.error ?? budgets.error ?? settings.error ?? profile.error ?? balance.error;
+    const firstError =
+      bills.error ?? budgets.error ?? settings.error ?? profile.error ?? balance.error;
     if (firstError) throw new Error(firstError.message);
 
     return {

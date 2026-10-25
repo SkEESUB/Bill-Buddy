@@ -15,9 +15,8 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
         const raw = await request.text();
         const signature = request.headers.get("x-razorpay-signature");
 
-        const { verifyWebhookSignature, webhookConfigured } = await import(
-          "@/lib/payments/provider.server"
-        );
+        const { verifyWebhookSignature, webhookConfigured } =
+          await import("@/lib/payments/provider.server");
         if (!webhookConfigured()) {
           console.error("[payments:webhook] RAZORPAY_WEBHOOK_SECRET is not configured");
           return new Response("Webhook not configured", { status: 503 });
@@ -36,10 +35,11 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
         const eventType = typeof event.event === "string" ? event.event : "";
         const paymentEntity = event.payload?.payment?.entity ?? null;
         const refundEntity = event.payload?.refund?.entity ?? null;
-        const providerOrderId =
-          paymentEntity?.order_id ?? event.payload?.order?.entity?.id ?? null;
+        const providerOrderId = paymentEntity?.order_id ?? event.payload?.order?.entity?.id ?? null;
         // Razorpay's delivery id is stable across retries — our dedupe key.
-        const eventId = request.headers.get("x-razorpay-event-id") ?? `${eventType}:${paymentEntity?.id ?? refundEntity?.id ?? ""}`;
+        const eventId =
+          request.headers.get("x-razorpay-event-id") ??
+          `${eventType}:${paymentEntity?.id ?? refundEntity?.id ?? ""}`;
 
         const {
           adminDb,
@@ -96,7 +96,7 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
         try {
           switch (eventType) {
             case "payment.captured":
-             case "order.paid": {
+            case "order.paid": {
               if (!paymentEntity) break;
               await settleCapturedPayment(db, order, {
                 id: paymentEntity.id,
@@ -126,9 +126,9 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
                   amount: paymentEntity.amount,
                   currency: paymentEntity.currency,
                   method: paymentEntity.method ?? null,
-                    error_code: paymentEntity.error_code ?? null,
+                  error_code: paymentEntity.error_code ?? null,
                   error_description: paymentEntity.error_description ?? null,
-                  },
+                },
                 "FAILED",
               );
               break;

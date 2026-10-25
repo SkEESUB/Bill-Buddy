@@ -53,25 +53,41 @@ describe("budget calculation", () => {
   });
 
   it("hits the warning threshold at 50%", () => {
-    const result = evaluateBudget(budget(), [txn({ amount: 2500, date: "2026-03-05" })], "2026-03-10");
+    const result = evaluateBudget(
+      budget(),
+      [txn({ amount: 2500, date: "2026-03-05" })],
+      "2026-03-10",
+    );
     expect(result.progress.percentageUsed).toBe(50);
     expect(result.progress.status).toBe("warning");
   });
 
   it("hits near-limit at 80%", () => {
-    const result = evaluateBudget(budget(), [txn({ amount: 4000, date: "2026-03-05" })], "2026-03-10");
+    const result = evaluateBudget(
+      budget(),
+      [txn({ amount: 4000, date: "2026-03-05" })],
+      "2026-03-10",
+    );
     expect(result.progress.percentageUsed).toBe(80);
     expect(result.progress.status).toBe("near_limit");
   });
 
   it("is over budget at exactly 100%", () => {
-    const result = evaluateBudget(budget(), [txn({ amount: 5000, date: "2026-03-05" })], "2026-03-10");
+    const result = evaluateBudget(
+      budget(),
+      [txn({ amount: 5000, date: "2026-03-05" })],
+      "2026-03-10",
+    );
     expect(result.progress.status).toBe("over_budget");
     expect(result.progress.remaining).toBe(0);
   });
 
   it("reports the overspend amount", () => {
-    const result = evaluateBudget(budget(), [txn({ amount: 6000, date: "2026-03-05" })], "2026-03-10");
+    const result = evaluateBudget(
+      budget(),
+      [txn({ amount: 6000, date: "2026-03-05" })],
+      "2026-03-10",
+    );
     expect(result.progress.remaining).toBe(-1000);
     expect(result.progress.percentageUsed).toBe(120);
   });
@@ -145,14 +161,18 @@ describe("budget calculation", () => {
   });
 
   it("handles weekly, quarterly and yearly cycles", () => {
-    expect(currentCycle(budget({ period: "weekly", start_date: "2026-03-02" }), "2026-03-10")).toEqual({
+    expect(
+      currentCycle(budget({ period: "weekly", start_date: "2026-03-02" }), "2026-03-10"),
+    ).toEqual({
       start: "2026-03-09",
       end: "2026-03-15",
     });
     expect(
       currentCycle(budget({ period: "quarterly", start_date: "2026-01-01" }), "2026-05-04"),
     ).toEqual({ start: "2026-04-01", end: "2026-06-30" });
-    expect(currentCycle(budget({ period: "yearly", start_date: "2025-06-01" }), "2026-05-04")).toEqual({
+    expect(
+      currentCycle(budget({ period: "yearly", start_date: "2025-06-01" }), "2026-05-04"),
+    ).toEqual({
       start: "2025-06-01",
       end: "2026-05-31",
     });
@@ -170,13 +190,19 @@ describe("budget calculation", () => {
   });
 
   it("drops a deleted transaction from spending", () => {
-    const rows = [txn({ amount: 400, date: "2026-03-02" }), txn({ amount: 600, date: "2026-03-03" })];
+    const rows = [
+      txn({ amount: 400, date: "2026-03-02" }),
+      txn({ amount: 600, date: "2026-03-03" }),
+    ];
     expect(evaluateBudget(budget(), rows, "2026-03-10").progress.spent).toBe(1000);
     expect(evaluateBudget(budget(), rows.slice(0, 1), "2026-03-10").progress.spent).toBe(400);
   });
 
   it("builds per-cycle history without NaN", () => {
-    const rows = [txn({ amount: 1000, date: "2026-02-10" }), txn({ amount: 500, date: "2026-03-10" })];
+    const rows = [
+      txn({ amount: 1000, date: "2026-02-10" }),
+      txn({ amount: 500, date: "2026-03-10" }),
+    ];
     const history = budgetHistory(budget(), rows, "2026-03-15", 3);
     expect(history[0]?.progress.spent).toBe(500);
     expect(history[1]?.progress.spent).toBe(1000);
@@ -184,7 +210,11 @@ describe("budget calculation", () => {
   });
 
   it("never divides by zero on the last day of a cycle", () => {
-    const result = evaluateBudget(budget(), [txn({ amount: 1000, date: "2026-03-01" })], "2026-03-31");
+    const result = evaluateBudget(
+      budget(),
+      [txn({ amount: 1000, date: "2026-03-01" })],
+      "2026-03-31",
+    );
     expect(result.daysRemaining).toBe(1);
     expect(Number.isFinite(result.dailyAllowance)).toBe(true);
   });
@@ -300,10 +330,30 @@ describe("recurring commitments", () => {
       [
         { id: "1", title: "Rent", category: "rent", amount: 1000, repeat_type: "monthly" },
         { id: "2", title: "Water", category: "water", amount: 3000, repeat_type: "quarterly" },
-        { id: "3", title: "Insurance", category: "insurance", amount: 12000, repeat_type: "yearly" },
+        {
+          id: "3",
+          title: "Insurance",
+          category: "insurance",
+          amount: 12000,
+          repeat_type: "yearly",
+        },
         { id: "4", title: "One-off", category: "other", amount: 5000, repeat_type: "none" },
-        { id: "5", title: "Ended", category: "other", amount: 900, repeat_type: "monthly", repeat_end_date: "2025-01-01" },
-        { id: "6", title: "Paused", category: "other", amount: 900, repeat_type: "monthly", is_active: false },
+        {
+          id: "5",
+          title: "Ended",
+          category: "other",
+          amount: 900,
+          repeat_type: "monthly",
+          repeat_end_date: "2025-01-01",
+        },
+        {
+          id: "6",
+          title: "Paused",
+          category: "other",
+          amount: 900,
+          repeat_type: "monthly",
+          is_active: false,
+        },
       ],
       "2026-03-10",
     );
@@ -384,7 +434,12 @@ describe("forecast", () => {
     txn({ amount, date, type });
 
   it("returns no scenarios with zero history", () => {
-    const result = forecast({ transactions: [], available: 1000, today: "2026-03-10", obligations: 0 });
+    const result = forecast({
+      transactions: [],
+      available: 1000,
+      today: "2026-03-10",
+      obligations: 0,
+    });
     expect(result.sufficient).toBe(false);
     expect(result.scenarios).toEqual([]);
   });
@@ -460,7 +515,11 @@ describe("insufficient data behaviour", () => {
 
   it("produces no insight cards when nothing supports one", () => {
     const cards = buildInsights({
-      comparison: comparePeriods([], { from: "2026-03-01", to: "2026-03-31" }, { from: "2026-02-01", to: "2026-02-28" }),
+      comparison: comparePeriods(
+        [],
+        { from: "2026-03-01", to: "2026-03-31" },
+        { from: "2026-02-01", to: "2026-02-28" },
+      ),
       categories: [],
       obligations: obligationSummary([], "2026-03-10"),
       commitmentsTotal: 0,

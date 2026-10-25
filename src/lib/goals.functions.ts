@@ -29,7 +29,7 @@ export const listGoals = createServerFn({ method: "GET" })
         .eq("user_id", context.userId)
         .order("created_at", { ascending: false });
       if (error) throw new Error(error.message);
-      return ((data ?? []) as unknown) as SpendingGoalRow[];
+      return (data ?? []) as unknown as SpendingGoalRow[];
     } catch (error) {
       throw new Error(classifyError(error).message);
     }
@@ -55,7 +55,7 @@ export const createGoal = createServerFn({ method: "POST" })
         .select()
         .single();
       if (error) throw new Error(error.message);
-      return (goal as unknown) as SpendingGoalRow;
+      return goal as unknown as SpendingGoalRow;
     } catch (error) {
       throw new Error(classifyError(error).message);
     }
@@ -83,8 +83,7 @@ export const contributeToGoal = createServerFn({ method: "POST" })
       if (fetchError || !goal) throw new Error("Goal not found");
 
       const newAmount = Number((goal as any).current_amount) + data.amount;
-      const newStatus =
-        newAmount >= Number((goal as any).target_amount) ? "completed" : "active";
+      const newStatus = newAmount >= Number((goal as any).target_amount) ? "completed" : "active";
 
       const { error: updateError } = await db
         .from("spending_goals")

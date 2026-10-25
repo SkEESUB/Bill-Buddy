@@ -41,9 +41,8 @@ export const createPaymentOrder = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<CheckoutSession> => {
     const { userId } = context;
-    const { readConfig, createProviderOrder, isSandboxKey, PROVIDER } = await import(
-      "./payments/provider.server"
-    );
+    const { readConfig, createProviderOrder, isSandboxKey, PROVIDER } =
+      await import("./payments/provider.server");
     const { adminDb, orderState } = await import("./payments/settle.server");
     const { isActive } = await import("./payments/state");
 
@@ -89,7 +88,14 @@ export const createPaymentOrder = createServerFn({ method: "POST" })
       .from("payment_orders")
       .select("*")
       .eq("bill_occurrence_id", data.occurrence_id)
-      .in("status", ["CREATED", "ORDER_CREATED", "CHECKOUT_OPENED", "USER_PROCESSING", "AUTHORIZED", "UNKNOWN"])
+      .in("status", [
+        "CREATED",
+        "ORDER_CREATED",
+        "CHECKOUT_OPENED",
+        "USER_PROCESSING",
+        "AUTHORIZED",
+        "UNKNOWN",
+      ])
       .maybeSingle();
     if (active) throw new Error("PAYMENT_ALREADY_IN_PROGRESS");
 
@@ -148,7 +154,12 @@ export const createPaymentOrder = createServerFn({ method: "POST" })
     return session(updated, occurrence, config.keyId, amount);
 
     function session(
-      row: { id: string; provider_order_id: string | null; currency: string; expires_at: string | null },
+      row: {
+        id: string;
+        provider_order_id: string | null;
+        currency: string;
+        expires_at: string | null;
+      },
       occ: { scheduled_date: string; bill?: { title?: string } | null },
       keyId: string,
       amountMajor: number,
@@ -200,9 +211,8 @@ export const submitCheckoutResult = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data, context }): Promise<PaymentStatusResult> => {
-    const { verifyCheckoutSignature, fetchProviderPayment } = await import(
-      "./payments/provider.server"
-    );
+    const { verifyCheckoutSignature, fetchProviderPayment } =
+      await import("./payments/provider.server");
     const {
       adminDb,
       loadOrder,
@@ -304,9 +314,8 @@ export const reconcilePayment = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
   .validator((data: unknown) => z.object({ payment_order_id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }): Promise<PaymentStatusResult> => {
-    const { adminDb, loadOrder, reconcileOrderWithProvider, orderState } = await import(
-      "./payments/settle.server"
-    );
+    const { adminDb, loadOrder, reconcileOrderWithProvider, orderState } =
+      await import("./payments/settle.server");
     const db = await adminDb();
     const order = await loadOrder(db, data.payment_order_id);
     if (!order || order.user_id !== context.userId) throw new Error("PAYMENT_ORDER_NOT_FOUND");
@@ -321,9 +330,8 @@ export const reconcilePayment = createServerFn({ method: "POST" })
 
 /** Is online payment available at all? Used to show an honest UI. */
 export const getPaymentConfig = createServerFn({ method: "GET" }).handler(async () => {
-  const { readConfig, isSandboxKey, webhookConfigured } = await import(
-    "./payments/provider.server"
-  );
+  const { readConfig, isSandboxKey, webhookConfigured } =
+    await import("./payments/provider.server");
   const config = readConfig();
   return {
     configured: !!config,

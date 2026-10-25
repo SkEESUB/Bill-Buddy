@@ -87,10 +87,21 @@ export async function notifyUser(
  * In-app notifications are real. Email, push and SMS have no configured
  * provider, so the app says so instead of pretending a message was sent.
  */
-export function deliveryChannelStatus(): { channel: string; configured: boolean; detail: string }[] {
+export function deliveryChannelStatus(): {
+  channel: string;
+  configured: boolean;
+  detail: string;
+}[] {
+  const hasEmail = Boolean(process.env["RESEND_API_KEY"] || process.env["SMTP_HOST"]);
   return [
     { channel: "in_app", configured: true, detail: "Delivered to the notification centre." },
-    { channel: "email", configured: false, detail: "No email provider configured." },
+    {
+      channel: "email",
+      configured: hasEmail,
+      detail: hasEmail
+        ? "Connected via configured email provider."
+        : "No email provider configured (set RESEND_API_KEY in .env).",
+    },
     { channel: "push", configured: false, detail: "No push provider configured." },
     { channel: "sms", configured: false, detail: "No SMS provider configured." },
   ];

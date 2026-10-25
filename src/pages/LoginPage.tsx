@@ -300,7 +300,8 @@ export function LoginPage() {
             </form>
 
             <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-xs text-text-tertiary">
-              <ShieldCheck className="h-4 w-4 text-emerald-600" /> Passwordless OTP · No password required
+              <ShieldCheck className="h-4 w-4 text-emerald-600" /> Passwordless OTP · No password
+              required
             </p>
           </div>
         )}
@@ -396,9 +397,7 @@ export function LoginPage() {
                   disabled={resendCooldown > 0 || loading}
                   className="text-xs font-semibold text-primary hover:underline disabled:text-text-tertiary disabled:no-underline cursor-pointer"
                 >
-                  {resendCooldown > 0
-                    ? `Resend OTP in ${mmss}`
-                    : "Didn't receive code? Resend OTP"}
+                  {resendCooldown > 0 ? `Resend OTP in ${mmss}` : "Didn't receive code? Resend OTP"}
                 </button>
                 <div>
                   <button

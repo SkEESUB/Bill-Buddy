@@ -111,7 +111,10 @@ export function openCheckout(options: {
 
     // Razorpay surfaces terminal failures through this event.
     const withOn = instance as RazorpayInstance & {
-      on?: (event: string, cb: (payload: { error?: { code?: string; description?: string } }) => void) => void;
+      on?: (
+        event: string,
+        cb: (payload: { error?: { code?: string; description?: string } }) => void,
+      ) => void;
     };
     withOn.on?.("payment.failed", (payload) => {
       finish({

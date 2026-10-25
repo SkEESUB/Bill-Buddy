@@ -34,14 +34,25 @@ export const Route = createFileRoute("/api/public/hooks/scheduler")({
           return json({ error: "Invalid JSON" }, 400);
         }
 
-        const { runNotificationSweep, runNotificationRetention } = await import(
-          "@/lib/jobs.server"
-        );
-        const job = body.job === "retention" ? "retention" : "sweep";
+        const { runNotificationSweep, runNotificationRetention, processDueEmailReminders } =
+          await import("@/lib/jobs.server");
+        const job =
+          body.job === "retention"
+            ? "retention"
+            : body.job === "email_reminders"
+              ? "email_reminders"
+              : "sweep";
 
         try {
-          const result =
-            job === "retention" ? await runNotificationRetention() : await runNotificationSweep();
+          let result: Record<string, unknown>;
+          if (job === "retention") {
+            result = await runNotificationRetention();
+          } else if (job === "email_reminders") {
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+            result = await processDueEmailReminders(supabaseAdmin as any);
+          } else {
+            result = await runNotificationSweep();
+          }
           return json({ job, ...result });
         } catch (error) {
           const { classifyFailure } = await import("@/lib/scheduler");

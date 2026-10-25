@@ -16,6 +16,8 @@ export type Bill = {
   repeat_interval?: number;
   repeat_end_date?: string | null;
   reminder_days_before?: number;
+  reminder_time?: string;
+  reminder_email?: string;
   is_active?: boolean;
   amount_type?: "fixed" | "variable";
   currency?: string;
@@ -36,12 +38,7 @@ export type Payment = {
 };
 
 export type TransactionType =
-  | "income"
-  | "expense"
-  | "transfer"
-  | "refund"
-  | "adjustment"
-  | "bill_payment";
+  "income" | "expense" | "transfer" | "refund" | "adjustment" | "bill_payment";
 
 export type Transaction = {
   id: string;

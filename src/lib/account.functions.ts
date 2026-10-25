@@ -111,7 +111,8 @@ export const createAvatarUpload = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const ext = data.mime_type === "image/png" ? "png" : data.mime_type === "image/webp" ? "webp" : "jpg";
+    const ext =
+      data.mime_type === "image/png" ? "png" : data.mime_type === "image/webp" ? "webp" : "jpg";
     const path = `${context.userId}/${crypto.randomUUID()}.${ext}`;
     const { data: signed, error } = await supabaseAdmin.storage
       .from("avatars")
@@ -281,7 +282,7 @@ export const deleteAccount = createServerFn({ method: "POST" })
         reason: z.string().trim().max(500).optional(),
       })
       .refine((v) => v.confirmation.trim().toUpperCase() === "DELETE", {
-        message: 'Type DELETE to confirm.',
+        message: "Type DELETE to confirm.",
         path: ["confirmation"],
       })
       .parse(data),
@@ -309,7 +310,9 @@ export const deleteAccount = createServerFn({ method: "POST" })
 
     // Remove stored files first — storage does not cascade with the auth user.
     for (const bucket of ["receipts", "avatars"]) {
-      const { data: files } = await supabaseAdmin.storage.from(bucket).list(userId, { limit: 1000 });
+      const { data: files } = await supabaseAdmin.storage
+        .from(bucket)
+        .list(userId, { limit: 1000 });
       const paths = (files ?? []).map((f) => `${userId}/${f.name}`);
       if (paths.length > 0) await supabaseAdmin.storage.from(bucket).remove(paths);
     }

@@ -100,9 +100,20 @@ async function finishRun(
   db: Db,
   id: string,
   startedAt: number,
-  result: { processed: number; created: number; failed: number; error?: string | null; details?: Record<string, unknown> },
+  result: {
+    processed: number;
+    created: number;
+    failed: number;
+    error?: string | null;
+    details?: Record<string, unknown>;
+  },
 ): Promise<void> {
-  const status = result.failed > 0 ? (result.created > 0 || result.processed > result.failed ? "partial" : "failed") : "success";
+  const status =
+    result.failed > 0
+      ? result.created > 0 || result.processed > result.failed
+        ? "partial"
+        : "failed"
+      : "success";
   const { error } = await db
     .from("job_runs")
     .update({
@@ -169,7 +180,11 @@ export async function draftsForUser(
   if (occErr) throw new Error(occErr.message);
 
   const rows: OccurrenceLike[] = (occurrences ?? []).map((o) => {
-    const bill = o.bill as { title?: string; reminder_days_before?: number; is_active?: boolean } | null;
+    const bill = o.bill as {
+      title?: string;
+      reminder_days_before?: number;
+      is_active?: boolean;
+    } | null;
     return {
       id: o.id,
       bill_id: o.bill_id,
@@ -194,7 +209,9 @@ export async function draftsForUser(
   if (budgetErr) throw new Error(budgetErr.message);
 
   const needsTxns = (budgets ?? []).length > 0 || slot === "weekly";
-  const txns: TxnLike[] = needsTxns ? await loadTransactions(db, userId, addDays(today, -400), today) : [];
+  const txns: TxnLike[] = needsTxns
+    ? await loadTransactions(db, userId, addDays(today, -400), today)
+    : [];
 
   for (const budget of budgets ?? []) {
     const cycle = currentCycle(budget as never, today);
@@ -254,7 +271,12 @@ export async function draftsForUser(
   return drafts;
 }
 
-async function loadTransactions(db: Db, userId: string, from: string, to: string): Promise<TxnLike[]> {
+async function loadTransactions(
+  db: Db,
+  userId: string,
+  from: string,
+  to: string,
+): Promise<TxnLike[]> {
   const { data, error } = await db
     .from("transactions")
     .select("type, amount, category, date, status")
@@ -281,6 +303,7 @@ export type SweepResult = {
   failed: number;
   retryable: number;
   users: number;
+  emailReminders?: { sent: number; failed: number };
 };
 
 /** The hourly sweep: schedules, reminders, budget alerts and weekly summaries. */
@@ -289,7 +312,15 @@ export async function runNotificationSweep(now: Date = new Date()): Promise<Swee
   const key = runKey(now);
   const claim = await claimRun(db, SWEEP_JOB, key);
   if (!claim) {
-    return { ran: false, reason: "already_claimed", processed: 0, created: 0, failed: 0, retryable: 0, users: 0 };
+    return {
+      ran: false,
+      reason: "already_claimed",
+      processed: 0,
+      created: 0,
+      failed: 0,
+      retryable: 0,
+      users: 0,
+    };
   }
 
   const startedAt = Date.now();
@@ -301,7 +332,12 @@ export async function runNotificationSweep(now: Date = new Date()): Promise<Swee
 
   const { data: users, error } = await db.from("user_settings").select("*");
   if (error) {
-    await finishRun(db, claim.id, startedAt, { processed: 0, created: 0, failed: 1, error: error.message });
+    await finishRun(db, claim.id, startedAt, {
+      processed: 0,
+      created: 0,
+      failed: 1,
+      error: error.message,
+    });
     throw new Error(error.message);
   }
 
@@ -349,15 +385,37 @@ export async function runNotificationSweep(now: Date = new Date()): Promise<Swee
     }
   }
 
+  // Process and deliver due email reminders
+  let emailReminders = { processed: 0, sent: 0, failed: 0 };
+  try {
+    emailReminders = await processDueEmailReminders(db, now);
+  } catch (emailErr) {
+    console.error("[jobs:email_reminders] processing error:", emailErr);
+  }
+
   await finishRun(db, claim.id, startedAt, {
     processed,
     created,
     failed,
     error: failures[0]?.message ?? null,
-    details: { failures: failures.slice(0, 20), retryable, users: (users ?? []).length, run_key: key },
+    details: {
+      failures: failures.slice(0, 20),
+      retryable,
+      users: (users ?? []).length,
+      run_key: key,
+      emailReminders,
+    },
   });
 
-  return { ran: true, processed, created, failed, retryable, users: (users ?? []).length };
+  return {
+    ran: true,
+    processed,
+    created,
+    failed,
+    retryable,
+    users: (users ?? []).length,
+    emailReminders,
+  };
 }
 
 /**
@@ -378,6 +436,127 @@ async function syncUserSchedules(db: Db, userId: string, today: string): Promise
   }
 }
 
+/**
+ * Deliver due email reminders across all users independently of website visitor sessions.
+ */
+export async function processDueEmailReminders(
+  db: Db,
+  now: Date = new Date(),
+): Promise<{ processed: number; sent: number; failed: number }> {
+  const nowIso = now.toISOString();
+
+  const { data: dueReminders, error } = await db
+    .from("bill_reminders")
+    .select(
+      `
+      id,
+      user_id,
+      bill_occurrence_id,
+      reminder_type,
+      scheduled_for,
+      occurrence:bill_occurrences(
+        id,
+        scheduled_date,
+        expected_amount,
+        actual_amount,
+        status,
+        bill:bills(id, title, reminder_email, is_active, notes)
+      )
+    `,
+    )
+    .eq("status", "pending")
+    .eq("reminder_type", "email")
+    .lte("scheduled_for", nowIso)
+    .limit(50);
+
+  if (error || !dueReminders) {
+    if (error) console.error("[jobs:email_reminders] Query error:", error.message);
+    return { processed: 0, sent: 0, failed: 0 };
+  }
+
+  let sent = 0;
+  let failed = 0;
+
+  for (const reminder of dueReminders) {
+    const occ = reminder.occurrence as any;
+    if (!occ || occ.status === "paid" || occ.status === "cancelled" || occ.status === "skipped") {
+      await db
+        .from("bill_reminders")
+        .update({ status: "cancelled" } as never)
+        .eq("id", reminder.id);
+      continue;
+    }
+
+    const bill = occ.bill;
+    if (bill && bill.is_active === false) {
+      await db
+        .from("bill_reminders")
+        .update({ status: "cancelled" } as never)
+        .eq("id", reminder.id);
+      continue;
+    }
+
+    let recipientEmail = bill?.reminder_email?.trim();
+    if (!recipientEmail) {
+      try {
+        const { data: userAuth } = await db.auth.admin.getUserById(reminder.user_id);
+        recipientEmail = userAuth?.user?.email?.trim();
+      } catch {
+        // Fallback
+      }
+    }
+
+    if (!recipientEmail) {
+      console.warn(`[jobs:email_reminders] No destination email for reminder ${reminder.id}`);
+      await db
+        .from("bill_reminders")
+        .update({ status: "failed" } as never)
+        .eq("id", reminder.id);
+      failed += 1;
+      continue;
+    }
+
+    const amount = Number(occ.actual_amount ?? occ.expected_amount);
+    const { sendReminderEmail } = await import("./email.server");
+    const result = await sendReminderEmail({
+      to: recipientEmail,
+      billTitle: bill?.title ?? "Bill",
+      amount,
+      dueDate: occ.scheduled_date,
+      notes: bill?.notes,
+    });
+
+    if (result.delivered) {
+      sent += 1;
+      await db
+        .from("bill_reminders")
+        .update({
+          status: "sent",
+          sent_at: new Date().toISOString(),
+        } as never)
+        .eq("id", reminder.id);
+
+      await insertDraft(db, reminder.user_id, {
+        type: "bill_due",
+        title: `${bill?.title ?? "Bill"} reminder sent`,
+        body: `Email reminder sent to ${recipientEmail} for ₹${amount} due on ${occ.scheduled_date}.`,
+        dedupeKey: `email_sent:${reminder.id}`,
+        billId: bill?.id,
+      });
+    } else {
+      failed += 1;
+      await db
+        .from("bill_reminders")
+        .update({
+          status: "failed",
+        } as never)
+        .eq("id", reminder.id);
+    }
+  }
+
+  return { processed: dueReminders.length, sent, failed };
+}
+
 /* ------------------------------- retention ------------------------------- */
 
 /**
@@ -389,7 +568,15 @@ export async function runNotificationRetention(now: Date = new Date()): Promise<
   const key = now.toISOString().slice(0, 10);
   const claim = await claimRun(db, RETENTION_JOB, key);
   if (!claim) {
-    return { ran: false, reason: "already_claimed", processed: 0, created: 0, failed: 0, retryable: 0, users: 0 };
+    return {
+      ran: false,
+      reason: "already_claimed",
+      processed: 0,
+      created: 0,
+      failed: 0,
+      retryable: 0,
+      users: 0,
+    };
   }
 
   const startedAt = Date.now();

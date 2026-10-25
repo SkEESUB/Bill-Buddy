@@ -3,7 +3,7 @@
 **Document Version:** 1.1.0  
 **Status:** Living Document / Authoritative  
 **Target Repository:** BillBuddy / Money Mind Frame  
-**Last Updated:** 2026-10-23  
+**Last Updated:** 2026-10-23
 
 ---
 
@@ -28,6 +28,7 @@ These rules are non-negotiable. Every developer, automated agent, and contributo
 The BillBuddy repository is actively synchronized with production deployment infrastructure. Breaking Git history causes catastrophic synchronization and deployment failures.
 
 ### 2.1 Git Commands & Behaviors
+
 - **PROHIBITED:**
   - `git push --force` or `git push -f`
   - `git rebase` on any commit already pushed to `origin/main`
@@ -43,6 +44,7 @@ The BillBuddy repository is actively synchronized with production deployment inf
 ## 3. Security & Environment Configuration Rules
 
 ### 3.1 Supabase Configuration Integrity
+
 - **Authoritative Project Endpoint:** All client and server initialization must target project `xsytaixmyeypoiscfbim` (`https://xsytaixmyeypoiscfbim.supabase.co`).
 - **Zero Ghost Projects:** Any pull request, patch, or configuration containing references to `ocajeaytrcakzoxavvvg`, `ocajeyatrckazoxavvgg`, or other ghost projects will be rejected immediately.
 - **Fail-Fast Environment Loading:** Fail immediately if `VITE_SUPABASE_URL` is unconfigured.
@@ -51,6 +53,7 @@ The BillBuddy repository is actively synchronized with production deployment inf
   - Server runtime: `SUPABASE_SERVICE_ROLE_KEY` is strictly confined to `src/integrations/supabase/client.server.ts` and Nitro server functions. Never prefix server secret variables with `VITE_`.
 
 ### 3.2 Database Security (RLS)
+
 - Every table created in PostgreSQL must execute `ALTER TABLE <table_name> ENABLE ROW LEVEL SECURITY;`.
 - Default RLS policies must strictly enforce user ownership:
   ```sql
@@ -66,11 +69,13 @@ The BillBuddy repository is actively synchronized with production deployment inf
 ## 4. Architecture & Coding Conventions
 
 ### 4.1 TypeScript & Type Safety
+
 - The project runs in **strict mode** (`"strict": true` in `tsconfig.json`).
 - **No `any` Types:** Use explicit interfaces or Zod schemas. If an external payload is unknown, use `unknown` and validate with a parser before consumption.
 - Keep database types aligned with `src/integrations/supabase/types.ts`.
 
 ### 4.2 TanStack Start & Server Functions
+
 - Client components must not perform direct multi-table balance mutations.
 - Use `createServerFn` in `src/lib/*.functions.ts` for operations that:
   1. Modify financial balances or log payment histories across multiple tables.
@@ -79,6 +84,7 @@ The BillBuddy repository is actively synchronized with production deployment inf
 - Server function inputs must be validated with Zod schemas.
 
 ### 4.3 Financial Math & Invariants
+
 - All monetary operations must adhere to the tested financial invariants:
   1. **Idempotency:** Require a unique `client_request_id` for each financial write.
   2. **Active Payment Lock:** At most one live `payment_order` per bill occurrence.
@@ -92,6 +98,7 @@ The BillBuddy repository is actively synchronized with production deployment inf
 ## 5. Testing & Quality Assurance Standards
 
 ### 5.1 Unit & Integration Testing (Vitest / Bun Test)
+
 - Run tests locally using `bun test` or `bun x vitest run`.
 - **Mandatory Test Coverage Areas:**
   - Date and recurrence calculators (`src/lib/dates.test.ts`).
@@ -102,7 +109,9 @@ The BillBuddy repository is actively synchronized with production deployment inf
   - Insights, forecasting, and safe-to-spend models (`src/lib/insights.test.ts`).
 
 ### 5.2 Pre-Push Verification Checklist
+
 Before committing or pushing any change to the repository, ensure:
+
 ```bash
 # 1. Typecheck passes with zero errors
 bun x tsc --noEmit

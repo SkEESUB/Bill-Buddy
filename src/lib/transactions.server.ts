@@ -22,7 +22,10 @@ const SELECT_COLUMNS =
 
 /** Escape PostgREST `or()` special characters in a user-supplied search term. */
 function safeTerm(term: string): string {
-  return term.replace(/[,()\\]/g, " ").replace(/%/g, "").trim();
+  return term
+    .replace(/[,()\\]/g, " ")
+    .replace(/%/g, "")
+    .trim();
 }
 
 /**
@@ -38,7 +41,8 @@ export function ledgerQuery(db: Db, userId: string, filters: LedgerFilters, coun
 
   if (filters.type && filters.type !== "all") query = query.eq("type", filters.type);
   if (filters.status && filters.status !== "all") query = query.eq("status", filters.status);
-  if (filters.category && filters.category !== "all") query = query.eq("category", filters.category);
+  if (filters.category && filters.category !== "all")
+    query = query.eq("category", filters.category);
   if (filters.payment_method && filters.payment_method !== "all") {
     query = query.eq("payment_method", filters.payment_method);
   }

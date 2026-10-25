@@ -93,7 +93,7 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
       if (userError || !userData?.user?.id) {
         if (userError?.message?.toLowerCase().includes("invalid api key")) {
           throw new Error(
-            "CONFIG_ERROR: Invalid API key — check SUPABASE_PUBLISHABLE_KEY in Vercel env vars"
+            "CONFIG_ERROR: Invalid API key — check SUPABASE_PUBLISHABLE_KEY in Vercel env vars",
           );
         }
         throw new Error(`AUTH_INVALID: ${userError?.message || "Invalid token"}`);

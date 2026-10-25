@@ -102,7 +102,13 @@ describe("amount integrity", () => {
 });
 
 describe("status reporting", () => {
-  const order = { id: "o1", amount: 250, currency: "INR", failure_code: null, failure_message: null };
+  const order = {
+    id: "o1",
+    amount: 250,
+    currency: "INR",
+    failure_code: null,
+    failure_message: null,
+  };
 
   it("marks settled only for CAPTURED", () => {
     expect(statusResult(order, "CAPTURED").settled).toBe(true);

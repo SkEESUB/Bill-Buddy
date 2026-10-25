@@ -8,6 +8,7 @@
 ---
 
 ## Table of Contents
+
 1. [Executive Summary](#1-executive-summary)
 2. [Original Problems Reported](#2-original-problems-reported)
 3. [Root Causes & Forensics](#3-root-causes--forensics)
@@ -48,6 +49,7 @@
 A comprehensive architectural, cryptographic, database, and source-code audit was performed on the BillBuddy repository and its live production deployment at `https://bill-buddy-liart.vercel.app`.
 
 ### Key Findings:
+
 1. **Critical Supabase Project Mismatch:** Two Supabase project IDs exist:
    - `ocajeaytrcakzoxavvvg`: **The true database project.** All 20 SQL migrations have been executed here, with 20 tables established (`bills`, `transactions`, `budgets`, `profiles`, `user_settings`, `categories`, `bill_occurrences`, etc.) and valid RLS policies in place. The publishable key `sb_publishable_saQROBUNabTGkLIVL7V5gQ_7LMxhJI9` in `.env` belongs exclusively to this project.
    - `xsytaixmyeypoiscfbim`: **Empty, unmigrated ghost project.** It contains 0 application tables and has never had migrations applied.
@@ -58,6 +60,7 @@ A comprehensive architectural, cryptographic, database, and source-code audit wa
 6. **Obsolete Branding:** Live production displayed legacy product names "PocketPilot" and "BillBoard" in page titles, OpenGraph tags, and UI headings.
 
 ### Audit Verdict:
+
 **NOT READY FOR DEPLOYMENT** until Vercel environment variables are switched to project `ocajeaytrcakzoxavvvg` and the updated repository codebase is redeployed. All local code fixes, error classification enhancements, environment resolution fallbacks, and brand homogenizations are complete and validated by 185 passing automated tests.
 
 ---
@@ -77,16 +80,18 @@ A comprehensive architectural, cryptographic, database, and source-code audit wa
 ## 3. Root Causes & Forensics
 
 ### Error 1 & 2: "Invalid API key" and "Invalid path specified in request URL"
+
 - **Forensic Discovery:** Inspection of the live bundle at `https://bill-buddy-liart.vercel.app/assets/index-BUpMBh4F.js` revealed:
   ```javascript
-  VITE_SUPABASE_URL: "https://xsytaixmyeypoiscfbim.supabase.co"
-  VITE_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_UIFyTcBEjaY-CjmupJEnNg__5rTgjKm"
+  VITE_SUPABASE_URL: "https://xsytaixmyeypoiscfbim.supabase.co";
+  VITE_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_UIFyTcBEjaY-CjmupJEnNg__5rTgjKm";
   ```
   Testing key `sb_publishable_saQROBUNabTGkLIVL7V5gQ_7LMxhJI9` against `xsytaixmyeypoiscfbim` returned:
   `HTTP 401: {"hint":"Double check the provided API key for typos. This API key might also be owned by another Supabase project.","message":"Invalid API key"}`.
 - **Invalid path:** When `/rest/v1/` or `/auth/v1/` was appended to `SUPABASE_URL`, `createClient()` appended `/auth/v1/otp`, yielding `https://PROJECT.supabase.co/rest/v1/auth/v1/otp`, resulting in HTTP 404 "Invalid path specified in request URL".
 
 ### Error 3: "Could not find the table 'public.transactions' in the schema cache"
+
 - **Forensic Discovery:** Directly querying both projects via REST API:
   - Querying `https://xsytaixmyeypoiscfbim.supabase.co/rest/v1/transactions`:
     `HTTP 404: {"code":"PGRST205","message":"Could not find the table 'public.transactions' in the schema cache"}`.
@@ -95,6 +100,7 @@ A comprehensive architectural, cryptographic, database, and source-code audit wa
 - The table was completely missing on `xsytaixmyeypoiscfbim` because migrations were never run there.
 
 ### Error 4: "Unauthorized: account status could not be verified"
+
 - In `src/lib/auth/active-account.ts`:
   ```typescript
   const { data, error } = await supabase
@@ -107,6 +113,7 @@ A comprehensive architectural, cryptographic, database, and source-code audit wa
 - When `SUPABASE_URL` pointed to `xsytaixmyeypoiscfbim`, `profiles` did not exist (HTTP 404 PGRST205). The query returned an error, triggering the fail-closed exception.
 
 ### Error 5: "Your session has expired. Please sign in again."
+
 - In `src/lib/errors.ts`:
   ```typescript
   if (lower.includes("unauthorized") || lower.includes("jwt") || lower.includes("signed in")) {
@@ -116,6 +123,7 @@ A comprehensive architectural, cryptographic, database, and source-code audit wa
 - Any thrown error containing "Unauthorized" (including Error 4 or RLS denials) was caught by UI components and transformed into the misleading session expiration prompt.
 
 ### Errors 6 & 7: PocketPilot / BillBoard Legacy Branding
+
 - Production build was deployed from an older commit prior to the complete rebranding across `src/routes/__root.tsx`, `src/routes/index.tsx`, `src/routes/login.tsx`, `src/pages/LoginPage.tsx`, and all subroutes.
 
 ---
@@ -145,31 +153,31 @@ A comprehensive architectural, cryptographic, database, and source-code audit wa
 
 ## 5. Complete File Map
 
-| File | Purpose | Important Functions / Exports | Used By | Database / API Dependencies | Status |
-|---|---|---|---|---|---|
-| `src/routes/__root.tsx` | Root route layout & head tags | `Route`, `RootComponent`, `RootShell` | All routes | None | Audited & Fixed |
-| `src/routes/index.tsx` | Home dashboard route | `Route` | Navigation | `finance.functions.ts` | Audited & Fixed |
-| `src/routes/login.tsx` | Authentication route | `Route` | Unauthenticated users | Supabase Auth | Audited & Fixed |
-| `src/routes/_authenticated/bills.tsx` | Bills management route | `Route` | Navigation | `bills.functions.ts` | Audited & Fixed |
-| `src/routes/_authenticated/money.index.tsx` | Cash flow & money route | `Route` | Navigation | `api.ts`, `transactions.functions.ts` | Audited & Fixed |
-| `src/routes/_authenticated/transactions.index.tsx` | Ledger route | `Route` | Navigation | `transactions.functions.ts` | Audited & Fixed |
-| `src/routes/_authenticated/insights.tsx` | Spending analytics & insights | `Route` | Navigation | `insights.functions.ts` | Audited & Fixed |
-| `src/pages/LoginPage.tsx` | Passwordless OTP login page | `LoginPage`, `sendOTP`, `verifyOTP` | `src/routes/login.tsx` | Supabase GoTrue (`signInWithOtp`) | Audited & Fixed |
-| `src/pages/BillsPage.tsx` | Interactive bills board | `BillsPage` | `src/routes/_authenticated/bills.tsx` | `bills.functions.ts` | Audited & Fixed |
-| `src/pages/MoneyPage.tsx` | Money overview & budget cards | `MoneyPage` | `src/routes/_authenticated/money.index.tsx` | `api.ts`, `transactions`, `budgets` | Audited & Fixed |
-| `src/pages/TransactionsPage.tsx` | Ledger page: filters, CSV/JSON export | `TransactionsPage`, `download` | `src/routes/_authenticated/transactions.index.tsx` | `transactions.functions.ts` | Audited & Fixed |
-| `src/integrations/supabase/client.ts` | Browser Supabase client singleton | `supabase`, `createSupabaseClient` | Frontend hooks & components | Supabase PostgREST & Auth | Audited & Fixed |
-| `src/integrations/supabase/client.server.ts` | Service-role administrative client | `supabaseAdmin`, `createSupabaseAdminClient` | Server functions only | Supabase Service Role API | Audited & Fixed |
-| `src/integrations/supabase/auth-middleware.ts` | Server function JWT authentication gate | `requireSupabaseAuth` | All server functions | Supabase Auth JWT verification | Audited & Fixed |
-| `src/integrations/supabase/auth-attacher.ts` | Client-side RPC bearer token attacher | `attachSupabaseAuth` | `src/start.ts` | Browser Supabase session | Audited |
-| `src/lib/auth/active-account.ts` | Server-side account status gate & auto-provisioner | `requireActiveAccount`, `assertAccountActive` | Server functions | `profiles`, `user_settings` | Audited & Fixed |
-| `src/lib/errors.ts` | Domain error classification engine | `classifyError`, `toUserMessage` | UI error handlers | None | Audited & Fixed |
-| `src/lib/transactions.functions.ts` | Server-authoritative transaction mutations & queries | `listTransactions`, `createTransaction`, `exportTransactions` | `TransactionsPage.tsx` | `transactions` table | Audited & Fixed |
-| `src/lib/transactions.server.ts` | Server-side ledger database queries | `ledgerQuery`, `executeExport` | `transactions.functions.ts` | `transactions` table | Audited |
-| `src/lib/bills.functions.ts` | Server-authoritative bills mutations | `listBills`, `createBill`, `recordPayment` | `BillsPage.tsx` | `bills`, `bill_occurrences` | Audited |
-| `src/lib/payments/provider.server.ts` | Razorpay payment provider adapter | `readConfig`, `requireConfig`, `createProviderOrder` | `payments.functions.ts` | Razorpay REST API | Audited |
-| `src/lib/payments/settle.server.ts` | Payment state settlement engine | `applyOrderState`, `reconcileOrderWithProvider` | `payments.functions.ts` | `payment_orders`, `bill_occurrences` | Audited |
-| `src/lib/invariants.test.ts` | Core financial & architectural test suite | 185 invariant unit tests | CI / test runner | Local mock & domain logic | Audited & Expanded |
+| File                                               | Purpose                                              | Important Functions / Exports                                 | Used By                                            | Database / API Dependencies           | Status             |
+| -------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------- | ------------------------------------- | ------------------ |
+| `src/routes/__root.tsx`                            | Root route layout & head tags                        | `Route`, `RootComponent`, `RootShell`                         | All routes                                         | None                                  | Audited & Fixed    |
+| `src/routes/index.tsx`                             | Home dashboard route                                 | `Route`                                                       | Navigation                                         | `finance.functions.ts`                | Audited & Fixed    |
+| `src/routes/login.tsx`                             | Authentication route                                 | `Route`                                                       | Unauthenticated users                              | Supabase Auth                         | Audited & Fixed    |
+| `src/routes/_authenticated/bills.tsx`              | Bills management route                               | `Route`                                                       | Navigation                                         | `bills.functions.ts`                  | Audited & Fixed    |
+| `src/routes/_authenticated/money.index.tsx`        | Cash flow & money route                              | `Route`                                                       | Navigation                                         | `api.ts`, `transactions.functions.ts` | Audited & Fixed    |
+| `src/routes/_authenticated/transactions.index.tsx` | Ledger route                                         | `Route`                                                       | Navigation                                         | `transactions.functions.ts`           | Audited & Fixed    |
+| `src/routes/_authenticated/insights.tsx`           | Spending analytics & insights                        | `Route`                                                       | Navigation                                         | `insights.functions.ts`               | Audited & Fixed    |
+| `src/pages/LoginPage.tsx`                          | Passwordless OTP login page                          | `LoginPage`, `sendOTP`, `verifyOTP`                           | `src/routes/login.tsx`                             | Supabase GoTrue (`signInWithOtp`)     | Audited & Fixed    |
+| `src/pages/BillsPage.tsx`                          | Interactive bills board                              | `BillsPage`                                                   | `src/routes/_authenticated/bills.tsx`              | `bills.functions.ts`                  | Audited & Fixed    |
+| `src/pages/MoneyPage.tsx`                          | Money overview & budget cards                        | `MoneyPage`                                                   | `src/routes/_authenticated/money.index.tsx`        | `api.ts`, `transactions`, `budgets`   | Audited & Fixed    |
+| `src/pages/TransactionsPage.tsx`                   | Ledger page: filters, CSV/JSON export                | `TransactionsPage`, `download`                                | `src/routes/_authenticated/transactions.index.tsx` | `transactions.functions.ts`           | Audited & Fixed    |
+| `src/integrations/supabase/client.ts`              | Browser Supabase client singleton                    | `supabase`, `createSupabaseClient`                            | Frontend hooks & components                        | Supabase PostgREST & Auth             | Audited & Fixed    |
+| `src/integrations/supabase/client.server.ts`       | Service-role administrative client                   | `supabaseAdmin`, `createSupabaseAdminClient`                  | Server functions only                              | Supabase Service Role API             | Audited & Fixed    |
+| `src/integrations/supabase/auth-middleware.ts`     | Server function JWT authentication gate              | `requireSupabaseAuth`                                         | All server functions                               | Supabase Auth JWT verification        | Audited & Fixed    |
+| `src/integrations/supabase/auth-attacher.ts`       | Client-side RPC bearer token attacher                | `attachSupabaseAuth`                                          | `src/start.ts`                                     | Browser Supabase session              | Audited            |
+| `src/lib/auth/active-account.ts`                   | Server-side account status gate & auto-provisioner   | `requireActiveAccount`, `assertAccountActive`                 | Server functions                                   | `profiles`, `user_settings`           | Audited & Fixed    |
+| `src/lib/errors.ts`                                | Domain error classification engine                   | `classifyError`, `toUserMessage`                              | UI error handlers                                  | None                                  | Audited & Fixed    |
+| `src/lib/transactions.functions.ts`                | Server-authoritative transaction mutations & queries | `listTransactions`, `createTransaction`, `exportTransactions` | `TransactionsPage.tsx`                             | `transactions` table                  | Audited & Fixed    |
+| `src/lib/transactions.server.ts`                   | Server-side ledger database queries                  | `ledgerQuery`, `executeExport`                                | `transactions.functions.ts`                        | `transactions` table                  | Audited            |
+| `src/lib/bills.functions.ts`                       | Server-authoritative bills mutations                 | `listBills`, `createBill`, `recordPayment`                    | `BillsPage.tsx`                                    | `bills`, `bill_occurrences`           | Audited            |
+| `src/lib/payments/provider.server.ts`              | Razorpay payment provider adapter                    | `readConfig`, `requireConfig`, `createProviderOrder`          | `payments.functions.ts`                            | Razorpay REST API                     | Audited            |
+| `src/lib/payments/settle.server.ts`                | Payment state settlement engine                      | `applyOrderState`, `reconcileOrderWithProvider`               | `payments.functions.ts`                            | `payment_orders`, `bill_occurrences`  | Audited            |
+| `src/lib/invariants.test.ts`                       | Core financial & architectural test suite            | 185 invariant unit tests                                      | CI / test runner                                   | Local mock & domain logic             | Audited & Expanded |
 
 ---
 
@@ -228,6 +236,7 @@ sequenceDiagram
 ```
 
 ### Verification of Supabase URL and Keys:
+
 - **Project URL:** Must strictly be `https://ocajeaytrcakzoxavvvg.supabase.co`. Suffixes like `/rest/v1/` or `/auth/v1/` are automatically stripped by `normalizeSupabaseUrl()`.
 - **Public Key:** `sb_publishable_saQROBUNabTGkLIVL7V5gQ_7LMxhJI9` (verified on GoTrue `/auth/v1/settings` with HTTP 200).
 - **Service Key:** `SUPABASE_SERVICE_ROLE_KEY` is kept strictly on the server and is never included in client bundles.
@@ -237,6 +246,7 @@ sequenceDiagram
 ## 8. Account Provisioning & Status Architecture
 
 ### The Mapping Chain:
+
 ```
 Supabase auth.users.id
         ↓ (Foreign Key)
@@ -252,6 +262,7 @@ Ledger & Mutations Access Granted
 ```
 
 ### Failure Point & Resolution:
+
 1. Previously, when `profiles` row was missing or when the database returned a query error due to an unmigrated project, `requireActiveAccount` threw `Unauthorized: account status could not be verified`.
 2. **Fixed Implementation:**
    - `requireActiveAccount` now catches missing profiles for authenticated users and automatically provisions `profiles`, `user_settings`, and `notification_preferences` rows using the administrative server client.
@@ -319,33 +330,33 @@ Ledger & Mutations Access Granted
 
 ## 15. Row Level Security (RLS) Matrix
 
-| Table | SELECT Policy | INSERT Policy | UPDATE Policy | DELETE Policy |
-|---|---|---|---|---|
-| `bills` | `auth.uid() = user_id` | `auth.uid() = user_id` | `auth.uid() = user_id` | `auth.uid() = user_id` |
-| `bill_occurrences` | `auth.uid() = user_id` | Revoked (Service Role) | Revoked (Service Role) | Revoked (Service Role) |
-| `transactions` | `auth.uid() = user_id` | Revoked (Service Role) | Revoked (Service Role) | Revoked (Service Role) |
-| `budgets` | `auth.uid() = user_id` | `auth.uid() = user_id` | `auth.uid() = user_id` | `auth.uid() = user_id` |
-| `profiles` | `auth.uid() = id` | `auth.uid() = id` | `auth.uid() = id` (Status locked) | Revoked |
-| `user_settings` | `auth.uid() = user_id` | `auth.uid() = user_id` | `auth.uid() = user_id` | `auth.uid() = user_id` |
-| `categories` | `is_system OR auth.uid() = user_id` | `auth.uid() = user_id AND NOT is_system` | `auth.uid() = user_id AND NOT is_system` | `auth.uid() = user_id AND NOT is_system` |
-| `notifications` | `auth.uid() = user_id` | Revoked (Service Role) | `auth.uid() = user_id` | `auth.uid() = user_id` |
+| Table              | SELECT Policy                       | INSERT Policy                            | UPDATE Policy                            | DELETE Policy                            |
+| ------------------ | ----------------------------------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- |
+| `bills`            | `auth.uid() = user_id`              | `auth.uid() = user_id`                   | `auth.uid() = user_id`                   | `auth.uid() = user_id`                   |
+| `bill_occurrences` | `auth.uid() = user_id`              | Revoked (Service Role)                   | Revoked (Service Role)                   | Revoked (Service Role)                   |
+| `transactions`     | `auth.uid() = user_id`              | Revoked (Service Role)                   | Revoked (Service Role)                   | Revoked (Service Role)                   |
+| `budgets`          | `auth.uid() = user_id`              | `auth.uid() = user_id`                   | `auth.uid() = user_id`                   | `auth.uid() = user_id`                   |
+| `profiles`         | `auth.uid() = id`                   | `auth.uid() = id`                        | `auth.uid() = id` (Status locked)        | Revoked                                  |
+| `user_settings`    | `auth.uid() = user_id`              | `auth.uid() = user_id`                   | `auth.uid() = user_id`                   | `auth.uid() = user_id`                   |
+| `categories`       | `is_system OR auth.uid() = user_id` | `auth.uid() = user_id AND NOT is_system` | `auth.uid() = user_id AND NOT is_system` | `auth.uid() = user_id AND NOT is_system` |
+| `notifications`    | `auth.uid() = user_id`              | Revoked (Service Role)                   | `auth.uid() = user_id`                   | `auth.uid() = user_id`                   |
 
 ---
 
 ## 16. Environment Variables Matrix
 
-| Variable Name | Environment | Client / Server | Required? | Purpose |
-|---|---|---|---|---|
-| `VITE_SUPABASE_URL` | Build & Runtime | Client + Server | Yes | Base URL of Supabase project |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Build & Runtime | Client | Yes | Public publishable API key |
-| `SUPABASE_URL` | Runtime | Server | Yes | Base URL for SSR & Server Functions |
-| `SUPABASE_PUBLISHABLE_KEY` | Runtime | Server | Yes | Fallback publishable key for server |
-| `SUPABASE_SERVICE_ROLE_KEY` | Runtime | Server Only | Optional* | Privileged key for admin mutations & provisioning |
-| `RAZORPAY_KEY_ID` | Runtime | Server Only | Optional | Razorpay payment key (BLOCKED if absent) |
-| `RAZORPAY_KEY_SECRET` | Runtime | Server Only | Optional | Razorpay secret (BLOCKED if absent) |
-| `RAZORPAY_WEBHOOK_SECRET` | Runtime | Server Only | Optional | Razorpay webhook verification |
+| Variable Name                   | Environment     | Client / Server | Required? | Purpose                                           |
+| ------------------------------- | --------------- | --------------- | --------- | ------------------------------------------------- |
+| `VITE_SUPABASE_URL`             | Build & Runtime | Client + Server | Yes       | Base URL of Supabase project                      |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Build & Runtime | Client          | Yes       | Public publishable API key                        |
+| `SUPABASE_URL`                  | Runtime         | Server          | Yes       | Base URL for SSR & Server Functions               |
+| `SUPABASE_PUBLISHABLE_KEY`      | Runtime         | Server          | Yes       | Fallback publishable key for server               |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Runtime         | Server Only     | Optional* | Privileged key for admin mutations & provisioning |
+| `RAZORPAY_KEY_ID`               | Runtime         | Server Only     | Optional  | Razorpay payment key (BLOCKED if absent)          |
+| `RAZORPAY_KEY_SECRET`           | Runtime         | Server Only     | Optional  | Razorpay secret (BLOCKED if absent)               |
+| `RAZORPAY_WEBHOOK_SECRET`       | Runtime         | Server Only     | Optional  | Razorpay webhook verification                     |
 
-**Note: Without `SUPABASE_SERVICE_ROLE_KEY`, direct database administrative provisioning is skipped and transactions must rely on authenticated caller permissions.*
+*_Note: Without `SUPABASE_SERVICE_ROLE_KEY`, direct database administrative provisioning is skipped and transactions must rely on authenticated caller permissions._
 
 ---
 
@@ -368,13 +379,15 @@ Ledger & Mutations Access Granted
 ## 18. Vercel Configuration
 
 To resolve all production errors, configure these environment variables in Vercel Project Settings:
+
 ```env
 VITE_SUPABASE_URL=https://ocajeaytrcakzoxavvvg.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_saQROBUNabTGkLIVL7V5gQ_7LMxhJI9
 SUPABASE_URL=https://ocajeaytrcakzoxavvvg.supabase.co
 SUPABASE_PUBLISHABLE_KEY=sb_publishable_saQROBUNabTGkLIVL7V5gQ_7LMxhJI9
 ```
-*(Optional for admin ledger & payment features: add `SUPABASE_SERVICE_ROLE_KEY`)*
+
+_(Optional for admin ledger & payment features: add `SUPABASE_SERVICE_ROLE_KEY`)_
 
 ---
 
@@ -401,6 +414,7 @@ SUPABASE_PUBLISHABLE_KEY=sb_publishable_saQROBUNabTGkLIVL7V5gQ_7LMxhJI9
 ## 21. Database Migrations Audit
 
 All 16 migration files in `supabase/migrations/` were reviewed:
+
 - `20260801171312_018b59bd-f4a5-4b21-9744-d52c30f3bf4f.sql`: Base bills & payments tables.
 - `20260811090959_11849c31-90b2-435a-864b-2211f10053ec.sql`: Transactions and budgets tables.
 - `20260811101338_5b438112-4b69-48ed-a464-cdc9582dce4a.sql`: Profiles, user_settings, and auth trigger.
@@ -414,6 +428,7 @@ All 16 migration files in `supabase/migrations/` were reviewed:
 ## 22. Database Migrations Applied
 
 Verification executed directly against Supabase database `ocajeaytrcakzoxavvvg`:
+
 - `public.bills`: **APPLIED**
 - `public.transactions`: **APPLIED**
 - `public.budgets`: **APPLIED**
@@ -449,6 +464,7 @@ Verification executed directly against Supabase database `ocajeaytrcakzoxavvvg`:
 ## 25. Live Production Results
 
 Tested URL: `https://bill-buddy-liart.vercel.app`
+
 - **HTTP Response:** Status 200 OK.
 - **Initial HTML Title:** `<title>BillBoard — Track Bills, Due Dates & Payments</title>` (Old branding detected).
 - **Login Page Title:** `<title>Sign In — PocketPilot</title>` (Old branding detected).
@@ -501,6 +517,7 @@ Tested URL: `https://bill-buddy-liart.vercel.app`
 ## 30. Rollback Procedure
 
 If issues arise after deployment:
+
 1. Revert Git commit via `git revert HEAD` and push to `main`.
 2. In Vercel, navigate to Deployments and promote the previous stable deployment.
 
@@ -519,19 +536,20 @@ If issues arise after deployment:
 
 ## 32. Definition of Done Assessment
 
-| Item | Requirement | Verified Status |
-|---|---|---|
-| 1 | Full repository source code audited | **YES** |
-| 2 | All Supabase migrations inspected | **YES** |
-| 3 | Root causes of all 7 errors diagnosed | **YES** |
-| 4 | Error classifier fixed (Part 14) | **YES** |
-| 5 | Environment variable resolution hardened | **YES** |
-| 6 | Active account provisioning implemented | **YES** |
-| 7 | Rebranding to BillBuddy enforced | **YES** |
-| 8 | Automated unit tests pass | **YES (185/185)** |
-| 9 | TypeScript compilation passes | **YES (0 errors)** |
-| 10 | Production build passes | **YES** |
-| 11 | Live production verified end-to-end | **NOT READY (Awaiting Vercel redeployment)** |
+| Item | Requirement                              | Verified Status                              |
+| ---- | ---------------------------------------- | -------------------------------------------- |
+| 1    | Full repository source code audited      | **YES**                                      |
+| 2    | All Supabase migrations inspected        | **YES**                                      |
+| 3    | Root causes of all 7 errors diagnosed    | **YES**                                      |
+| 4    | Error classifier fixed (Part 14)         | **YES**                                      |
+| 5    | Environment variable resolution hardened | **YES**                                      |
+| 6    | Active account provisioning implemented  | **YES**                                      |
+| 7    | Rebranding to BillBuddy enforced         | **YES**                                      |
+| 8    | Automated unit tests pass                | **YES (185/185)**                            |
+| 9    | TypeScript compilation passes            | **YES (0 errors)**                           |
+| 10   | Production build passes                  | **YES**                                      |
+| 11   | Live production verified end-to-end      | **NOT READY (Awaiting Vercel redeployment)** |
 
 ### Final Status:
+
 **NOT READY** (Local codebase is 100% verified and ready; awaiting Vercel environment variable synchronization and deployment trigger).

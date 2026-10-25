@@ -45,7 +45,10 @@ export function Skeleton({ className, variant = "text", ...props }: SkeletonProp
   if (variant === "avatar") {
     return (
       <div
-        className={cn("rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse w-10 h-10", className)}
+        className={cn(
+          "rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse w-10 h-10",
+          className,
+        )}
         {...props}
       />
     );

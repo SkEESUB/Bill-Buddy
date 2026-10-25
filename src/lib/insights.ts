@@ -248,7 +248,13 @@ export type BillLike = {
   is_active?: boolean;
 };
 
-export type Commitment = { id: string; title: string; category: string; monthly: number; repeat: string };
+export type Commitment = {
+  id: string;
+  title: string;
+  category: string;
+  monthly: number;
+  repeat: string;
+};
 
 /**
  * Recurring bills normalised to a monthly-equivalent cost so weekly,
@@ -306,14 +312,13 @@ function bucket(rows: ObligationLike[]): ObligationBucket {
 }
 
 /** Overdue / today / 7-day / 30-day obligation buckets from real occurrences. */
-export function obligationSummary(
-  occurrences: ObligationLike[],
-  today: string,
-): ObligationSummary {
+export function obligationSummary(occurrences: ObligationLike[], today: string): ObligationSummary {
   const open = occurrences.filter(OPEN);
   const overdue = open.filter((o) => o.scheduled_date < today);
   const dueToday = open.filter((o) => o.scheduled_date === today);
-  const in7 = open.filter((o) => o.scheduled_date >= today && o.scheduled_date <= addDays(today, 7));
+  const in7 = open.filter(
+    (o) => o.scheduled_date >= today && o.scheduled_date <= addDays(today, 7),
+  );
   const in30 = open.filter(
     (o) => o.scheduled_date >= today && o.scheduled_date <= addDays(today, 30),
   );
@@ -500,7 +505,7 @@ function addMonthsBack(day: string, months: number): string {
   const [y, m] = day.split("-").map(Number);
   const zero = (m ?? 1) - 1 - months;
   const year = (y ?? 1970) + Math.floor(zero / 12);
-  const month = ((zero % 12) + 12) % 12 + 1;
+  const month = (((zero % 12) + 12) % 12) + 1;
   return `${year}-${String(month).padStart(2, "0")}-01`;
 }
 
@@ -582,7 +587,12 @@ export function buildInsights(input: InsightInputs): InsightCard[] {
   if (riskiest && riskiest.percentageUsed > 0) {
     cards.push({
       id: "budget",
-      tone: riskiest.status === "over_budget" ? "danger" : riskiest.status === "near_limit" ? "warning" : "neutral",
+      tone:
+        riskiest.status === "over_budget"
+          ? "danger"
+          : riskiest.status === "near_limit"
+            ? "warning"
+            : "neutral",
       text: `You have used ${riskiest.percentageUsed}% of your ${riskiest.name} budget.`,
     });
   }

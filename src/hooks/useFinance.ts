@@ -140,7 +140,7 @@ export function useFinance() {
 
   /** Run a server mutation, then refresh authoritative data before resolving. */
   const mutate = useCallback(
-    async <T,>(action: () => Promise<T>): Promise<T> => {
+    async <T>(action: () => Promise<T>): Promise<T> => {
       const result = await action();
       await load("refresh");
       bumpFinance();
@@ -172,7 +172,8 @@ export function useFinance() {
       recordPayment: (data: PaymentInput) => mutate(() => recordPayment({ data })),
       skipOccurrence: (occurrenceId: string) =>
         mutate(() => skip({ data: { occurrence_id: occurrenceId } })),
-      createTransaction: (data: CreateTransactionInput) => mutate(() => createTransaction({ data })),
+      createTransaction: (data: CreateTransactionInput) =>
+        mutate(() => createTransaction({ data })),
       updateTransaction: (data: UpdateTransactionInput) =>
         mutate(() => updateTransaction({ data })),
       deleteTransaction: (id: string) => mutate(() => deleteTransaction({ data: { id } })),
@@ -203,10 +204,7 @@ export function useFinance() {
   );
 
   const today = todayInTimeZone();
-  const derived = useMemo(
-    () => deriveFinance(snapshot, today),
-    [snapshot, today],
-  );
+  const derived = useMemo(() => deriveFinance(snapshot, today), [snapshot, today]);
 
   return { ...derived, snapshot, today, loading, refreshing, error, reload, actions };
 }
@@ -264,10 +262,7 @@ export function deriveFinance(snapshot: Snapshot, today: string) {
 
   const budgets = snapshot.budgets.map((budget) => ({
     ...budget,
-    progress: budgetProgress(
-      Number(budget.amount),
-      spentByCategory.get(budget.category) ?? 0,
-    ),
+    progress: budgetProgress(Number(budget.amount), spentByCategory.get(budget.category) ?? 0),
   }));
 
   const overallBudget = budgetProgress(monthlyBudgetLimit, monthSpending);

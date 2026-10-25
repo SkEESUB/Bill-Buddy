@@ -49,9 +49,9 @@ describe("role model", () => {
   });
 
   it("reserves account status changes for super admins", () => {
-    const holders = (["super_admin", "finance_admin", "support_admin", "readonly_admin"] as const).filter(
-      (role) => hasPermission([role], "users.status"),
-    );
+    const holders = (
+      ["super_admin", "finance_admin", "support_admin", "readonly_admin"] as const
+    ).filter((role) => hasPermission([role], "users.status"));
     expect(holders).toEqual(["super_admin"]);
   });
 

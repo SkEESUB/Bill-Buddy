@@ -46,9 +46,9 @@ describe("recurrence", () => {
     expect(nextOccurrenceDate("2026-03-10", { repeat_type: "monthly" })).toBe("2026-04-10");
     expect(nextOccurrenceDate("2026-03-10", { repeat_type: "quarterly" })).toBe("2026-06-10");
     expect(nextOccurrenceDate("2026-03-10", { repeat_type: "yearly" })).toBe("2027-03-10");
-    expect(
-      nextOccurrenceDate("2026-03-10", { repeat_type: "custom", repeat_interval: 10 }),
-    ).toBe("2026-03-20");
+    expect(nextOccurrenceDate("2026-03-10", { repeat_type: "custom", repeat_interval: 10 })).toBe(
+      "2026-03-20",
+    );
     expect(nextOccurrenceDate("2026-03-10", { repeat_type: "none" })).toBeNull();
   });
 
@@ -65,12 +65,7 @@ describe("recurrence", () => {
     const dates = occurrenceDatesThrough("2026-01-31", "2026-05-01", {
       repeat_type: "monthly",
     });
-    expect(dates).toEqual([
-      "2026-01-31",
-      "2026-02-28",
-      "2026-03-28",
-      "2026-04-28",
-    ]);
+    expect(dates).toEqual(["2026-01-31", "2026-02-28", "2026-03-28", "2026-04-28"]);
   });
 
   it("returns a single date for non-recurring bills", () => {
@@ -100,9 +95,7 @@ describe("occurrence status", () => {
   it("never overrides settled or in-flight states", () => {
     expect(deriveOccurrenceStatus("paid", "2026-01-01", today)).toBe("paid");
     expect(deriveOccurrenceStatus("skipped", "2026-01-01", today)).toBe("skipped");
-    expect(deriveOccurrenceStatus("payment_pending", "2026-01-01", today)).toBe(
-      "payment_pending",
-    );
+    expect(deriveOccurrenceStatus("payment_pending", "2026-01-01", today)).toBe("payment_pending");
   });
 });
 

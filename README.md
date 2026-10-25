@@ -27,16 +27,16 @@ bills: when they're due, how much they cost, and what you've already paid.
 
 ## Tech stack
 
-| Layer | Choice |
-| --- | --- |
-| Framework | React 19 + TanStack Start (SSR) |
-| Routing | TanStack Router (file-based, `src/routes`) |
-| Build | Vite 7 |
-| Styling | Tailwind CSS v4 with semantic tokens in `src/styles.css` |
-| Backend | Supabase (PostgreSQL + Auth) with Row Level Security |
-| Charts | Recharts |
-| Icons | lucide-react |
-| Toasts | sonner |
+| Layer     | Choice                                                   |
+| --------- | -------------------------------------------------------- |
+| Framework | React 19 + TanStack Start (SSR)                          |
+| Routing   | TanStack Router (file-based, `src/routes`)               |
+| Build     | Vite 7                                                   |
+| Styling   | Tailwind CSS v4 with semantic tokens in `src/styles.css` |
+| Backend   | Supabase (PostgreSQL + Auth) with Row Level Security     |
+| Charts    | Recharts                                                 |
+| Icons     | lucide-react                                             |
+| Toasts    | sonner                                                   |
 
 > React Router is not supported on this stack; TanStack Router provides the
 > equivalent routing primitives.

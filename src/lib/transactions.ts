@@ -309,7 +309,11 @@ export function toLedgerJson(rows: ExportRow[]): string {
     const values = toExportRow(row);
     return Object.fromEntries(EXPORT_HEADERS.map((header, i) => [header, values[i]]));
   });
-  return JSON.stringify({ exported_at: new Date().toISOString(), count: records.length, transactions: records }, null, 2);
+  return JSON.stringify(
+    { exported_at: new Date().toISOString(), count: records.length, transactions: records },
+    null,
+    2,
+  );
 }
 
 /* --------------------------------- totals --------------------------------- */

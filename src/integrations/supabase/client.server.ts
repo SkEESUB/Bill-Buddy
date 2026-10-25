@@ -74,7 +74,7 @@ export const supabaseAdmin = new Proxy({} as ReturnType<typeof createSupabaseAdm
 export function getAdminClient() {
   if (!process.env["SUPABASE_SERVICE_ROLE_KEY"]) {
     throw new Error(
-      "[BillBuddy] SUPABASE_SERVICE_ROLE_KEY is not set. Add it to Vercel environment variables."
+      "[BillBuddy] SUPABASE_SERVICE_ROLE_KEY is not set. Add it to Vercel environment variables.",
     );
   }
   return supabaseAdmin;

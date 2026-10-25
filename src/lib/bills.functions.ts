@@ -22,6 +22,8 @@ const billInput = z.object({
   repeat_interval: z.number().int().min(1).max(365).default(1),
   repeat_end_date: dayString.nullable().optional(),
   reminder_days_before: z.number().int().min(0).max(60).default(3),
+  reminder_time: z.string().trim().default("09:00"),
+  reminder_email: z.string().trim().email("Valid email required").nullable().optional(),
   upi_id: z.string().trim().max(120).nullable().optional(),
   notes: z.string().trim().max(1000).nullable().optional(),
   amount_type: z.enum(["fixed", "variable"]).default("fixed"),
@@ -52,6 +54,8 @@ export const createBill = createServerFn({ method: "POST" })
         repeat_interval: data.repeat_interval,
         repeat_end_date: data.repeat_end_date ?? null,
         reminder_days_before: data.reminder_days_before,
+        reminder_time: data.reminder_time ?? "09:00:00",
+        reminder_email: data.reminder_email ?? null,
         upi_id: data.upi_id ?? null,
         notes: data.notes ?? null,
         amount_type: data.amount_type,
@@ -130,7 +134,19 @@ export const deleteBill = createServerFn({ method: "POST" })
   .validator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { audit } = await import("./bills.server");
+    const { audit, privilegedDb } = await import("./bills.server");
+    const db = await privilegedDb(supabase as any);
+
+    // Cancel pending reminders for this bill
+    await db.from("bill_reminders").delete().eq("user_id", userId).eq("status", "pending");
+
+    // Remove pending / future occurrences so they no longer appear in remaining totals
+    await db
+      .from("bill_occurrences")
+      .delete()
+      .eq("bill_id", data.id)
+      .eq("user_id", userId)
+      .neq("status", "paid");
 
     const { count, error: countError } = await supabase
       .from("bill_occurrences")
@@ -139,20 +155,23 @@ export const deleteBill = createServerFn({ method: "POST" })
       .eq("user_id", userId)
       .eq("status", "paid");
     if (countError) throw new Error(countError.message);
+
     if ((count ?? 0) > 0) {
-      throw new Error(
-        "This bill has recorded payments, so it can't be deleted. Pause it instead to keep your payment history.",
-      );
+      // Archive / deactivate bill so historical payments remain preserved in DB
+      const { error: archiveError } = await supabase
+        .from("bills")
+        .update({ is_active: false } as never)
+        .eq("id", data.id)
+        .eq("user_id", userId);
+      if (archiveError) throw new Error(archiveError.message);
+      await audit(supabase, userId, "bill.archived", "bill", data.id);
+      return { ok: true, archived: true };
     }
 
-    const { error } = await supabase
-      .from("bills")
-      .delete()
-      .eq("id", data.id)
-      .eq("user_id", userId);
+    const { error } = await supabase.from("bills").delete().eq("id", data.id).eq("user_id", userId);
     if (error) throw new Error(error.message);
     await audit(supabase, userId, "bill.deleted", "bill", data.id);
-    return { ok: true };
+    return { ok: true, deleted: true };
   });
 
 /**
@@ -261,6 +280,13 @@ export const recordOccurrencePayment = createServerFn({ method: "POST" })
       throw new Error(updateError.message);
     }
 
+    // Cancel future pending reminders for this completed occurrence
+    await db
+      .from("bill_reminders")
+      .update({ status: "cancelled" } as never)
+      .eq("bill_occurrence_id", occurrence.id)
+      .eq("status", "pending");
+
     await audit(supabase, userId, "bill.payment_recorded", "bill_occurrence", occurrence.id, {
       amount: data.amount,
       payment_method: data.payment_method,
@@ -289,9 +315,7 @@ export const recordOccurrencePayment = createServerFn({ method: "POST" })
 /** Skip a single instalment without paying it (e.g. a month you were not billed). */
 export const skipOccurrence = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .validator((data: unknown) =>
-    z.object({ occurrence_id: z.string().uuid() }).parse(data),
-  )
+  .validator((data: unknown) => z.object({ occurrence_id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { audit, privilegedDb } = await import("./bills.server");

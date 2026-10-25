@@ -1,32 +1,25 @@
-﻿import {
-  format,
-  formatDistanceToNow,
-  isToday,
-  isTomorrow,
-  isYesterday,
-  parseISO,
-} from 'date-fns';
+﻿import { format, formatDistanceToNow, isToday, isTomorrow, isYesterday, parseISO } from "date-fns";
 
 function toDate(date: string | Date): Date {
-  return typeof date === 'string' ? parseISO(date) : date;
+  return typeof date === "string" ? parseISO(date) : date;
 }
 
 export function formatDate(date: string | Date): string {
-  return format(toDate(date), 'dd MMM yyyy');
+  return format(toDate(date), "dd MMM yyyy");
 }
 
 export function formatRelativeDate(date: string | Date): string {
   const d = toDate(date);
-  if (isToday(d)) return 'Today';
-  if (isTomorrow(d)) return 'Tomorrow';
-  if (isYesterday(d)) return 'Yesterday';
+  if (isToday(d)) return "Today";
+  if (isTomorrow(d)) return "Tomorrow";
+  if (isYesterday(d)) return "Yesterday";
   return formatDistanceToNow(d, { addSuffix: true });
 }
 
 export function formatMonthYear(date: string | Date): string {
-  return format(toDate(date), 'MMM yyyy');
+  return format(toDate(date), "MMM yyyy");
 }
 
 export function formatShortDate(date: string | Date): string {
-  return format(toDate(date), 'dd MMM');
+  return format(toDate(date), "dd MMM");
 }

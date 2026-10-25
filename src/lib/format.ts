@@ -71,7 +71,8 @@ export function setDisplayCurrency(code: string | null | undefined): void {
 
 export function currencySymbol(code?: string | null): string {
   if (!code) return displayCurrency.symbol;
-  return (SUPPORTED_CURRENCIES.find((c) => c.code === code.toUpperCase()) ?? displayCurrency).symbol;
+  return (SUPPORTED_CURRENCIES.find((c) => c.code === code.toUpperCase()) ?? displayCurrency)
+    .symbol;
 }
 
 /** ₹1,240.00 — grouped for the active currency's locale. */

@@ -263,7 +263,8 @@ export async function settleCapturedPayment(
 
   let duplicate = false;
   if (txnError) {
-    if (!/duplicate key|unique constraint/i.test(txnError.message)) throw new Error(txnError.message);
+    if (!/duplicate key|unique constraint/i.test(txnError.message))
+      throw new Error(txnError.message);
     duplicate = true;
     const { data: existing } = await db
       .from("transactions")
@@ -391,7 +392,12 @@ export async function recordRefund(
     // A fully refunded instalment is no longer settled.
     await db
       .from("bill_occurrences")
-      .update({ status: "pending", paid_at: null, actual_amount: null, transaction_id: null } as never)
+      .update({
+        status: "pending",
+        paid_at: null,
+        actual_amount: null,
+        transaction_id: null,
+      } as never)
       .eq("id", order.bill_occurrence_id);
   }
 

@@ -1,11 +1,13 @@
 # BillBuddy — Comprehensive Application Documentation
 
 ## 1. Overview & Vision
+
 **BillBuddy** is a modern, high-performance personal finance and bill-management web application. It combines automated recurring bill scheduling, one-tap UPI payments, real-time cash flow runway calculations, intelligent spending budgets, and full ledger tracking into an elegant, distraction-free fintech interface.
 
 ---
 
 ## 2. Technology Stack
+
 - **Framework**: TanStack Start (SSR + Server Functions) with TanStack Router
 - **Runtime**: Bun & Node.js
 - **Styling**: Tailwind CSS v4 with custom semantic fintech tokens
@@ -18,6 +20,7 @@
 ## 3. Design System & Tokens (`src/styles.css`)
 
 The interface replaces heavy neumorphism with a crisp modern fintech aesthetic:
+
 - **Surfaces & Borders**: Subtle 1px borders (`border-border-light`), flat surfaces, and refined elevation shadows (`shadow-card`, `shadow-card-hover`).
 - **Color Palette**:
   - **Light Mode**:
@@ -40,6 +43,7 @@ The interface replaces heavy neumorphism with a crisp modern fintech aesthetic:
 ## 4. Information Architecture & Navigation
 
 ### Global Top Navigation (`src/components/TopNav.tsx`)
+
 - **Left**: BillBuddy branding with violet icon mark and bold wordmark.
 - **Center (Desktop)**: Primary links: `Home`, `Bills`, `Money`, `Goals`, `Insights`.
 - **Right**:
@@ -47,7 +51,9 @@ The interface replaces heavy neumorphism with a crisp modern fintech aesthetic:
   - **UserMenu (`src/components/UserMenu.tsx`)**: Interactive avatar dropdown containing profile details, direct links to Profile, Settings, Admin (if admin), Theme Switcher (Light/Dark/Auto), and Sign Out. The misplaced header signout button has been permanently relocated inside this menu.
 
 ### Mobile Bottom Dock (`src/components/BottomNav.tsx`)
+
 A 5-item dock optimized for mobile ergonomics with safe-area bottom padding:
+
 1. `Home` (`/`): Dashboard summary, safe to spend, upcoming bills.
 2. `Bills` (`/bills`): Full bill list with status filters (Upcoming, Soon, Overdue, Paid).
 3. `+` **Quick Add**: Center floating button triggering `QuickAddModal` ("New Bill", "Record Expense", "Record Income").
@@ -59,6 +65,7 @@ A 5-item dock optimized for mobile ergonomics with safe-area bottom padding:
 ## 5. User Profile & Account System (`src/pages/ProfilePage.tsx`)
 
 The unified Profile & Account hub is organized into 4 cohesive tabs:
+
 1. **Personal**:
    - Avatar management (upload via signed URL, change, remove photo, or initials fallback).
    - Full Name, read-only auth Email, Mobile Phone, and Default UPI ID.
@@ -77,6 +84,7 @@ The unified Profile & Account hub is organized into 4 cohesive tabs:
 ## 6. Onboarding Flow (`src/routes/onboarding.tsx`, `src/pages/OnboardingPage.tsx`)
 
 New users are automatically guided through a 3-step setup wizard before accessing the dashboard:
+
 - **Step 1**: Personal greeting & Full Name.
 - **Step 2**: Preferred currency & Estimated monthly income.
 - **Step 3**: Optional first bill creation (or skip to explore).
@@ -96,6 +104,7 @@ New users are automatically guided through a 3-step setup wizard before accessin
 ---
 
 ## 8. Security & Database Resilience
+
 - **Server Functions**: Gated by `requireActiveAccount` middleware (`src/lib/auth/active-account.ts`), ensuring deactivated, suspended, or closed accounts cannot execute writes.
 - **Row-Level Security (RLS)**: Strictly enforced on `bills`, `bill_occurrences`, `transactions`, `budgets`, `profiles`, `user_settings`, and `spending_goals`.
 - **Audit Logging**: Sensitive changes (payments, user status changes) are recorded to `audit_logs` with credential scrubbing.

@@ -57,85 +57,99 @@ export const listUsers = createServerFn({ method: "GET" })
   .middleware([requireActiveAccount])
   .validator((input: { search?: string; page?: number } | undefined) =>
     z
-      .object({ search: z.string().max(200).optional(), page: z.number().int().min(1).max(200).optional() })
+      .object({
+        search: z.string().max(200).optional(),
+        page: z.number().int().min(1).max(200).optional(),
+      })
       .parse(input ?? {}),
   )
-  .handler(async ({ context, data }): Promise<{ users: AdminUserRow[]; page: number; hasMore: boolean }> => {
-    const { requireAdmin } = await import("@/lib/admin/guard.server");
-    const { writeAudit } = await import("@/lib/admin/audit.server");
-    const { db, actor } = await requireAdmin(context.userId, "users.read");
+  .handler(
+    async ({
+      context,
+      data,
+    }): Promise<{ users: AdminUserRow[]; page: number; hasMore: boolean }> => {
+      const { requireAdmin } = await import("@/lib/admin/guard.server");
+      const { writeAudit } = await import("@/lib/admin/audit.server");
+      const { db, actor } = await requireAdmin(context.userId, "users.read");
 
-    const page = data.page ?? 1;
-    const perPage = 25;
-    const search = (data.search ?? "").trim().toLowerCase();
+      const page = data.page ?? 1;
+      const perPage = 25;
+      const search = (data.search ?? "").trim().toLowerCase();
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: authList, error } = await supabaseAdmin.auth.admin.listUsers({
-      page: search ? 1 : page,
-      perPage: search ? 1000 : perPage,
-    });
-    if (error) throw new Error(error.message);
-
-    let authUsers = authList.users;
-    if (search) {
-      authUsers = authUsers.filter(
-        (u) => (u.email ?? "").toLowerCase().includes(search) || u.id === search,
-      );
-    }
-
-    const ids = authUsers.map((u) => u.id);
-    const [{ data: profiles }, { data: roleRows }] = await Promise.all([
-      db.from("profiles").select("id, full_name, account_status").in("id", ids.length ? ids : [""]),
-      db.from("user_roles").select("user_id, role").in("user_id", ids.length ? ids : [""]),
-    ]);
-
-    const profileById = new Map((profiles ?? []).map((p) => [p.id, p]));
-    const rolesById = new Map<string, string[]>();
-    for (const row of roleRows ?? []) {
-      rolesById.set(row.user_id, [...(rolesById.get(row.user_id) ?? []), String(row.role)]);
-    }
-
-    let users: AdminUserRow[] = authUsers.map((u) => ({
-      id: u.id,
-      email: u.email ?? null,
-      fullName: profileById.get(u.id)?.full_name ?? null,
-      accountStatus: profileById.get(u.id)?.account_status ?? "ACTIVE",
-      roles: rolesById.get(u.id) ?? [],
-      createdAt: u.created_at ?? null,
-      lastSignInAt: u.last_sign_in_at ?? null,
-    }));
-
-    if (search && users.length === 0) {
-      const { data: byName } = await db
-        .from("profiles")
-        .select("id, full_name, account_status")
-        .ilike("full_name", `%${search}%`)
-        .limit(perPage);
-      users = (byName ?? []).map((p) => ({
-        id: p.id,
-        email: null,
-        fullName: p.full_name,
-        accountStatus: p.account_status ?? "ACTIVE",
-        roles: rolesById.get(p.id) ?? [],
-        createdAt: null,
-        lastSignInAt: null,
-      }));
-    }
-
-    const hasMore = !search && authUsers.length === perPage;
-    if (search) {
-      await writeAudit(db, {
-        action: "ADMIN_SEARCH_USERS",
-        entityType: "user",
-        actorUserId: actor.userId,
-        actorRole: actor.role,
-        metadata: { matches: users.length },
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: authList, error } = await supabaseAdmin.auth.admin.listUsers({
+        page: search ? 1 : page,
+        perPage: search ? 1000 : perPage,
       });
-      users = users.slice(0, perPage);
-    }
+      if (error) throw new Error(error.message);
 
-    return { users, page, hasMore };
-  });
+      let authUsers = authList.users;
+      if (search) {
+        authUsers = authUsers.filter(
+          (u) => (u.email ?? "").toLowerCase().includes(search) || u.id === search,
+        );
+      }
+
+      const ids = authUsers.map((u) => u.id);
+      const [{ data: profiles }, { data: roleRows }] = await Promise.all([
+        db
+          .from("profiles")
+          .select("id, full_name, account_status")
+          .in("id", ids.length ? ids : [""]),
+        db
+          .from("user_roles")
+          .select("user_id, role")
+          .in("user_id", ids.length ? ids : [""]),
+      ]);
+
+      const profileById = new Map((profiles ?? []).map((p) => [p.id, p]));
+      const rolesById = new Map<string, string[]>();
+      for (const row of roleRows ?? []) {
+        rolesById.set(row.user_id, [...(rolesById.get(row.user_id) ?? []), String(row.role)]);
+      }
+
+      let users: AdminUserRow[] = authUsers.map((u) => ({
+        id: u.id,
+        email: u.email ?? null,
+        fullName: profileById.get(u.id)?.full_name ?? null,
+        accountStatus: profileById.get(u.id)?.account_status ?? "ACTIVE",
+        roles: rolesById.get(u.id) ?? [],
+        createdAt: u.created_at ?? null,
+        lastSignInAt: u.last_sign_in_at ?? null,
+      }));
+
+      if (search && users.length === 0) {
+        const { data: byName } = await db
+          .from("profiles")
+          .select("id, full_name, account_status")
+          .ilike("full_name", `%${search}%`)
+          .limit(perPage);
+        users = (byName ?? []).map((p) => ({
+          id: p.id,
+          email: null,
+          fullName: p.full_name,
+          accountStatus: p.account_status ?? "ACTIVE",
+          roles: rolesById.get(p.id) ?? [],
+          createdAt: null,
+          lastSignInAt: null,
+        }));
+      }
+
+      const hasMore = !search && authUsers.length === perPage;
+      if (search) {
+        await writeAudit(db, {
+          action: "ADMIN_SEARCH_USERS",
+          entityType: "user",
+          actorUserId: actor.userId,
+          actorRole: actor.role,
+          metadata: { matches: users.length },
+        });
+        users = users.slice(0, perPage);
+      }
+
+      return { users, page, hasMore };
+    },
+  );
 
 export const getUserDetail = createServerFn({ method: "GET" })
   .middleware([requireActiveAccount])
@@ -150,12 +164,22 @@ export const getUserDetail = createServerFn({ method: "GET" })
     const [profile, roles, settings, counts, orders, tickets] = await Promise.all([
       db.from("profiles").select("*").eq("id", data.userId).maybeSingle(),
       db.from("user_roles").select("role").eq("user_id", data.userId),
-      db.from("user_settings").select("currency, timezone, theme").eq("user_id", data.userId).maybeSingle(),
+      db
+        .from("user_settings")
+        .select("currency, timezone, theme")
+        .eq("user_id", data.userId)
+        .maybeSingle(),
       Promise.all([
         db.from("bills").select("id", { count: "exact", head: true }).eq("user_id", data.userId),
-        db.from("transactions").select("id", { count: "exact", head: true }).eq("user_id", data.userId),
+        db
+          .from("transactions")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", data.userId),
         db.from("budgets").select("id", { count: "exact", head: true }).eq("user_id", data.userId),
-        db.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", data.userId),
+        db
+          .from("notifications")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", data.userId),
       ]),
       db
         .from("payment_orders")
@@ -296,7 +320,9 @@ export const listTickets = createServerFn({ method: "GET" })
 
 export const getTicket = createServerFn({ method: "GET" })
   .middleware([requireActiveAccount])
-  .validator((input: { ticketId: string }) => z.object({ ticketId: z.string().uuid() }).parse(input))
+  .validator((input: { ticketId: string }) =>
+    z.object({ ticketId: z.string().uuid() }).parse(input),
+  )
   .handler(async ({ context, data }) => {
     const { requireAdmin } = await import("@/lib/admin/guard.server");
     const { writeAudit } = await import("@/lib/admin/audit.server");
@@ -338,15 +364,16 @@ export const getTicket = createServerFn({ method: "GET" })
 
 export const updateTicket = createServerFn({ method: "POST" })
   .middleware([requireActiveAccount])
-  .validator((input: { ticketId: string; status?: string; priority?: string; assignToMe?: boolean }) =>
-    z
-      .object({
-        ticketId: z.string().uuid(),
-        status: z.enum(["open", "in_progress", "waiting_user", "resolved", "closed"]).optional(),
-        priority: z.enum(["low", "normal", "high", "urgent"]).optional(),
-        assignToMe: z.boolean().optional(),
-      })
-      .parse(input),
+  .validator(
+    (input: { ticketId: string; status?: string; priority?: string; assignToMe?: boolean }) =>
+      z
+        .object({
+          ticketId: z.string().uuid(),
+          status: z.enum(["open", "in_progress", "waiting_user", "resolved", "closed"]).optional(),
+          priority: z.enum(["low", "normal", "high", "urgent"]).optional(),
+          assignToMe: z.boolean().optional(),
+        })
+        .parse(input),
   )
   .handler(async ({ context, data }) => {
     const { requireAdmin } = await import("@/lib/admin/guard.server");
@@ -469,7 +496,9 @@ export const listWebhookEvents = createServerFn({ method: "GET" })
 
     const { data, error } = await db
       .from("payment_events")
-      .select("id, provider, event_type, payment_order_id, processed, processed_at, process_error, created_at")
+      .select(
+        "id, provider, event_type, payment_order_id, processed, processed_at, process_error, created_at",
+      )
       .order("created_at", { ascending: false })
       .limit(100);
     if (error) throw new Error(error.message);
@@ -547,7 +576,8 @@ export const retryJob = createServerFn({ method: "POST" })
     const { runNotificationSweep, runNotificationRetention } = await import("@/lib/jobs.server");
     // Both jobs are claim-locked and idempotent, so a manual run can never
     // duplicate work already done for the current window.
-    const result = data.job === "retention" ? await runNotificationRetention() : await runNotificationSweep();
+    const result =
+      data.job === "retention" ? await runNotificationRetention() : await runNotificationSweep();
 
     await writeAudit(db, {
       action: "ADMIN_RETRY_JOB",
@@ -570,7 +600,9 @@ export const getSystemHealth = createServerFn({ method: "GET" })
     const checks: HealthCheck[] = [];
     const started = Date.now();
 
-    const { error: dbError } = await db.from("user_settings").select("user_id", { count: "exact", head: true });
+    const { error: dbError } = await db
+      .from("user_settings")
+      .select("user_id", { count: "exact", head: true });
     checks.push({
       component: "Database",
       status: dbError ? "FAILING" : "HEALTHY",
@@ -608,13 +640,18 @@ export const getSystemHealth = createServerFn({ method: "GET" })
       .maybeSingle();
     checks.push({
       component: "Retention",
-      status: !lastRetention ? "UNKNOWN" : lastRetention.status === "failed" ? "FAILING" : "HEALTHY",
+      status: !lastRetention
+        ? "UNKNOWN"
+        : lastRetention.status === "failed"
+          ? "FAILING"
+          : "HEALTHY",
       detail: lastRetention
         ? `Last run ${new Date(lastRetention.started_at).toISOString().slice(0, 16).replace("T", " ")} UTC, ${lastRetention.processed} pruned`
         : "No run recorded yet",
     });
 
-    const { readConfig, webhookConfigured, isSandboxKey } = await import("@/lib/payments/provider.server");
+    const { readConfig, webhookConfigured, isSandboxKey } =
+      await import("@/lib/payments/provider.server");
     const config = readConfig();
     checks.push({
       component: "Payment provider",
@@ -642,7 +679,10 @@ export const getSystemHealth = createServerFn({ method: "GET" })
     const [{ count: users }, { count: notifications }, { count: openTickets }] = await Promise.all([
       db.from("user_settings").select("user_id", { count: "exact", head: true }),
       db.from("notifications").select("id", { count: "exact", head: true }).is("read_at", null),
-      db.from("support_tickets").select("id", { count: "exact", head: true }).in("status", ["open", "in_progress"]),
+      db
+        .from("support_tickets")
+        .select("id", { count: "exact", head: true })
+        .in("status", ["open", "in_progress"]),
     ]);
 
     return {
@@ -672,7 +712,9 @@ export const listAuditLogs = createServerFn({ method: "GET" })
 
     let query = db
       .from("audit_logs")
-      .select("id, action, entity_type, entity_id, actor_user_id, actor_role, actor_type, result, user_id, metadata, created_at")
+      .select(
+        "id, action, entity_type, entity_id, actor_user_id, actor_role, actor_type, result, user_id, metadata, created_at",
+      )
       .order("created_at", { ascending: false })
       .limit(200);
     if (data.action) query = query.eq("action", data.action);

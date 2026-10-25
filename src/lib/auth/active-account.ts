@@ -57,37 +57,29 @@ export const requireActiveAccount = createMiddleware({ type: "function" })
     if (profileError) {
       // Preserve actual error — never hide as "session expired"
       throw new Error(
-        `DB_ERROR: Profile lookup failed — ${profileError.message} (${profileError.code})`
+        `DB_ERROR: Profile lookup failed — ${profileError.message} (${profileError.code})`,
       );
     }
 
     if (!profile && !profileError) {
       // First login — create profile and settings automatically
       try {
-        await adminClient
-          .from("profiles")
-          .upsert(
-            {
-              id: userId,
-              account_status: "ACTIVE",
-              full_name: email.split("@")[0],
-            } as never,
-            { onConflict: "id", ignoreDuplicates: true }
-          );
+        await adminClient.from("profiles").upsert(
+          {
+            id: userId,
+            account_status: "ACTIVE",
+            full_name: email.split("@")[0],
+          } as never,
+          { onConflict: "id", ignoreDuplicates: true },
+        );
 
         await adminClient
           .from("user_settings")
-          .upsert(
-            { user_id: userId } as never,
-            { onConflict: "user_id", ignoreDuplicates: true }
-          );
+          .upsert({ user_id: userId } as never, { onConflict: "user_id", ignoreDuplicates: true });
 
         await adminClient
           .from("notification_preferences")
-          .upsert(
-            { user_id: userId } as never,
-            { onConflict: "user_id", ignoreDuplicates: true }
-          );
+          .upsert({ user_id: userId } as never, { onConflict: "user_id", ignoreDuplicates: true });
       } catch (provisionErr) {
         console.warn("[BillBuddy] Auto-provisioning notice:", provisionErr);
       }

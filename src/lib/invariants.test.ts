@@ -302,10 +302,9 @@ describe("Security Invariant 13: Secret isolation in client bundles", () => {
     for (const file of clientFiles) {
       const content = readFileSync(file, "utf8");
       for (const secret of SENSITIVE_STRINGS) {
-        expect(
-          content.includes(secret),
-          `Secret ${secret} leaked in client file: ${file}`,
-        ).toBe(false);
+        expect(content.includes(secret), `Secret ${secret} leaked in client file: ${file}`).toBe(
+          false,
+        );
       }
     }
   });
@@ -332,7 +331,9 @@ describe("Error classification (Part 14)", () => {
   });
 
   it("classifies missing table / schema cache errors as database errors, never session expired", () => {
-    const err1 = classifyError("Could not find the table 'public.transactions' in the schema cache");
+    const err1 = classifyError(
+      "Could not find the table 'public.transactions' in the schema cache",
+    );
     expect(err1.kind).toBe("missing_table");
     expect(err1.message).toContain("Service temporarily unavailable");
     expect(err1.message).not.toContain("session has expired");
@@ -347,7 +348,9 @@ describe("Error classification (Part 14)", () => {
     expect(err.message).toContain("Setting up your account");
     expect(err.message).not.toContain("session has expired");
 
-    const err2 = classifyError(new Error("ACCOUNT_SUSPENDED: this account cannot perform this operation."));
+    const err2 = classifyError(
+      new Error("ACCOUNT_SUSPENDED: this account cannot perform this operation."),
+    );
     expect(err2.kind).toBe("account_suspended");
   });
 
@@ -384,8 +387,11 @@ describe("Error classification (Part 14)", () => {
 
   it("toUserMessage helper returns clean message string", () => {
     expect(toUserMessage("Invalid API key")).toContain("configuration error");
-    expect(toUserMessage("Could not find the table 'public.transactions' in the schema cache")).toContain("temporarily unavailable");
-    expect(toUserMessage(new Error("Unauthorized: account status could not be verified"))).toContain("Setting up your account");
+    expect(
+      toUserMessage("Could not find the table 'public.transactions' in the schema cache"),
+    ).toContain("temporarily unavailable");
+    expect(
+      toUserMessage(new Error("Unauthorized: account status could not be verified")),
+    ).toContain("Setting up your account");
   });
 });
-

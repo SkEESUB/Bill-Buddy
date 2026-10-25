@@ -5,7 +5,7 @@
 **Target Runtime:** TanStack Start (SSR) + React 19 + Nitro + Supabase  
 **Authoritative Supabase Project:** `xsytaixmyeypoiscfbim` (`https://xsytaixmyeypoiscfbim.supabase.co`)  
 **Audit Verification:** 186/186 Tests Passing | TypeScript Strict: 0 Errors | Production Build: Clean (Zero Deprecation Warnings)  
-**Last Updated:** 2026-10-23  
+**Last Updated:** 2026-10-23
 
 ---
 
@@ -57,20 +57,20 @@ flowchart TB
 
 Server-side mutations and aggregations are strictly partitioned into 12 dedicated server function modules, fully modernized to `.validator()` schemas:
 
-| Server Function Module | File Path | Scope & Responsibilities |
-| :--- | :--- | :--- |
-| **`account`** | [`src/lib/account.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/account.functions.ts) | Profile updates, user settings, avatar upload URLs, GDPR data export, account closure. |
-| **`admin`** | [`src/lib/admin.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/admin.functions.ts) | Role-based permissions (`super_admin`, `finance_admin`, `support`), audit trails, system health. |
-| **`bills`** | [`src/lib/bills.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/bills.functions.ts) | Bill CRUD, recurrence occurrence generator, occurrence status transitions, bill archiving. |
-| **`budgets`** | [`src/lib/budgets.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/budgets.functions.ts) | Category budget limits, period tracking, overrun warning thresholds. |
-| **`categories`**| [`src/lib/categories.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/categories.functions.ts) | Default & custom expense categories, color and icon associations. |
-| **`finance`** | [`src/lib/finance.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/finance.functions.ts) | Cash-flow run rates, safe-to-spend projections, aggregated balances. |
-| **`goals`** | [`src/lib/goals.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/goals.functions.ts) | Spending goals CRUD, milestone progress, target dates. |
-| **`insights`** | [`src/lib/insights.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/insights.functions.ts) | Financial health calculations, spend distribution, anomaly detection. |
-| **`jobs`** | [`src/lib/jobs.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/jobs.functions.ts) | Idempotent background job claim keys, recurrence synchronization, reminder sweeps. |
-| **`notifications`**| [`src/lib/notifications.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/notifications.functions.ts) | In-app alerts, read state toggles, notification channel preferences. |
-| **`payments`** | [`src/lib/payments.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/payments.functions.ts) | Payment orders, state transitions (`CREATED` → `CAPTURED`), webhook persistence. |
-| **`transactions`**| [`src/lib/transactions.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/transactions.functions.ts) | Ledger writes, idempotency enforcement (`client_request_id`), append-only reversals. |
+| Server Function Module | File Path                                                                                                                | Scope & Responsibilities                                                                         |
+| :--------------------- | :----------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
+| **`account`**          | [`src/lib/account.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/account.functions.ts)             | Profile updates, user settings, avatar upload URLs, GDPR data export, account closure.           |
+| **`admin`**            | [`src/lib/admin.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/admin.functions.ts)                 | Role-based permissions (`super_admin`, `finance_admin`, `support`), audit trails, system health. |
+| **`bills`**            | [`src/lib/bills.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/bills.functions.ts)                 | Bill CRUD, recurrence occurrence generator, occurrence status transitions, bill archiving.       |
+| **`budgets`**          | [`src/lib/budgets.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/budgets.functions.ts)             | Category budget limits, period tracking, overrun warning thresholds.                             |
+| **`categories`**       | [`src/lib/categories.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/categories.functions.ts)       | Default & custom expense categories, color and icon associations.                                |
+| **`finance`**          | [`src/lib/finance.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/finance.functions.ts)             | Cash-flow run rates, safe-to-spend projections, aggregated balances.                             |
+| **`goals`**            | [`src/lib/goals.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/goals.functions.ts)                 | Spending goals CRUD, milestone progress, target dates.                                           |
+| **`insights`**         | [`src/lib/insights.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/insights.functions.ts)           | Financial health calculations, spend distribution, anomaly detection.                            |
+| **`jobs`**             | [`src/lib/jobs.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/jobs.functions.ts)                   | Idempotent background job claim keys, recurrence synchronization, reminder sweeps.               |
+| **`notifications`**    | [`src/lib/notifications.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/notifications.functions.ts) | In-app alerts, read state toggles, notification channel preferences.                             |
+| **`payments`**         | [`src/lib/payments.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/payments.functions.ts)           | Payment orders, state transitions (`CREATED` → `CAPTURED`), webhook persistence.                 |
+| **`transactions`**     | [`src/lib/transactions.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/transactions.functions.ts)   | Ledger writes, idempotency enforcement (`client_request_id`), append-only reversals.             |
 
 ---
 
@@ -102,5 +102,17 @@ All tables are defined idempotently in [`supabase/migrations/001_billbuddy_schem
 22. **`public.job_runs`**: Lock keys and execution tracking for scheduled recurring jobs.
 
 ### Storage Buckets & Policies
+
 - **`avatars`**: Profile photos (user ID path-prefixed write access, public read).
 - **`receipts`**: Encrypted receipt and invoice document scans (authenticated user isolated).
+
+---
+
+## 4. Rebuilt Minimal Single-Screen Footprint
+
+Following the repository cleanup, all obsolete pages, unreferenced UI primitives, and deprecated packages have been excised:
+- **Active Routes:** Single authenticated home route `/`, login `/login`, and background reminder webhooks.
+- **Retained UI Primitives (`src/components/ui`):** `button`, `dialog`, `input`, `label`, `separator`, `sheet`, `skeleton`, `sonner`, `toggle`, `tooltip`.
+- **Pruned Dependencies:** 29 unused packages removed (including `recharts`, `embla-carousel-react`, `react-resizable-panels`, `cmdk`, `vaul`, `react-day-picker`, and 20 unused Radix wrappers).
+- **CSS Bundle Optimization:** Reduced compiled CSS footprint by 35% (74.56 kB vs 113.56 kB).
+- **Verification:** 189/189 Vitest unit tests pass, TypeScript strict 0 errors, ESLint 0 errors, and production build succeeds.

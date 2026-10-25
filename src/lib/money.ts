@@ -63,8 +63,7 @@ export function todayInTimeZone(timeZone = "Asia/Kolkata", now: Date = new Date(
 export function daysBetween(from: string, to: string): number {
   const a = parseDay(from);
   const b = parseDay(to);
-  const ms =
-    Date.UTC(b.year, b.month - 1, b.date) - Date.UTC(a.year, a.month - 1, a.date);
+  const ms = Date.UTC(b.year, b.month - 1, b.date) - Date.UTC(a.year, a.month - 1, a.date);
   return Math.round(ms / 86_400_000);
 }
 
@@ -83,7 +82,7 @@ export function addMonthsClamped(day: string, count: number): string {
   const { year, month, date } = parseDay(day);
   const zeroBased = month - 1 + count;
   const targetYear = year + Math.floor(zeroBased / 12);
-  const targetMonth = ((zeroBased % 12) + 12) % 12 + 1;
+  const targetMonth = (((zeroBased % 12) + 12) % 12) + 1;
   const clamped = Math.min(date, daysInMonth(targetYear, targetMonth));
   return formatDay(targetYear, targetMonth, clamped);
 }
@@ -208,12 +207,7 @@ export const MAX_AMOUNT = 1_000_000_000;
 
 /** True when a value is a usable positive money amount. */
 export function isValidAmount(value: unknown): value is number {
-  return (
-    typeof value === "number" &&
-    Number.isFinite(value) &&
-    value > 0 &&
-    value <= MAX_AMOUNT
-  );
+  return typeof value === "number" && Number.isFinite(value) && value > 0 && value <= MAX_AMOUNT;
 }
 
 /** Round to 2 decimal places without floating-point drift. */
@@ -393,7 +387,10 @@ export function budgetProgress(
 /** First and last day of the calendar month containing `day`. */
 export function monthBounds(day: string): { start: string; end: string } {
   const { year, month } = parseDay(day);
-  return { start: formatDay(year, month, 1), end: formatDay(year, month, daysInMonth(year, month)) };
+  return {
+    start: formatDay(year, month, 1),
+    end: formatDay(year, month, daysInMonth(year, month)),
+  };
 }
 
 /** Same for the month before `day`. */
