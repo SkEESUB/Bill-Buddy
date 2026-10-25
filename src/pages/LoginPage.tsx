@@ -21,12 +21,12 @@ type AuthStep = "welcome" | "email" | "otp";
 /** Screen 1: Premium 3D wallet with floating finance cards & coins */
 function WalletIllustration() {
   return (
-    <div className="auth-illustration-container relative w-full flex items-center justify-center py-2">
+    <div className="auth-illustration-container relative w-full flex items-center justify-center py-0.5 sm:py-2">
       <svg
         viewBox="0 0 380 320"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full max-w-[340px] h-auto"
+        className="w-full max-w-[200px] sm:max-w-[270px] max-h-[125px] sm:max-h-[180px] h-auto object-contain"
         aria-hidden="true"
       >
         {/* Ambient glow ring */}
@@ -218,12 +218,12 @@ function WalletIllustration() {
 /** Screen 2: Premium 3D envelope with @ symbol and floating elements */
 function EmailIllustration() {
   return (
-    <div className="auth-illustration-container relative w-full flex items-center justify-center py-2">
+    <div className="auth-illustration-container relative w-full flex items-center justify-center py-0.5 sm:py-2">
       <svg
         viewBox="0 0 380 260"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full max-w-[320px] h-auto"
+        className="w-full max-w-[190px] sm:max-w-[250px] max-h-[110px] sm:max-h-[160px] h-auto object-contain"
         aria-hidden="true"
       >
         {/* Ambient glow ring */}
@@ -390,12 +390,12 @@ function EmailIllustration() {
 /** Screen 3: Premium 3D shield with lock, envelope, and OTP elements */
 function OTPIllustration() {
   return (
-    <div className="auth-illustration-container relative w-full flex items-center justify-center py-2">
+    <div className="auth-illustration-container relative w-full flex items-center justify-center py-0.5 sm:py-2">
       <svg
         viewBox="0 0 380 260"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full max-w-[320px] h-auto"
+        className="w-full max-w-[190px] sm:max-w-[250px] max-h-[110px] sm:max-h-[160px] h-auto object-contain"
         aria-hidden="true"
       >
         {/* Ambient glow */}
@@ -558,7 +558,7 @@ function FeatureIcon({
 }) {
   return (
     <div
-      className="flex h-14 w-14 items-center justify-center rounded-2xl"
+      className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl sm:rounded-2xl transition-transform"
       style={{ backgroundColor: bgColor }}
     >
       <div style={{ color: iconColor }}>{icon}</div>
@@ -718,26 +718,26 @@ export function LoginPage() {
   ).padStart(2, "0")}`;
 
   return (
-    <div className="auth-root relative min-h-screen overflow-hidden">
+    <div className="auth-root relative min-h-dvh flex flex-col justify-center overflow-x-hidden overflow-y-auto px-4 py-3 sm:px-6 sm:py-6">
       {/* Ambient background gradients */}
       <div className="auth-bg-glow auth-bg-glow-1" />
       <div className="auth-bg-glow auth-bg-glow-2" />
       <div className="auth-bg-glow auth-bg-glow-3" />
 
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-start px-5 py-6 sm:justify-center sm:px-6">
-        <div className="w-full max-w-[420px]">
+      <div className="relative z-10 flex flex-1 flex-col items-center justify-center w-full max-w-[420px] mx-auto py-1 sm:py-3">
+        <div className="w-full">
           {/* ============================================================ */}
           {/* SCREEN 1: ONBOARDING / WELCOME                               */}
           {/* ============================================================ */}
           {step === "welcome" && (
-            <div className="animate-fade-in flex flex-col items-center">
+            <div className="animate-fade-in flex flex-col items-center w-full my-auto">
               {/* Top bar: Logo & Skip */}
-              <div className="flex w-full items-center justify-between mb-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 shadow-md">
+              <div className="flex w-full items-center justify-between mb-1 sm:mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 shadow-md">
                     <svg
-                      width="20"
-                      height="20"
+                      width="18"
+                      height="18"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="white"
@@ -748,14 +748,14 @@ export function LoginPage() {
                       <path d="M2 10h20" />
                     </svg>
                   </div>
-                  <span className="text-lg font-extrabold tracking-tight text-slate-900">
+                  <span className="text-base sm:text-lg font-extrabold tracking-tight text-slate-900">
                     BillBuddy
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setStep("email")}
-                  className="flex items-center gap-0.5 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
+                  className="flex items-center gap-0.5 text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
                 >
                   Skip <ChevronRight className="h-3.5 w-3.5" />
                 </button>
@@ -765,27 +765,27 @@ export function LoginPage() {
               <WalletIllustration />
 
               {/* Heading */}
-              <h1 className="mt-3 text-center text-[28px] sm:text-[32px] font-extrabold leading-[1.15] tracking-tight text-slate-900">
+              <h1 className="mt-1 sm:mt-2 text-center text-[22px] sm:text-[28px] font-extrabold leading-[1.18] tracking-tight text-slate-900">
                 Take Control of
                 <br />
                 <span className="auth-gradient-text">Your Money</span>
               </h1>
 
               {/* Subtext */}
-              <p className="mt-3 text-center text-sm leading-relaxed text-slate-500 max-w-[300px]">
+              <p className="mt-1 sm:mt-1.5 text-center text-xs sm:text-sm leading-relaxed text-slate-500 max-w-[280px]">
                 Track bills, manage budgets and achieve your financial goals effortlessly.
               </p>
 
               {/* Feature row */}
-              <div className="mt-6 flex w-full items-start justify-center gap-6 sm:gap-8">
-                <div className="flex flex-col items-center text-center max-w-[90px]">
+              <div className="mt-2.5 sm:mt-4 flex w-full items-start justify-center gap-4 sm:gap-7">
+                <div className="flex flex-col items-center text-center max-w-[80px] sm:max-w-[90px]">
                   <FeatureIcon
                     bgColor="#EDE9FE"
                     iconColor="#7C3AED"
                     icon={
                       <svg
-                        width="22"
-                        height="22"
+                        width="18"
+                        height="18"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -797,19 +797,21 @@ export function LoginPage() {
                       </svg>
                     }
                   />
-                  <span className="mt-2 text-xs font-bold text-slate-800">Track Bills</span>
-                  <span className="text-[10px] text-slate-500 leading-tight">
+                  <span className="mt-1.5 text-[11px] sm:text-xs font-bold text-slate-800">
+                    Track Bills
+                  </span>
+                  <span className="text-[9px] sm:text-[10px] text-slate-500 leading-tight">
                     Never miss a payment
                   </span>
                 </div>
-                <div className="flex flex-col items-center text-center max-w-[90px]">
+                <div className="flex flex-col items-center text-center max-w-[80px] sm:max-w-[90px]">
                   <FeatureIcon
                     bgColor="#FEE2E2"
                     iconColor="#EF4444"
                     icon={
                       <svg
-                        width="22"
-                        height="22"
+                        width="18"
+                        height="18"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -820,19 +822,21 @@ export function LoginPage() {
                       </svg>
                     }
                   />
-                  <span className="mt-2 text-xs font-bold text-slate-800">Manage Budgets</span>
-                  <span className="text-[10px] text-slate-500 leading-tight">
+                  <span className="mt-1.5 text-[11px] sm:text-xs font-bold text-slate-800">
+                    Manage Budgets
+                  </span>
+                  <span className="text-[9px] sm:text-[10px] text-slate-500 leading-tight">
                     Stay on top of spending
                   </span>
                 </div>
-                <div className="flex flex-col items-center text-center max-w-[90px]">
+                <div className="flex flex-col items-center text-center max-w-[80px] sm:max-w-[90px]">
                   <FeatureIcon
                     bgColor="#DCFCE7"
                     iconColor="#16A34A"
                     icon={
                       <svg
-                        width="22"
-                        height="22"
+                        width="18"
+                        height="18"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -844,32 +848,34 @@ export function LoginPage() {
                       </svg>
                     }
                   />
-                  <span className="mt-2 text-xs font-bold text-slate-800">Achieve Goals</span>
-                  <span className="text-[10px] text-slate-500 leading-tight">
+                  <span className="mt-1.5 text-[11px] sm:text-xs font-bold text-slate-800">
+                    Achieve Goals
+                  </span>
+                  <span className="text-[9px] sm:text-[10px] text-slate-500 leading-tight">
                     Build a better future
                   </span>
                 </div>
               </div>
 
               {/* Page indicators */}
-              <div className="mt-6 flex items-center gap-2" aria-hidden="true">
-                <span className="h-2 w-7 rounded-full bg-indigo-600" />
-                <span className="h-2 w-2 rounded-full bg-slate-300" />
-                <span className="h-2 w-2 rounded-full bg-slate-300" />
+              <div className="mt-2.5 sm:mt-3.5 flex items-center gap-1.5" aria-hidden="true">
+                <span className="h-1.5 w-6 rounded-full bg-indigo-600" />
+                <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
+                <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
               </div>
 
               {/* Actions */}
-              <div className="mt-7 w-full space-y-3.5">
+              <div className="mt-3.5 sm:mt-5 w-full space-y-2 sm:space-y-2.5">
                 <button
                   type="button"
                   onClick={() => setStep("email")}
-                  className="auth-btn-gradient w-full cursor-pointer"
+                  className="auth-btn-gradient w-full min-h-[46px] sm:min-h-[52px] py-2 text-sm sm:text-base cursor-pointer"
                 >
                   <span>Get Started</span>
-                  <ArrowRight className="h-5 w-5" />
+                  <ArrowRight className="h-4.5 w-4.5" />
                 </button>
 
-                <p className="text-center text-sm text-slate-500">
+                <p className="text-center text-xs sm:text-sm text-slate-500">
                   Already have an account?{" "}
                   <button
                     type="button"
@@ -887,20 +893,22 @@ export function LoginPage() {
           {/* SCREEN 2: EMAIL ENTRY                                        */}
           {/* ============================================================ */}
           {step === "email" && (
-            <div className="animate-fade-in flex flex-col items-center">
+            <div className="animate-fade-in flex flex-col items-center w-full my-auto">
               {/* Top bar */}
-              <div className="flex w-full items-center justify-between mb-2">
+              <div className="flex w-full items-center justify-between mb-1 sm:mb-2">
                 <button
                   type="button"
                   onClick={() => setStep("welcome")}
-                  className="flex h-11 w-11 items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-all cursor-pointer"
+                  className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-all cursor-pointer"
                   aria-label="Back to welcome"
                 >
-                  <ArrowLeft className="h-5 w-5" />
+                  <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
-                <div className="flex flex-col items-end gap-1">
-                  <span className="text-xs font-semibold text-slate-500">Step 1 of 2</span>
-                  <div className="h-1 w-20 rounded-full bg-slate-200 overflow-hidden">
+                <div className="flex flex-col items-end gap-0.5">
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">
+                    Step 1 of 2
+                  </span>
+                  <div className="h-1 w-16 sm:w-20 rounded-full bg-slate-200 overflow-hidden">
                     <div className="h-full w-1/2 rounded-full bg-indigo-600" />
                   </div>
                 </div>
@@ -910,26 +918,26 @@ export function LoginPage() {
               <EmailIllustration />
 
               {/* Heading */}
-              <h2 className="mt-2 text-center text-[28px] sm:text-[32px] font-extrabold leading-[1.15] tracking-tight text-slate-900">
+              <h2 className="mt-1 sm:mt-2 text-center text-[22px] sm:text-[28px] font-extrabold leading-[1.18] tracking-tight text-slate-900">
                 Enter Your <span className="auth-gradient-text">Email</span>
               </h2>
 
               {/* Subtext */}
-              <p className="mt-2.5 text-center text-sm leading-relaxed text-slate-500 max-w-[300px]">
+              <p className="mt-1 sm:mt-1.5 text-center text-xs sm:text-sm leading-relaxed text-slate-500 max-w-[280px]">
                 We'll send a 6-digit verification code to your inbox to sign you in securely.
               </p>
 
               {/* Form */}
-              <form onSubmit={sendOTP} className="mt-6 w-full space-y-4">
+              <form onSubmit={sendOTP} className="mt-2.5 sm:mt-4 w-full space-y-2.5 sm:space-y-3">
                 <div>
                   <label
                     htmlFor="email"
-                    className="mb-2 block text-sm font-semibold text-slate-800"
+                    className="mb-1 block text-xs sm:text-sm font-semibold text-slate-800"
                   >
                     Email Address
                   </label>
                   <div className="relative">
-                    <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                    <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <input
                       id="email"
                       type="email"
@@ -937,14 +945,14 @@ export function LoginPage() {
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="name@example.com"
                       disabled={loading}
-                      className="auth-input pl-12"
+                      className="auth-input pl-10 text-xs sm:text-sm min-h-[44px] sm:min-h-[50px]"
                       autoFocus
                     />
                   </div>
                 </div>
 
                 {error && (
-                  <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700 flex items-start gap-2">
+                  <div className="rounded-xl bg-rose-50 border border-rose-200 p-2.5 text-xs text-rose-700 flex items-start gap-1.5">
                     <span className="font-bold shrink-0">!</span>
                     <span>{error}</span>
                   </div>
@@ -953,38 +961,38 @@ export function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading || !isValidEmail(email)}
-                  className="auth-btn-gradient w-full cursor-pointer"
+                  className="auth-btn-gradient w-full min-h-[46px] sm:min-h-[52px] py-2 text-sm sm:text-base cursor-pointer"
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <Loader2 className="h-4.5 w-4.5 animate-spin" />
                       <span>Sending Code...</span>
                     </>
                   ) : (
                     <>
                       <span>Continue</span>
-                      <ArrowRight className="h-5 w-5" />
+                      <ArrowRight className="h-4.5 w-4.5" />
                     </>
                   )}
                 </button>
               </form>
 
               {/* OR divider */}
-              <div className="mt-5 flex w-full items-center gap-3">
+              <div className="mt-2.5 sm:mt-3.5 flex w-full items-center gap-3">
                 <div className="h-px flex-1 bg-slate-200" />
-                <span className="text-xs font-medium text-slate-400">OR</span>
+                <span className="text-[11px] sm:text-xs font-medium text-slate-400">OR</span>
                 <div className="h-px flex-1 bg-slate-200" />
               </div>
 
-              {/* Social sign-in buttons (visual only — providers not configured) */}
-              <div className="mt-4 flex w-full gap-3">
+              {/* Social sign-in buttons */}
+              <div className="mt-2 sm:mt-3 flex w-full gap-2.5">
                 <button
                   type="button"
                   disabled
-                  className="auth-social-btn flex-1"
+                  className="auth-social-btn flex-1 min-h-[40px] sm:min-h-[46px] py-1.5 sm:py-2"
                   title="Google sign-in not configured"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24">
+                  <svg width="16" height="16" viewBox="0 0 24 24">
                     <path
                       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
                       fill="#4285F4"
@@ -1002,38 +1010,34 @@ export function LoginPage() {
                       fill="#EA4335"
                     />
                   </svg>
-                  <span className="text-xs font-semibold text-slate-700">
-                    Continue
-                    <br />
-                    with Google
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-700 leading-tight">
+                    Continue with Google
                   </span>
                 </button>
                 <button
                   type="button"
                   disabled
-                  className="auth-social-btn flex-1"
+                  className="auth-social-btn flex-1 min-h-[40px] sm:min-h-[46px] py-1.5 sm:py-2"
                   title="Apple sign-in not configured"
                 >
                   <svg
-                    width="18"
-                    height="18"
+                    width="16"
+                    height="16"
                     viewBox="0 0 24 24"
                     fill="currentColor"
                     className="text-slate-900"
                   >
                     <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.52-3.23 0-1.44.62-2.2.44-3.06-.4C3.79 16.17 4.36 9.04 8.93 8.78c1.27.07 2.15.72 2.91.78.97-.2 1.9-.75 2.96-.68 1.25.1 2.19.6 2.82 1.5-2.57 1.54-1.97 4.92.58 5.87-.48 1.27-.69 1.83-1.15 3.03zM12.02 8.7c-.14-2.32 1.81-4.31 4-4.5.27 2.59-2.34 4.57-4 4.5z" />
                   </svg>
-                  <span className="text-xs font-semibold text-slate-700">
-                    Continue
-                    <br />
-                    with Apple
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-700 leading-tight">
+                    Continue with Apple
                   </span>
                 </button>
               </div>
 
               {/* Passwordless note */}
-              <p className="mt-5 flex items-center justify-center gap-1.5 text-xs text-slate-400">
-                <ShieldCheck className="h-4 w-4 text-emerald-500" />
+              <p className="mt-2.5 sm:mt-3.5 flex items-center justify-center gap-1.5 text-[11px] sm:text-xs text-slate-400">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
                 Passwordless OTP · No password required
               </p>
             </div>
@@ -1043,20 +1047,22 @@ export function LoginPage() {
           {/* SCREEN 3: OTP VERIFICATION                                   */}
           {/* ============================================================ */}
           {step === "otp" && (
-            <div className="animate-scale-in flex flex-col items-center">
+            <div className="animate-scale-in flex flex-col items-center w-full my-auto">
               {/* Top bar */}
-              <div className="flex w-full items-center justify-between mb-2">
+              <div className="flex w-full items-center justify-between mb-1 sm:mb-2">
                 <button
                   type="button"
                   onClick={() => setStep("email")}
-                  className="flex h-11 w-11 items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-all cursor-pointer"
+                  className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-all cursor-pointer"
                   aria-label="Back to email"
                 >
-                  <ArrowLeft className="h-5 w-5" />
+                  <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
-                <div className="flex flex-col items-end gap-1">
-                  <span className="text-xs font-semibold text-slate-500">Step 2 of 2</span>
-                  <div className="h-1 w-20 rounded-full bg-slate-200 overflow-hidden">
+                <div className="flex flex-col items-end gap-0.5">
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">
+                    Step 2 of 2
+                  </span>
+                  <div className="h-1 w-16 sm:w-20 rounded-full bg-slate-200 overflow-hidden">
                     <div className="h-full w-full rounded-full bg-indigo-600" />
                   </div>
                 </div>
@@ -1066,15 +1072,15 @@ export function LoginPage() {
               <OTPIllustration />
 
               {/* Heading */}
-              <h2 className="mt-2 text-center text-[28px] sm:text-[32px] font-extrabold leading-[1.15] tracking-tight text-slate-900">
+              <h2 className="mt-1 sm:mt-2 text-center text-[22px] sm:text-[28px] font-extrabold leading-[1.18] tracking-tight text-slate-900">
                 Enter <span className="auth-gradient-text">OTP</span>
               </h2>
 
               {/* Email display */}
-              <p className="mt-2 text-center text-sm text-slate-500">
+              <p className="mt-1 text-center text-xs sm:text-sm text-slate-500">
                 We've sent a 6-digit code to
               </p>
-              <p className="text-center text-sm font-bold text-slate-900">{email}</p>
+              <p className="text-center text-xs sm:text-sm font-bold text-slate-900">{email}</p>
 
               {/* OTP input */}
               <form
@@ -1082,9 +1088,9 @@ export function LoginPage() {
                   e.preventDefault();
                   void verifyOTP();
                 }}
-                className="mt-5 w-full"
+                className="mt-3 sm:mt-4 w-full"
               >
-                <div className="flex justify-center gap-2.5 sm:gap-3" onPaste={handlePaste}>
+                <div className="flex justify-center gap-2 sm:gap-2.5" onPaste={handlePaste}>
                   {otp.map((digit, index) => (
                     <input
                       key={index}
@@ -1105,44 +1111,44 @@ export function LoginPage() {
                 </div>
 
                 {/* Status messages */}
-                <div className="mt-4 space-y-2">
+                <div className="mt-2.5 sm:mt-3 space-y-1.5">
                   {error && (
-                    <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700 flex items-start gap-2">
+                    <div className="rounded-xl bg-rose-50 border border-rose-200 p-2 text-xs text-rose-700 flex items-start gap-1.5">
                       <span className="font-bold shrink-0">!</span>
                       <span>{error}</span>
                     </div>
                   )}
                   {success && (
-                    <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700 flex items-center gap-2">
-                      <CheckCircle2 className="h-4.5 w-4.5 shrink-0 text-emerald-600" />
+                    <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-2 text-xs text-emerald-700 flex items-center gap-1.5">
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
                       <span>{success}</span>
                     </div>
                   )}
                 </div>
 
                 {/* Verify button */}
-                <div className="mt-4">
+                <div className="mt-3 sm:mt-3.5">
                   <button
                     type="submit"
                     disabled={loading || otp.join("").length !== 6}
-                    className="auth-btn-gradient w-full cursor-pointer"
+                    className="auth-btn-gradient w-full min-h-[46px] sm:min-h-[52px] py-2 text-sm sm:text-base cursor-pointer"
                   >
                     {loading ? (
                       <>
-                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <Loader2 className="h-4.5 w-4.5 animate-spin" />
                         <span>Verifying...</span>
                       </>
                     ) : (
                       <>
                         <span>Verify & Continue</span>
-                        <ArrowRight className="h-5 w-5" />
+                        <ArrowRight className="h-4.5 w-4.5" />
                       </>
                     )}
                   </button>
                 </div>
 
                 {/* Resend countdown */}
-                <p className="mt-4 text-center text-sm text-slate-500">
+                <p className="mt-2.5 sm:mt-3 text-center text-xs sm:text-sm text-slate-500">
                   {resendCooldown > 0 ? (
                     <>
                       Resend OTP in <span className="font-bold text-indigo-600">{mmss}</span>
@@ -1160,9 +1166,9 @@ export function LoginPage() {
                 </p>
 
                 {/* OR divider */}
-                <div className="mt-4 flex w-full items-center gap-3">
+                <div className="mt-2.5 sm:mt-3 flex w-full items-center gap-3">
                   <div className="h-px flex-1 bg-slate-200" />
-                  <span className="text-xs font-medium text-slate-400">OR</span>
+                  <span className="text-[11px] sm:text-xs font-medium text-slate-400">OR</span>
                   <div className="h-px flex-1 bg-slate-200" />
                 </div>
 
@@ -1175,11 +1181,11 @@ export function LoginPage() {
                     setError("");
                     setSuccess("");
                   }}
-                  className="mt-4 flex w-full items-center gap-3 rounded-2xl bg-white border border-slate-200 px-4 py-3.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer shadow-sm"
+                  className="mt-2.5 sm:mt-3 flex w-full items-center gap-2.5 rounded-xl bg-white border border-slate-200 px-3.5 py-2.5 sm:py-3 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer shadow-sm"
                 >
-                  <Edit3 className="h-4.5 w-4.5 text-indigo-500" />
+                  <Edit3 className="h-4 w-4 text-indigo-500" />
                   <span className="flex-1 text-left">Change email address</span>
-                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                  <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
                 </button>
               </form>
             </div>

@@ -1,23 +1,34 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { LogOut, Moon, Sun, Laptop } from "lucide-react";
+import { Check, Edit2, Loader2, LogOut, User } from "lucide-react";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useAccount } from "@/hooks/useAccount";
-import { useTheme } from "@/lib/hooks/useTheme";
-import { displayName, initials } from "@/lib/format";
+import { initials } from "@/lib/format";
 import { Avatar } from "@/components/Avatar";
+import { bumpFinance } from "@/lib/finance-sync";
 
 export function UserMenu() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { user, signOut } = useAuth();
-  const { overview } = useAccount();
-  const { theme, setTheme } = useTheme();
+  const { overview, updateProfile, refresh } = useAccount();
   const navigate = useNavigate();
 
   const profile = overview?.profile as { full_name: string | null } | null | undefined;
-  const name = profile?.full_name?.trim() || displayName(user?.email);
-  const userInitials = initials(name || user?.email);
+  const currentFullName = profile?.full_name?.trim() || "";
+  const userInitials = initials(currentFullName || user?.email);
+
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState(currentFullName);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setNameInput(currentFullName);
+      setEditingName(false);
+    }
+  }, [open, currentFullName]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -37,6 +48,23 @@ export function UserMenu() {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [open]);
+
+  const handleSaveName = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const trimmed = nameInput.trim();
+    setSaving(true);
+    try {
+      await updateProfile({ full_name: trimmed || null });
+      toast.success(trimmed ? "Name updated" : "Name cleared");
+      setEditingName(false);
+      refresh();
+      bumpFinance();
+    } catch {
+      toast.error("Failed to update name");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleSignOut = async () => {
     setOpen(false);
@@ -60,61 +88,90 @@ export function UserMenu() {
       {open && (
         <div
           role="menu"
-          className="animate-scale-in absolute right-0 top-full mt-2 w-64 origin-top-right rounded-2xl border border-border-light bg-surface p-2 shadow-xl ring-1 ring-black/5 z-50"
+          className="animate-scale-in absolute right-0 top-full mt-2 w-72 origin-top-right rounded-2xl border border-border-light bg-surface p-2 shadow-xl ring-1 ring-black/5 z-50"
         >
           {/* User Info Header */}
-          <div className="px-3 py-2.5 border-b border-border-light mb-1">
-            <div className="flex items-center gap-2">
-              <Avatar fallback={userInitials} size={32} />
+          <div className="px-3.5 py-3 border-b border-border-light mb-1">
+            <div className="flex items-center gap-2.5">
+              <Avatar fallback={userInitials} size={36} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-text-primary leading-tight">
-                  {name}
+                <p className="truncate text-sm font-bold text-text-primary leading-tight">
+                  {currentFullName || "No name set"}
                 </p>
                 <p className="truncate text-xs text-text-secondary mt-0.5">{user?.email}</p>
               </div>
             </div>
           </div>
 
-          {/* Theme Quick Selector */}
-          <div className="border-t border-border-light my-1 pt-1.5 px-3">
-            <p className="text-[11px] font-semibold text-text-tertiary uppercase tracking-wider mb-1.5">
-              Appearance
-            </p>
-            <div className="grid grid-cols-3 gap-1 rounded-xl bg-muted p-1 text-[11px]">
-              <button
-                type="button"
-                onClick={() => setTheme("light")}
-                className={`flex items-center justify-center gap-1 rounded-lg py-1 transition-all cursor-pointer ${
-                  theme === "light"
-                    ? "bg-surface font-semibold text-primary shadow-sm"
-                    : "text-text-secondary hover:text-text-primary"
-                }`}
+          {/* Profile Name Editing Section */}
+          <div className="my-1.5 px-3 py-2">
+            <div className="flex items-center justify-between mb-1.5">
+              <label
+                htmlFor="user-menu-name-input"
+                className="text-[11px] font-bold text-text-tertiary uppercase tracking-wider"
               >
-                <Sun className="h-3 w-3" /> Light
-              </button>
-              <button
-                type="button"
-                onClick={() => setTheme("dark")}
-                className={`flex items-center justify-center gap-1 rounded-lg py-1 transition-all cursor-pointer ${
-                  theme === "dark"
-                    ? "bg-surface font-semibold text-primary shadow-sm"
-                    : "text-text-secondary hover:text-text-primary"
-                }`}
-              >
-                <Moon className="h-3 w-3" /> Dark
-              </button>
-              <button
-                type="button"
-                onClick={() => setTheme("system")}
-                className={`flex items-center justify-center gap-1 rounded-lg py-1 transition-all cursor-pointer ${
-                  theme === "system"
-                    ? "bg-surface font-semibold text-primary shadow-sm"
-                    : "text-text-secondary hover:text-text-primary"
-                }`}
-              >
-                <Laptop className="h-3 w-3" /> Auto
-              </button>
+                Display Name
+              </label>
+              {!editingName && (
+                <button
+                  type="button"
+                  onClick={() => setEditingName(true)}
+                  className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
+                >
+                  <Edit2 className="h-3 w-3" />
+                  <span>{currentFullName ? "Edit" : "Set Name"}</span>
+                </button>
+              )}
             </div>
+
+            {editingName ? (
+              <form onSubmit={handleSaveName} className="space-y-2">
+                <div className="relative">
+                  <User className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                  <input
+                    id="user-menu-name-input"
+                    type="text"
+                    value={nameInput}
+                    onChange={(e) => setNameInput(e.target.value)}
+                    placeholder="Enter your name (e.g. Arun)"
+                    maxLength={60}
+                    className="w-full rounded-xl border border-border-light bg-muted/60 pl-8 pr-3 py-1.5 text-xs text-text-primary outline-none focus:border-primary focus:bg-surface focus:ring-2 focus:ring-primary/20 transition-all"
+                    autoFocus
+                  />
+                </div>
+                <div className="flex items-center justify-end gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNameInput(currentFullName);
+                      setEditingName(false);
+                    }}
+                    disabled={saving}
+                    className="rounded-lg px-2.5 py-1 text-xs text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="inline-flex items-center gap-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-xs font-semibold shadow-sm transition-transform active:scale-95 disabled:opacity-50 cursor-pointer"
+                  >
+                    {saving ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Check className="h-3 w-3 stroke-[2.5]" />
+                    )}
+                    <span>Save</span>
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <p className="text-xs text-text-secondary bg-muted/50 rounded-xl px-3 py-2 border border-border-light/60">
+                {currentFullName || (
+                  <span className="text-slate-400 italic">No name provided yet</span>
+                )}
+              </p>
+            )}
           </div>
 
           {/* Sign Out */}

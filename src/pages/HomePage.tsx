@@ -41,9 +41,9 @@ export function HomePage() {
   const [deleteTarget, setDeleteTarget] = useState<OccurrenceView | null>(null);
   const [working, setWorking] = useState(false);
 
-  // Authenticated User Greeting
+  // Authenticated User Greeting: Use actual saved name, fallback to "there"
   const profileName = snapshot.profile?.full_name?.trim();
-  const userName = profileName || displayName(user?.email);
+  const userName = profileName || "there";
 
   // Bill occurrence views
   const views = useMemo(() => toViews(snapshot.occurrences, today), [snapshot.occurrences, today]);
@@ -54,14 +54,36 @@ export function HomePage() {
     return map;
   }, [snapshot.bills]);
 
-  // Financial Summary calculations (safe numeric handling)
-  const remainingOccurrences = useMemo(() => views.filter((o) => !o.isSettled), [views]);
+  // Clean recurring bill management: display one primary bill card for each
+  // recurring bill series on the dashboard (the next upcoming/active occurrence)
+  const primaryRemainingOccurrences = useMemo(() => {
+    const sorted = [...views.filter((o) => !o.isSettled)].sort(byUrgency);
+    const seenBills = new Set<string>();
+    const result: OccurrenceView[] = [];
+
+    for (const occ of sorted) {
+      if (!occ.isRecurring) {
+        result.push(occ);
+      } else {
+        if (!seenBills.has(occ.billId)) {
+          seenBills.add(occ.billId);
+          result.push(occ);
+        }
+      }
+    }
+    return result;
+  }, [views]);
+
+  // Financial Summary calculations (safe numeric handling on primary upcoming bills)
   const remainingAmount = useMemo(
     () =>
-      remainingOccurrences.reduce((sum, o) => sum + (Number.isFinite(o.amount) ? o.amount : 0), 0),
-    [remainingOccurrences],
+      primaryRemainingOccurrences.reduce(
+        (sum, o) => sum + (Number.isFinite(o.amount) ? o.amount : 0),
+        0,
+      ),
+    [primaryRemainingOccurrences],
   );
-  const remainingCount = remainingOccurrences.length;
+  const remainingCount = primaryRemainingOccurrences.length;
 
   const completedOccurrences = useMemo(() => views.filter((o) => o.isSettled), [views]);
   const completedAmount = useMemo(
@@ -78,12 +100,12 @@ export function HomePage() {
       return [...completedOccurrences].sort((a, b) => b.dueDate.localeCompare(a.dueDate));
     }
     if (activeView === "remaining") {
-      // All outstanding bills sorted strictly by urgency/due date
-      return [...remainingOccurrences].sort(byUrgency);
+      // All primary outstanding bills sorted strictly by urgency/due date
+      return [...primaryRemainingOccurrences].sort(byUrgency);
     }
-    // Default home list: Outstanding bills, overdue first then upcoming
-    return [...remainingOccurrences].sort(byUrgency);
-  }, [activeView, completedOccurrences, remainingOccurrences]);
+    // Default home list: Outstanding primary bills (one per recurring series)
+    return [...primaryRemainingOccurrences].sort(byUrgency);
+  }, [activeView, completedOccurrences, primaryRemainingOccurrences]);
 
   // Handlers for Bill operations
   const handleSubmitBill = async (values: BillInput) => {
@@ -158,9 +180,26 @@ export function HomePage() {
                 BillBuddy
               </span>
             </div>
-            <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 leading-tight">
-              Hi, {userName}
-            </h1>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 leading-tight">
+                {profileName ? `Hi, ${profileName}` : "Hi there"}
+              </h1>
+              {!profileName && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const btn = document.querySelector<HTMLButtonElement>(
+                      'button[aria-label="User account menu"]',
+                    );
+                    btn?.click();
+                  }}
+                  className="text-[11px] font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100/70 px-2 py-0.5 rounded-full transition-colors cursor-pointer"
+                  title="Click to set your display name"
+                >
+                  + Add name
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

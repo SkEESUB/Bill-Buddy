@@ -1,6 +1,7 @@
 import { Bell, CheckCircle2, ChevronRight, Repeat } from "lucide-react";
 import { category } from "@/lib/categories";
 import { formatAmount } from "@/lib/format";
+import { BillBuddyLogo } from "@/components/BillBuddyLogo";
 import type { OccurrenceView } from "@/lib/occurrences";
 
 const REPEAT_LABEL: Record<string, string> = {
@@ -108,7 +109,6 @@ export function BillCard({
   onCopyUpi?: (upi: string) => void;
 }) {
   const cat = category(occurrence.category);
-  const Icon = cat.icon;
   const settled = occurrence.isSettled;
   const statusDetails = getStatusDetails(occurrence.dueDate, today, settled);
 
@@ -131,14 +131,13 @@ export function BillCard({
       }}
       aria-label={`${occurrence.title}, ${formatAmount(occurrence.amount)}, ${statusDetails.label}`}
     >
-      {/* Category Icon */}
+      {/* Primary Branded BillBuddy Icon */}
       <div className="flex items-center gap-3 min-w-0">
         <span
           aria-hidden="true"
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all duration-200 group-hover:scale-108 group-hover:shadow-sm"
-          style={{ backgroundColor: `${cat.color}14`, color: cat.color }}
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/15 via-indigo-500/15 to-purple-500/15 text-blue-600 dark:text-indigo-400 border border-blue-200/50 dark:border-indigo-500/30 shadow-sm transition-all duration-200 group-hover:scale-108 group-hover:shadow-md group-hover:from-blue-600/25 group-hover:to-purple-600/25"
         >
-          <Icon className="h-5 w-5 stroke-[2.2]" />
+          <BillBuddyLogo size={20} className="stroke-[2.3]" />
         </span>
 
         {/* Title, Status & Metadata */}
@@ -154,23 +153,26 @@ export function BillCard({
                 <span className="inline-flex items-center gap-1">
                   <CheckCircle2 className="h-3 w-3 stroke-[2.5]" /> Paid
                 </span>
+              ) : occurrence.isRecurring ? (
+                `Next: ${statusDetails.label}`
               ) : (
                 statusDetails.label
               )}
             </span>
+
+            {/* Recurrence frequency badge */}
+            {occurrence.isRecurring && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-full border border-indigo-200/70 dark:border-indigo-800/50">
+                <Repeat className="h-3 w-3 text-indigo-500 dark:text-indigo-400 stroke-[2.2]" />
+                {REPEAT_LABEL[occurrence.repeatType] ?? "Recurring"}
+              </span>
+            )}
 
             {/* Reminder indicator */}
             {occurrence.reminderTime && !settled && (
               <span className="inline-flex items-center gap-0.5 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                 <Bell className="h-3 w-3 text-slate-400 dark:text-slate-500 stroke-[2]" />
                 <span>{occurrence.reminderTime.slice(0, 5)}</span>
-              </span>
-            )}
-
-            {occurrence.isRecurring && (
-              <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                <Repeat className="h-3 w-3 text-slate-400 dark:text-slate-500 stroke-[2]" />
-                {REPEAT_LABEL[occurrence.repeatType] ?? "Repeat"}
               </span>
             )}
           </div>
