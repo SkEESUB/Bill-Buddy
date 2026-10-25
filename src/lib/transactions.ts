@@ -19,6 +19,7 @@ export const TRANSACTION_TYPES = [
 export type LedgerType = (typeof TRANSACTION_TYPES)[number];
 
 export const TRANSACTION_STATUSES = [
+  "settled",
   "completed",
   "pending",
   "failed",
@@ -57,6 +58,7 @@ export const TYPE_LABELS: Record<LedgerType, string> = {
 };
 
 export const STATUS_LABELS: Record<LedgerStatus, string> = {
+  settled: "Completed",
   completed: "Completed",
   pending: "Pending",
   failed: "Failed",

@@ -225,9 +225,10 @@ export type TxnLike = {
   category?: string | null;
 };
 
-/** Only settled money movements count towards balances. */
+/** Only settled money movements count towards balances. Accepts 'completed' or 'settled'. */
 function counts(txn: TxnLike): boolean {
-  return (txn.status ?? "completed") === "completed";
+  const s = txn.status ?? "settled";
+  return s === "completed" || s === "settled";
 }
 
 /**

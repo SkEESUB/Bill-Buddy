@@ -308,9 +308,10 @@ export function HomePage() {
         {/* Bill Rows */}
         {!loading && displayedBills.length > 0 && (
           <div className="flex flex-col gap-2.5">
-            {displayedBills.map((occurrence) => (
+            {displayedBills.map((occurrence, index) => (
               <BillCard
                 key={occurrence.id}
+                index={index}
                 occurrence={occurrence}
                 today={today}
                 onSelect={(o) => setDetailsTarget(o)}

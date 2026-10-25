@@ -3,20 +3,572 @@ import { useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft,
   ArrowRight,
-  Check,
+  CheckCircle2,
   ChevronRight,
+  Edit3,
   Loader2,
   Mail,
-  Shield,
   ShieldCheck,
-  Sparkles,
-  Wallet,
-  PieChart,
-  BellRing,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 type AuthStep = "welcome" | "email" | "otp";
+
+/* ================================================================== *
+ * SVG Illustrations                                                   *
+ * ================================================================== */
+
+/** Screen 1: Premium 3D wallet with floating finance cards & coins */
+function WalletIllustration() {
+  return (
+    <div className="auth-illustration-container relative w-full flex items-center justify-center py-2">
+      <svg
+        viewBox="0 0 380 320"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-full max-w-[340px] h-auto"
+        aria-hidden="true"
+      >
+        {/* Ambient glow ring */}
+        <ellipse cx="190" cy="220" rx="140" ry="35" fill="url(#walletRingGrad)" opacity="0.5" />
+        {/* Wallet body - dark blue gradient with leather texture feel */}
+        <rect x="110" y="110" width="160" height="110" rx="18" fill="url(#walletBodyGrad)" />
+        {/* Wallet clasp line */}
+        <rect x="130" y="146" width="120" height="2" rx="1" fill="rgba(255,255,255,0.15)" />
+        {/* Wallet flap */}
+        <path
+          d="M110 128 C110 110, 128 100, 190 100 C252 100, 270 110, 270 128 L270 140 L110 140 Z"
+          fill="url(#walletFlapGrad)"
+        />
+        {/* Clasp button */}
+        <circle cx="190" cy="165" r="10" fill="url(#claspGrad)" />
+        <circle cx="190" cy="165" r="6" fill="url(#claspInnerGrad)" />
+        {/* Belt/strap */}
+        <rect
+          x="107"
+          y="155"
+          width="166"
+          height="20"
+          rx="10"
+          fill="url(#strapGrad)"
+          opacity="0.7"
+        />
+
+        {/* Floating card — Track Expenses (top-center, light card) */}
+        <g transform="translate(160, 55) rotate(-8)">
+          <rect width="90" height="60" rx="12" fill="white" filter="url(#cardShadow)" />
+          <rect width="90" height="60" rx="12" fill="url(#cardOverlay)" opacity="0.5" />
+          {/* Chart bars */}
+          <rect x="20" y="30" width="10" height="18" rx="3" fill="#818CF8" />
+          <rect x="35" y="22" width="10" height="26" rx="3" fill="#6366F1" />
+          <rect x="50" y="16" width="10" height="32" rx="3" fill="#4F46E5" />
+          <text x="45" y="15" textAnchor="middle" fontSize="7" fontWeight="600" fill="#4F46E5">
+            Track
+          </text>
+          <text x="45" y="55" textAnchor="middle" fontSize="6" fill="#6B7280">
+            Expenses
+          </text>
+        </g>
+
+        {/* Floating card — Pay Bills (right, salmon/orange) */}
+        <g transform="translate(275, 105) rotate(5)">
+          <rect width="72" height="60" rx="12" fill="#FFF7ED" filter="url(#cardShadow)" />
+          <rect x="20" y="14" width="32" height="22" rx="6" fill="#FB923C" />
+          <rect x="26" y="18" width="8" height="3" rx="1" fill="white" />
+          <rect x="26" y="24" width="14" height="3" rx="1" fill="white" opacity="0.7" />
+          <text x="36" y="50" textAnchor="middle" fontSize="6.5" fontWeight="600" fill="#EA580C">
+            Pay Bills
+          </text>
+        </g>
+
+        {/* Floating card — Achieve Goals (left, green) */}
+        <g transform="translate(25, 120) rotate(-5)">
+          <rect width="82" height="72" rx="14" fill="#ECFDF5" filter="url(#cardShadow)" />
+          <circle cx="41" cy="30" r="15" fill="#D1FAE5" />
+          <path
+            d="M33 30 L39 36 L49 24"
+            stroke="#059669"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
+          <text x="41" y="58" textAnchor="middle" fontSize="6.5" fontWeight="600" fill="#059669">
+            Achieve
+          </text>
+          <text x="41" y="66" textAnchor="middle" fontSize="6" fill="#6B7280">
+            Goals
+          </text>
+        </g>
+
+        {/* Floating coin — top-left (₹) */}
+        <g transform="translate(90, 80)">
+          <circle r="14" fill="url(#coinGrad)" filter="url(#coinShadow)" />
+          <text textAnchor="middle" dy="5" fontSize="12" fontWeight="700" fill="#92400E">
+            ₹
+          </text>
+        </g>
+
+        {/* Floating coin — bottom-right */}
+        <g transform="translate(305, 195)">
+          <circle r="12" fill="url(#coinGrad)" filter="url(#coinShadow)" />
+          <text textAnchor="middle" dy="4" fontSize="10" fontWeight="700" fill="#92400E">
+            ₹
+          </text>
+        </g>
+
+        {/* Arrow icon — purple circle bottom-right of wallet */}
+        <g transform="translate(275, 180)">
+          <circle r="14" fill="#7C3AED" />
+          <path
+            d="M-5 0 L5 0 M2 -4 L6 0 L2 4"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </g>
+
+        {/* Sparkle decorations */}
+        <g transform="translate(130, 72)" opacity="0.7">
+          <path d="M0 -4 L1 0 L0 4 L-1 0 Z" fill="#FCD34D" />
+          <path d="M-4 0 L0 1 L4 0 L0 -1 Z" fill="#FCD34D" />
+        </g>
+
+        <defs>
+          <linearGradient
+            id="walletBodyGrad"
+            x1="110"
+            y1="100"
+            x2="270"
+            y2="230"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stopColor="#4338CA" />
+            <stop offset="50%" stopColor="#3B82F6" />
+            <stop offset="100%" stopColor="#6366F1" />
+          </linearGradient>
+          <linearGradient
+            id="walletFlapGrad"
+            x1="110"
+            y1="95"
+            x2="270"
+            y2="145"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stopColor="#6366F1" />
+            <stop offset="100%" stopColor="#818CF8" />
+          </linearGradient>
+          <linearGradient
+            id="strapGrad"
+            x1="107"
+            y1="155"
+            x2="273"
+            y2="175"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stopColor="#312E81" />
+            <stop offset="100%" stopColor="#4338CA" />
+          </linearGradient>
+          <radialGradient id="claspGrad">
+            <stop offset="0%" stopColor="#E5E7EB" />
+            <stop offset="100%" stopColor="#9CA3AF" />
+          </radialGradient>
+          <radialGradient id="claspInnerGrad">
+            <stop offset="0%" stopColor="#F9FAFB" />
+            <stop offset="100%" stopColor="#D1D5DB" />
+          </radialGradient>
+          <radialGradient id="walletRingGrad">
+            <stop offset="0%" stopColor="#C7D2FE" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="#C7D2FE" stopOpacity="0" />
+          </radialGradient>
+          <linearGradient
+            id="coinGrad"
+            x1="-14"
+            y1="-14"
+            x2="14"
+            y2="14"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stopColor="#FDE68A" />
+            <stop offset="100%" stopColor="#F59E0B" />
+          </linearGradient>
+          <linearGradient
+            id="cardOverlay"
+            x1="0"
+            y1="0"
+            x2="90"
+            y2="60"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stopColor="#EEF2FF" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#F5F3FF" stopOpacity="0" />
+          </linearGradient>
+          <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#0f2742" floodOpacity="0.08" />
+          </filter>
+          <filter id="coinShadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#92400E" floodOpacity="0.2" />
+          </filter>
+        </defs>
+      </svg>
+    </div>
+  );
+}
+
+/** Screen 2: Premium 3D envelope with @ symbol and floating elements */
+function EmailIllustration() {
+  return (
+    <div className="auth-illustration-container relative w-full flex items-center justify-center py-2">
+      <svg
+        viewBox="0 0 380 260"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-full max-w-[320px] h-auto"
+        aria-hidden="true"
+      >
+        {/* Ambient glow ring */}
+        <ellipse cx="190" cy="200" rx="130" ry="30" fill="url(#emailRingGrad)" opacity="0.4" />
+
+        {/* Envelope body */}
+        <rect x="100" y="100" width="180" height="120" rx="16" fill="url(#envelopeBodyGrad)" />
+        {/* Envelope flap */}
+        <path
+          d="M100 116 C100 104, 112 100, 190 100 C268 100, 280 104, 280 116 L190 170 Z"
+          fill="url(#envelopeFlapGrad)"
+        />
+        {/* Envelope inner line */}
+        <path
+          d="M105 112 L190 164 L275 112"
+          stroke="rgba(255,255,255,0.2)"
+          strokeWidth="1.5"
+          fill="none"
+        />
+
+        {/* @ symbol in purple hexagon */}
+        <g transform="translate(190, 80)">
+          <circle r="32" fill="url(#atBgGrad)" filter="url(#emailHeroShadow)" />
+          <circle r="28" fill="url(#atBgInnerGrad)" opacity="0.6" />
+          <text
+            textAnchor="middle"
+            dy="10"
+            fontSize="30"
+            fontWeight="700"
+            fill="white"
+            opacity="0.95"
+          >
+            @
+          </text>
+        </g>
+
+        {/* Floating lock icon — right */}
+        <g transform="translate(310, 150)">
+          <rect
+            x="-22"
+            y="-22"
+            width="44"
+            height="44"
+            rx="10"
+            fill="white"
+            filter="url(#emailCardShadow)"
+          />
+          <rect x="-12" y="-2" width="24" height="16" rx="4" fill="url(#lockBodyGrad)" />
+          <path
+            d="M-6 -2 L-6 -8 C-6 -14, 6 -14, 6 -8 L6 -2"
+            stroke="#7C3AED"
+            strokeWidth="2.5"
+            fill="none"
+            strokeLinecap="round"
+          />
+        </g>
+
+        {/* Floating send icon — left */}
+        <g transform="translate(68, 160)">
+          <circle r="18" fill="url(#sendBgGrad)" filter="url(#emailCardShadow)" />
+          <path d="M-7 2 L8 -6 L-3 8 L-2 1 Z" fill="white" />
+        </g>
+
+        {/* Floating purple sphere — top-right */}
+        <circle cx="310" cy="80" r="8" fill="url(#sphereGrad)" opacity="0.7" />
+
+        {/* Floating small sphere — left */}
+        <circle cx="80" cy="100" r="5" fill="#A5B4FC" opacity="0.6" />
+
+        <defs>
+          <linearGradient
+            id="envelopeBodyGrad"
+            x1="100"
+            y1="100"
+            x2="280"
+            y2="220"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stopColor="#E0E7FF" />
+            <stop offset="100%" stopColor="#EDE9FE" />
+          </linearGradient>
+          <linearGradient
+            id="envelopeFlapGrad"
+            x1="100"
+            y1="100"
+            x2="280"
+            y2="170"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stopColor="#C7D2FE" />
+            <stop offset="50%" stopColor="#DDD6FE" />
+            <stop offset="100%" stopColor="#E9D5FF" />
+          </linearGradient>
+          <linearGradient
+            id="atBgGrad"
+            x1="-32"
+            y1="-32"
+            x2="32"
+            y2="32"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stopColor="#7C3AED" />
+            <stop offset="100%" stopColor="#4F46E5" />
+          </linearGradient>
+          <radialGradient id="atBgInnerGrad">
+            <stop offset="0%" stopColor="#A78BFA" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#7C3AED" stopOpacity="0" />
+          </radialGradient>
+          <linearGradient
+            id="lockBodyGrad"
+            x1="-12"
+            y1="-2"
+            x2="12"
+            y2="14"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stopColor="#A78BFA" />
+            <stop offset="100%" stopColor="#7C3AED" />
+          </linearGradient>
+          <linearGradient
+            id="sendBgGrad"
+            x1="-18"
+            y1="-18"
+            x2="18"
+            y2="18"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stopColor="#818CF8" />
+            <stop offset="100%" stopColor="#4F46E5" />
+          </linearGradient>
+          <linearGradient
+            id="sphereGrad"
+            x1="-8"
+            y1="-8"
+            x2="8"
+            y2="8"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stopColor="#A78BFA" />
+            <stop offset="100%" stopColor="#6366F1" />
+          </linearGradient>
+          <radialGradient id="emailRingGrad">
+            <stop offset="0%" stopColor="#DDD6FE" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="#DDD6FE" stopOpacity="0" />
+          </radialGradient>
+          <filter id="emailHeroShadow" x="-60%" y="-60%" width="220%" height="220%">
+            <feDropShadow
+              dx="0"
+              dy="6"
+              stdDeviation="10"
+              floodColor="#4F46E5"
+              floodOpacity="0.25"
+            />
+          </filter>
+          <filter id="emailCardShadow" x="-40%" y="-40%" width="180%" height="180%">
+            <feDropShadow dx="0" dy="3" stdDeviation="5" floodColor="#0f2742" floodOpacity="0.08" />
+          </filter>
+        </defs>
+      </svg>
+    </div>
+  );
+}
+
+/** Screen 3: Premium 3D shield with lock, envelope, and OTP elements */
+function OTPIllustration() {
+  return (
+    <div className="auth-illustration-container relative w-full flex items-center justify-center py-2">
+      <svg
+        viewBox="0 0 380 260"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-full max-w-[320px] h-auto"
+        aria-hidden="true"
+      >
+        {/* Ambient glow */}
+        <ellipse cx="190" cy="200" rx="130" ry="30" fill="url(#otpRingGrad)" opacity="0.4" />
+
+        {/* Shield shape */}
+        <path
+          d="M190 40 C220 40, 260 55, 280 70 C280 140, 260 190, 190 220 C120 190, 100 140, 100 70 C120 55, 160 40, 190 40Z"
+          fill="url(#shieldGrad)"
+          filter="url(#shieldShadow)"
+        />
+        <path
+          d="M190 50 C216 50, 250 63, 268 76 C268 138, 252 182, 190 210 C128 182, 112 138, 112 76 C130 63, 164 50, 190 50Z"
+          fill="url(#shieldInnerGrad)"
+          opacity="0.5"
+        />
+
+        {/* Lock icon in center */}
+        <g transform="translate(190, 115)">
+          <rect x="-18" y="-4" width="36" height="28" rx="6" fill="white" opacity="0.9" />
+          <path
+            d="M-8 -4 L-8 -14 C-8 -22, 8 -22, 8 -14 L8 -4"
+            stroke="white"
+            strokeWidth="4"
+            fill="none"
+            strokeLinecap="round"
+            opacity="0.7"
+          />
+          <rect x="-16" y="-2" width="32" height="24" rx="5" fill="url(#otpLockGrad)" />
+          <circle cx="0" cy="8" r="4" fill="white" opacity="0.9" />
+          <rect x="-1.5" y="10" width="3" height="6" rx="1.5" fill="white" opacity="0.7" />
+        </g>
+
+        {/* Floating envelope — bottom-left */}
+        <g transform="translate(80, 170) rotate(-12)">
+          <rect
+            x="-28"
+            y="-18"
+            width="56"
+            height="36"
+            rx="6"
+            fill="white"
+            filter="url(#otpCardShadow)"
+          />
+          <path d="M-24 -14 L0 2 L24 -14" stroke="#C7D2FE" strokeWidth="1.5" fill="none" />
+          <circle cx="14" cy="-22" r="6" fill="#F87171" />
+        </g>
+
+        {/* Floating OTP code card — right */}
+        <g transform="translate(300, 150) rotate(8)">
+          <rect
+            x="-32"
+            y="-18"
+            width="64"
+            height="36"
+            rx="8"
+            fill="white"
+            filter="url(#otpCardShadow)"
+          />
+          <text
+            x="0"
+            y="4"
+            textAnchor="middle"
+            fontSize="14"
+            fontWeight="700"
+            fill="#A78BFA"
+            letterSpacing="3"
+          >
+            ***
+          </text>
+        </g>
+
+        {/* Floating purple sphere — top-right */}
+        <circle cx="300" cy="60" r="10" fill="url(#otpSphereGrad)" opacity="0.6" />
+        {/* Small sphere — left */}
+        <circle cx="85" cy="85" r="6" fill="#A5B4FC" opacity="0.5" />
+        {/* Tiny sphere — bottom */}
+        <circle cx="240" cy="210" r="5" fill="#C4B5FD" opacity="0.4" />
+
+        <defs>
+          <linearGradient
+            id="shieldGrad"
+            x1="100"
+            y1="40"
+            x2="280"
+            y2="220"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stopColor="#C7D2FE" />
+            <stop offset="50%" stopColor="#DDD6FE" />
+            <stop offset="100%" stopColor="#E9D5FF" />
+          </linearGradient>
+          <linearGradient
+            id="shieldInnerGrad"
+            x1="112"
+            y1="50"
+            x2="268"
+            y2="210"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stopColor="#EEF2FF" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="#F5F3FF" stopOpacity="0.2" />
+          </linearGradient>
+          <linearGradient
+            id="otpLockGrad"
+            x1="-16"
+            y1="-2"
+            x2="16"
+            y2="22"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stopColor="#A78BFA" />
+            <stop offset="100%" stopColor="#7C3AED" />
+          </linearGradient>
+          <linearGradient
+            id="otpSphereGrad"
+            x1="-10"
+            y1="-10"
+            x2="10"
+            y2="10"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stopColor="#A78BFA" />
+            <stop offset="100%" stopColor="#6366F1" />
+          </linearGradient>
+          <radialGradient id="otpRingGrad">
+            <stop offset="0%" stopColor="#DDD6FE" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="#DDD6FE" stopOpacity="0" />
+          </radialGradient>
+          <filter id="shieldShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow
+              dx="0"
+              dy="6"
+              stdDeviation="12"
+              floodColor="#4F46E5"
+              floodOpacity="0.15"
+            />
+          </filter>
+          <filter id="otpCardShadow" x="-40%" y="-40%" width="180%" height="180%">
+            <feDropShadow dx="0" dy="3" stdDeviation="5" floodColor="#0f2742" floodOpacity="0.08" />
+          </filter>
+        </defs>
+      </svg>
+    </div>
+  );
+}
+
+/* ================================================================== *
+ * Feature icon components for onboarding                              *
+ * ================================================================== */
+
+function FeatureIcon({
+  icon,
+  bgColor,
+  iconColor,
+}: {
+  icon: React.ReactNode;
+  bgColor: string;
+  iconColor: string;
+}) {
+  return (
+    <div
+      className="flex h-14 w-14 items-center justify-center rounded-2xl"
+      style={{ backgroundColor: bgColor }}
+    >
+      <div style={{ color: iconColor }}>{icon}</div>
+    </div>
+  );
+}
+
+/* ================================================================== *
+ * Main LoginPage component                                            *
+ * ================================================================== */
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -166,255 +718,473 @@ export function LoginPage() {
   ).padStart(2, "0")}`;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4 sm:p-6">
-      <div className="w-full max-w-md">
-        {/* STEP 1: WELCOME SCREEN (media_1792824194145.jpg Phase 2 Screen 1) */}
-        {step === "welcome" && (
-          <div className="card p-7 sm:p-8 rounded-[36px] shadow-2xl border border-border-light/80 animate-fade-in flex flex-col items-center text-center">
-            {/* 3D Fintech Graphic Container */}
-            <div className="relative my-4 flex h-36 w-36 items-center justify-center rounded-full bg-gradient-to-tr from-indigo-600 via-primary to-purple-500 shadow-2xl shadow-primary/40">
-              <div className="absolute inset-2 rounded-full border border-white/20 backdrop-blur-xs flex items-center justify-center">
-                <Wallet className="h-16 w-16 text-white stroke-[1.8]" />
-              </div>
-              {/* Floating feature pills */}
-              <span className="absolute -top-1 -right-2 flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-400 text-slate-950 shadow-md">
-                <Sparkles className="h-5 w-5" />
-              </span>
-              <span className="absolute -bottom-1 -left-2 flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-400 text-slate-950 shadow-md">
-                <PieChart className="h-5 w-5" />
-              </span>
-            </div>
+    <div className="auth-root relative min-h-screen overflow-hidden">
+      {/* Ambient background gradients */}
+      <div className="auth-bg-glow auth-bg-glow-1" />
+      <div className="auth-bg-glow auth-bg-glow-2" />
+      <div className="auth-bg-glow auth-bg-glow-3" />
 
-            <h1 className="mt-4 text-2xl sm:text-[28px] font-extrabold tracking-tight text-text-primary leading-tight">
-              Take Control of Your Money
-            </h1>
-            <p className="mt-2.5 text-sm text-text-secondary leading-relaxed max-w-xs">
-              Track bills, manage budgets and achieve your financial goals effortlessly.
-            </p>
-
-            {/* Pagination Carousel Dots */}
-            <div className="mt-6 flex items-center gap-2" aria-hidden="true">
-              <span className="h-2 w-7 rounded-full bg-primary" />
-              <span className="h-2 w-2 rounded-full bg-muted-foreground/30" />
-              <span className="h-2 w-2 rounded-full bg-muted-foreground/30" />
-            </div>
-
-            {/* Action Buttons */}
-            <div className="mt-8 w-full space-y-3">
-              <button
-                type="button"
-                onClick={() => setStep("email")}
-                className="btn btn-primary w-full !min-h-12 !rounded-2xl text-sm font-bold shadow-lg shadow-primary/25 cursor-pointer flex items-center justify-center gap-2"
-              >
-                Get Started <ArrowRight className="h-4 w-4" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setStep("email")}
-                className="w-full py-2 text-xs font-semibold text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-              >
-                Already have an account? <span className="text-primary font-bold">Sign In</span>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 2: EMAIL ENTRY SCREEN (Phase 2 Screen 2) */}
-        {step === "email" && (
-          <div className="card p-7 sm:p-8 rounded-[36px] shadow-2xl border border-border-light/80 animate-fade-in">
-            {/* Top Back Navigation */}
-            <div className="flex items-center justify-between pb-3">
-              <button
-                type="button"
-                onClick={() => setStep("welcome")}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-                aria-label="Back to welcome"
-              >
-                <ArrowLeft className="h-4.5 w-4.5" />
-              </button>
-              <span className="text-xs font-bold text-text-tertiary">Step 1 of 2</span>
-            </div>
-
-            <div className="pt-2 pb-4">
-              <h2 className="text-2xl font-extrabold tracking-tight text-text-primary">
-                Enter Your Email
-              </h2>
-              <p className="mt-1.5 text-xs text-text-secondary leading-relaxed">
-                We'll send a 6-digit verification code to your inbox to sign you in securely.
-              </p>
-            </div>
-
-            <form onSubmit={sendOTP} className="mt-2 space-y-4">
-              <div>
-                <label
-                  htmlFor="email"
-                  className="mb-1.5 block text-xs font-semibold text-text-secondary"
-                >
-                  Email Address
-                </label>
-                <div className="relative">
-                  <Mail className="pointer-events-none absolute left-4 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-text-tertiary" />
-                  <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@example.com"
-                    disabled={loading}
-                    className="input-field pl-11"
-                    autoFocus
-                  />
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-start px-5 py-6 sm:justify-center sm:px-6">
+        <div className="w-full max-w-[420px]">
+          {/* ============================================================ */}
+          {/* SCREEN 1: ONBOARDING / WELCOME                               */}
+          {/* ============================================================ */}
+          {step === "welcome" && (
+            <div className="animate-fade-in flex flex-col items-center">
+              {/* Top bar: Logo & Skip */}
+              <div className="flex w-full items-center justify-between mb-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 shadow-md">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    >
+                      <rect x="2" y="6" width="20" height="14" rx="3" />
+                      <path d="M2 10h20" />
+                    </svg>
+                  </div>
+                  <span className="text-lg font-extrabold tracking-tight text-slate-900">
+                    BillBuddy
+                  </span>
                 </div>
-              </div>
-
-              {error && (
-                <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700 flex items-start gap-2">
-                  <span className="font-bold">!</span>
-                  <span>{error}</span>
-                </div>
-              )}
-              {success && (
-                <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700 flex items-center gap-2">
-                  <Check className="h-4 w-4 shrink-0" />
-                  <span>{success}</span>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading || !isValidEmail(email)}
-                className="btn btn-primary w-full !min-h-12 !rounded-2xl text-sm font-bold shadow-lg shadow-primary/25 cursor-pointer mt-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Sending Code...
-                  </>
-                ) : (
-                  <>
-                    Continue <ArrowRight className="h-4 w-4" />
-                  </>
-                )}
-              </button>
-            </form>
-
-            <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-xs text-text-tertiary">
-              <ShieldCheck className="h-4 w-4 text-emerald-600" /> Passwordless OTP · No password
-              required
-            </p>
-          </div>
-        )}
-
-        {/* STEP 3: OTP VERIFICATION SCREEN (Phase 2 Screen 3) */}
-        {step === "otp" && (
-          <div className="card p-7 sm:p-8 rounded-[36px] shadow-2xl border border-border-light/80 animate-scale-in">
-            {/* Top Back Navigation */}
-            <div className="flex items-center justify-between pb-3">
-              <button
-                type="button"
-                onClick={() => setStep("email")}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-                aria-label="Back to email"
-              >
-                <ArrowLeft className="h-4.5 w-4.5" />
-              </button>
-              <span className="text-xs font-bold text-text-tertiary">Step 2 of 2</span>
-            </div>
-
-            <div className="text-center pt-2 pb-4">
-              <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/10 text-primary">
-                <Shield className="h-8 w-8 stroke-[2]" />
-              </div>
-              <h2 className="text-2xl font-extrabold tracking-tight text-text-primary">
-                Enter OTP
-              </h2>
-              <p className="mt-1.5 text-xs text-text-secondary">
-                We've sent a 6-digit code to
-                <br />
-                <span className="font-semibold text-text-primary">{email}</span>
-              </p>
-            </div>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                void verifyOTP();
-              }}
-              className="mt-2 space-y-4"
-            >
-              <div className="flex justify-center gap-2 sm:gap-2.5" onPaste={handlePaste}>
-                {otp.map((digit, index) => (
-                  <input
-                    key={index}
-                    ref={(el) => {
-                      otpRefs.current[index] = el;
-                    }}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => handleOtpChange(index, e.target.value)}
-                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                    disabled={loading}
-                    className="h-13 w-11 sm:h-14 sm:w-12 rounded-2xl border-2 border-border-light bg-surface text-center text-xl font-bold text-text-primary outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15 disabled:opacity-50"
-                  />
-                ))}
-              </div>
-
-              {error && (
-                <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700 flex items-start gap-2">
-                  <span className="font-bold">!</span>
-                  <span>{error}</span>
-                </div>
-              )}
-              {success && (
-                <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700 flex items-center gap-2">
-                  <Check className="h-4 w-4 shrink-0" />
-                  <span>{success}</span>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading || otp.join("").length !== 6}
-                className="btn btn-primary w-full !min-h-12 !rounded-2xl text-sm font-bold shadow-lg shadow-primary/25 cursor-pointer"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Verifying...
-                  </>
-                ) : (
-                  "Verify & Continue"
-                )}
-              </button>
-
-              <div className="space-y-2.5 text-center pt-2">
                 <button
                   type="button"
-                  onClick={() => void handleResendOTP()}
-                  disabled={resendCooldown > 0 || loading}
-                  className="text-xs font-semibold text-primary hover:underline disabled:text-text-tertiary disabled:no-underline cursor-pointer"
+                  onClick={() => setStep("email")}
+                  className="flex items-center gap-0.5 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
                 >
-                  {resendCooldown > 0 ? `Resend OTP in ${mmss}` : "Didn't receive code? Resend OTP"}
+                  Skip <ChevronRight className="h-3.5 w-3.5" />
                 </button>
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStep("email");
-                      setOtp(["", "", "", "", "", ""]);
-                    }}
-                    className="text-xs text-text-secondary hover:text-text-primary cursor-pointer"
-                  >
-                    Change email address
-                  </button>
+              </div>
+
+              {/* Hero illustration */}
+              <WalletIllustration />
+
+              {/* Heading */}
+              <h1 className="mt-3 text-center text-[28px] sm:text-[32px] font-extrabold leading-[1.15] tracking-tight text-slate-900">
+                Take Control of
+                <br />
+                <span className="auth-gradient-text">Your Money</span>
+              </h1>
+
+              {/* Subtext */}
+              <p className="mt-3 text-center text-sm leading-relaxed text-slate-500 max-w-[300px]">
+                Track bills, manage budgets and achieve your financial goals effortlessly.
+              </p>
+
+              {/* Feature row */}
+              <div className="mt-6 flex w-full items-start justify-center gap-6 sm:gap-8">
+                <div className="flex flex-col items-center text-center max-w-[90px]">
+                  <FeatureIcon
+                    bgColor="#EDE9FE"
+                    iconColor="#7C3AED"
+                    icon={
+                      <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      >
+                        <rect x="3" y="3" width="18" height="18" rx="3" />
+                        <path d="M7 8h10M7 12h6" />
+                      </svg>
+                    }
+                  />
+                  <span className="mt-2 text-xs font-bold text-slate-800">Track Bills</span>
+                  <span className="text-[10px] text-slate-500 leading-tight">
+                    Never miss a payment
+                  </span>
+                </div>
+                <div className="flex flex-col items-center text-center max-w-[90px]">
+                  <FeatureIcon
+                    bgColor="#FEE2E2"
+                    iconColor="#EF4444"
+                    icon={
+                      <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                      >
+                        <path d="M6 20V8M12 20V4M18 20V12" />
+                      </svg>
+                    }
+                  />
+                  <span className="mt-2 text-xs font-bold text-slate-800">Manage Budgets</span>
+                  <span className="text-[10px] text-slate-500 leading-tight">
+                    Stay on top of spending
+                  </span>
+                </div>
+                <div className="flex flex-col items-center text-center max-w-[90px]">
+                  <FeatureIcon
+                    bgColor="#DCFCE7"
+                    iconColor="#16A34A"
+                    icon={
+                      <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      >
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M8 12l3 3 5-5" />
+                      </svg>
+                    }
+                  />
+                  <span className="mt-2 text-xs font-bold text-slate-800">Achieve Goals</span>
+                  <span className="text-[10px] text-slate-500 leading-tight">
+                    Build a better future
+                  </span>
                 </div>
               </div>
-            </form>
-          </div>
-        )}
+
+              {/* Page indicators */}
+              <div className="mt-6 flex items-center gap-2" aria-hidden="true">
+                <span className="h-2 w-7 rounded-full bg-indigo-600" />
+                <span className="h-2 w-2 rounded-full bg-slate-300" />
+                <span className="h-2 w-2 rounded-full bg-slate-300" />
+              </div>
+
+              {/* Actions */}
+              <div className="mt-7 w-full space-y-3.5">
+                <button
+                  type="button"
+                  onClick={() => setStep("email")}
+                  className="auth-btn-gradient w-full cursor-pointer"
+                >
+                  <span>Get Started</span>
+                  <ArrowRight className="h-5 w-5" />
+                </button>
+
+                <p className="text-center text-sm text-slate-500">
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setStep("email")}
+                    className="font-bold text-slate-800 hover:text-indigo-600 transition-colors cursor-pointer"
+                  >
+                    Sign In
+                  </button>
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* ============================================================ */}
+          {/* SCREEN 2: EMAIL ENTRY                                        */}
+          {/* ============================================================ */}
+          {step === "email" && (
+            <div className="animate-fade-in flex flex-col items-center">
+              {/* Top bar */}
+              <div className="flex w-full items-center justify-between mb-2">
+                <button
+                  type="button"
+                  onClick={() => setStep("welcome")}
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-all cursor-pointer"
+                  aria-label="Back to welcome"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
+                <div className="flex flex-col items-end gap-1">
+                  <span className="text-xs font-semibold text-slate-500">Step 1 of 2</span>
+                  <div className="h-1 w-20 rounded-full bg-slate-200 overflow-hidden">
+                    <div className="h-full w-1/2 rounded-full bg-indigo-600" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Illustration */}
+              <EmailIllustration />
+
+              {/* Heading */}
+              <h2 className="mt-2 text-center text-[28px] sm:text-[32px] font-extrabold leading-[1.15] tracking-tight text-slate-900">
+                Enter Your <span className="auth-gradient-text">Email</span>
+              </h2>
+
+              {/* Subtext */}
+              <p className="mt-2.5 text-center text-sm leading-relaxed text-slate-500 max-w-[300px]">
+                We'll send a 6-digit verification code to your inbox to sign you in securely.
+              </p>
+
+              {/* Form */}
+              <form onSubmit={sendOTP} className="mt-6 w-full space-y-4">
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="mb-2 block text-sm font-semibold text-slate-800"
+                  >
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                    <input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="name@example.com"
+                      disabled={loading}
+                      className="auth-input pl-12"
+                      autoFocus
+                    />
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700 flex items-start gap-2">
+                    <span className="font-bold shrink-0">!</span>
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading || !isValidEmail(email)}
+                  className="auth-btn-gradient w-full cursor-pointer"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span>Sending Code...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Continue</span>
+                      <ArrowRight className="h-5 w-5" />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              {/* OR divider */}
+              <div className="mt-5 flex w-full items-center gap-3">
+                <div className="h-px flex-1 bg-slate-200" />
+                <span className="text-xs font-medium text-slate-400">OR</span>
+                <div className="h-px flex-1 bg-slate-200" />
+              </div>
+
+              {/* Social sign-in buttons (visual only — providers not configured) */}
+              <div className="mt-4 flex w-full gap-3">
+                <button
+                  type="button"
+                  disabled
+                  className="auth-social-btn flex-1"
+                  title="Google sign-in not configured"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24">
+                    <path
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                      fill="#4285F4"
+                    />
+                    <path
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                      fill="#34A853"
+                    />
+                    <path
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                      fill="#FBBC05"
+                    />
+                    <path
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                      fill="#EA4335"
+                    />
+                  </svg>
+                  <span className="text-xs font-semibold text-slate-700">
+                    Continue
+                    <br />
+                    with Google
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  disabled
+                  className="auth-social-btn flex-1"
+                  title="Apple sign-in not configured"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="text-slate-900"
+                  >
+                    <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.52-3.23 0-1.44.62-2.2.44-3.06-.4C3.79 16.17 4.36 9.04 8.93 8.78c1.27.07 2.15.72 2.91.78.97-.2 1.9-.75 2.96-.68 1.25.1 2.19.6 2.82 1.5-2.57 1.54-1.97 4.92.58 5.87-.48 1.27-.69 1.83-1.15 3.03zM12.02 8.7c-.14-2.32 1.81-4.31 4-4.5.27 2.59-2.34 4.57-4 4.5z" />
+                  </svg>
+                  <span className="text-xs font-semibold text-slate-700">
+                    Continue
+                    <br />
+                    with Apple
+                  </span>
+                </button>
+              </div>
+
+              {/* Passwordless note */}
+              <p className="mt-5 flex items-center justify-center gap-1.5 text-xs text-slate-400">
+                <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                Passwordless OTP · No password required
+              </p>
+            </div>
+          )}
+
+          {/* ============================================================ */}
+          {/* SCREEN 3: OTP VERIFICATION                                   */}
+          {/* ============================================================ */}
+          {step === "otp" && (
+            <div className="animate-scale-in flex flex-col items-center">
+              {/* Top bar */}
+              <div className="flex w-full items-center justify-between mb-2">
+                <button
+                  type="button"
+                  onClick={() => setStep("email")}
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-all cursor-pointer"
+                  aria-label="Back to email"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
+                <div className="flex flex-col items-end gap-1">
+                  <span className="text-xs font-semibold text-slate-500">Step 2 of 2</span>
+                  <div className="h-1 w-20 rounded-full bg-slate-200 overflow-hidden">
+                    <div className="h-full w-full rounded-full bg-indigo-600" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Illustration */}
+              <OTPIllustration />
+
+              {/* Heading */}
+              <h2 className="mt-2 text-center text-[28px] sm:text-[32px] font-extrabold leading-[1.15] tracking-tight text-slate-900">
+                Enter <span className="auth-gradient-text">OTP</span>
+              </h2>
+
+              {/* Email display */}
+              <p className="mt-2 text-center text-sm text-slate-500">
+                We've sent a 6-digit code to
+              </p>
+              <p className="text-center text-sm font-bold text-slate-900">{email}</p>
+
+              {/* OTP input */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void verifyOTP();
+                }}
+                className="mt-5 w-full"
+              >
+                <div className="flex justify-center gap-2.5 sm:gap-3" onPaste={handlePaste}>
+                  {otp.map((digit, index) => (
+                    <input
+                      key={index}
+                      ref={(el) => {
+                        otpRefs.current[index] = el;
+                      }}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleOtpChange(index, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                      disabled={loading}
+                      className="auth-otp-input"
+                      aria-label={`Digit ${index + 1}`}
+                    />
+                  ))}
+                </div>
+
+                {/* Status messages */}
+                <div className="mt-4 space-y-2">
+                  {error && (
+                    <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700 flex items-start gap-2">
+                      <span className="font-bold shrink-0">!</span>
+                      <span>{error}</span>
+                    </div>
+                  )}
+                  {success && (
+                    <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700 flex items-center gap-2">
+                      <CheckCircle2 className="h-4.5 w-4.5 shrink-0 text-emerald-600" />
+                      <span>{success}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Verify button */}
+                <div className="mt-4">
+                  <button
+                    type="submit"
+                    disabled={loading || otp.join("").length !== 6}
+                    className="auth-btn-gradient w-full cursor-pointer"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <span>Verifying...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Verify & Continue</span>
+                        <ArrowRight className="h-5 w-5" />
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Resend countdown */}
+                <p className="mt-4 text-center text-sm text-slate-500">
+                  {resendCooldown > 0 ? (
+                    <>
+                      Resend OTP in <span className="font-bold text-indigo-600">{mmss}</span>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => void handleResendOTP()}
+                      disabled={loading}
+                      className="font-semibold text-indigo-600 hover:underline cursor-pointer disabled:text-slate-400 disabled:no-underline"
+                    >
+                      Didn't receive code? Resend OTP
+                    </button>
+                  )}
+                </p>
+
+                {/* OR divider */}
+                <div className="mt-4 flex w-full items-center gap-3">
+                  <div className="h-px flex-1 bg-slate-200" />
+                  <span className="text-xs font-medium text-slate-400">OR</span>
+                  <div className="h-px flex-1 bg-slate-200" />
+                </div>
+
+                {/* Change email */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep("email");
+                    setOtp(["", "", "", "", "", ""]);
+                    setError("");
+                    setSuccess("");
+                  }}
+                  className="mt-4 flex w-full items-center gap-3 rounded-2xl bg-white border border-slate-200 px-4 py-3.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer shadow-sm"
+                >
+                  <Edit3 className="h-4.5 w-4.5 text-indigo-500" />
+                  <span className="flex-1 text-left">Change email address</span>
+                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                </button>
+              </form>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

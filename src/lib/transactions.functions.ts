@@ -211,7 +211,7 @@ export const createTransaction = createServerFn({ method: "POST" })
     const { privilegedDb, audit } = await import("./bills.server");
     const db = await privilegedDb(supabase as any);
 
-    const payload = {
+    const basePayload = {
       user_id: userId,
       type: data.type,
       amount: data.type === "adjustment" ? data.amount : Math.abs(data.amount),
@@ -221,16 +221,25 @@ export const createTransaction = createServerFn({ method: "POST" })
       payment_method: data.payment_method ?? "manual",
       notes: data.notes ?? null,
       currency: data.currency,
-      status: "completed",
       source: "manual",
       client_request_id: data.client_request_id,
     };
 
-    const { data: row, error } = await db
+    let { data: row, error } = await db
       .from("transactions")
-      .insert(payload as never)
+      .insert({ ...basePayload, status: "settled" } as never)
       .select("*")
       .single();
+
+    if (error && (error.code === "23514" || /check constraint/i.test(error.message))) {
+      const fallback = await db
+        .from("transactions")
+        .insert({ ...basePayload, status: "completed" } as never)
+        .select("*")
+        .single();
+      row = fallback.data;
+      error = fallback.error;
+    }
 
     if (error) {
       // Unique violation on (user_id, client_request_id) = a repeated submit.
@@ -377,28 +386,39 @@ export const reverseTransaction = createServerFn({ method: "POST" })
     const type = reversalTypeFor(original);
     const amount = Math.abs(Number(original.amount));
 
-    const { data: created, error } = await db
+    const reversalPayload = {
+      user_id: userId,
+      type,
+      // An adjustment reversing money in must remove it again.
+      amount: type === "adjustment" ? -amount : amount,
+      category: original.category,
+      description: data.reason?.trim()
+        ? `Reversal: ${data.reason.trim()}`
+        : `Reversal of ${original.description || original.category}`,
+      date: new Date().toISOString().slice(0, 10),
+      currency: original.currency ?? "INR",
+      payment_method: original.payment_method ?? null,
+      external_reference: original.external_reference ?? null,
+      source: "system",
+      reversal_of: original.id,
+      client_request_id: data.client_request_id,
+    };
+
+    let { data: created, error } = await db
       .from("transactions")
-      .insert({
-        user_id: userId,
-        type,
-        // An adjustment reversing money in must remove it again.
-        amount: type === "adjustment" ? -amount : amount,
-        category: original.category,
-        description: data.reason?.trim()
-          ? `Reversal: ${data.reason.trim()}`
-          : `Reversal of ${original.description || original.category}`,
-        date: new Date().toISOString().slice(0, 10),
-        currency: original.currency ?? "INR",
-        payment_method: original.payment_method ?? null,
-        external_reference: original.external_reference ?? null,
-        status: "completed",
-        source: "system",
-        reversal_of: original.id,
-        client_request_id: data.client_request_id,
-      } as never)
+      .insert({ ...reversalPayload, status: "settled" } as never)
       .select("*")
       .single();
+
+    if (error && (error.code === "23514" || /check constraint/i.test(error.message))) {
+      const fallback = await db
+        .from("transactions")
+        .insert({ ...reversalPayload, status: "completed" } as never)
+        .select("*")
+        .single();
+      created = fallback.data;
+      error = fallback.error;
+    }
 
     if (error) {
       if (error.code === "23505") {

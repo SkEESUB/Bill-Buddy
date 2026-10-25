@@ -243,23 +243,34 @@ export async function settleCapturedPayment(
   // Idempotent transaction creation: the partial unique index guarantees one
   // bill_payment transaction per instalment even under concurrent webhooks.
   let transactionId: string | null = null;
-  const { data: txn, error: txnError } = await db
+  const baseSettlePayload = {
+    user_id: order.user_id,
+    type: "bill_payment",
+    amount: Number(order.amount),
+    category: bill?.category ?? "general",
+    description: bill?.title ?? "Bill payment",
+    date: paidOn.slice(0, 10),
+    payment_method: payment.method ?? "upi",
+    external_reference: payment.id,
+    bill_occurrence_id: order.bill_occurrence_id,
+    notes: `${PROVIDER}:${payment.id}`,
+  };
+
+  let { data: txn, error: txnError } = await db
     .from("transactions")
-    .insert({
-      user_id: order.user_id,
-      type: "bill_payment",
-      amount: Number(order.amount),
-      category: bill?.category ?? "general",
-      description: bill?.title ?? "Bill payment",
-      date: paidOn.slice(0, 10),
-      status: "completed",
-      payment_method: payment.method ?? "upi",
-      external_reference: payment.id,
-      bill_occurrence_id: order.bill_occurrence_id,
-      notes: `${PROVIDER}:${payment.id}`,
-    } as never)
+    .insert({ ...baseSettlePayload, status: "settled" } as never)
     .select("id")
     .single();
+
+  if (txnError && (txnError.code === "23514" || /check constraint/i.test(txnError.message))) {
+    const fallback = await db
+      .from("transactions")
+      .insert({ ...baseSettlePayload, status: "completed" } as never)
+      .select("id")
+      .single();
+    txn = fallback.data;
+    txnError = fallback.error;
+  }
 
   let duplicate = false;
   if (txnError) {
@@ -273,7 +284,7 @@ export async function settleCapturedPayment(
       .eq("type", "bill_payment")
       .maybeSingle();
     transactionId = existing?.id ?? null;
-  } else {
+  } else if (txn) {
     transactionId = txn.id;
   }
 
@@ -365,21 +376,32 @@ export async function recordRefund(
   const delta = refundedMajor - Number(order.refunded_amount);
   const full = refundedMajor >= Number(order.amount);
 
-  const { error: refundTxnError } = await db.from("transactions").insert({
+  const baseRefundPayload = {
     user_id: order.user_id,
     type: "refund",
     amount: delta,
     category: "refund",
     description: "Bill payment refund",
     date: new Date().toISOString().slice(0, 10),
-    status: "completed",
     payment_method: "upi",
     external_reference: input.refundId,
-    // Unique per (user_id, client_request_id): two concurrent refund events for
-    // the same provider refund can never create two ledger rows.
     client_request_id: `refund:${input.refundId}`,
     notes: `${PROVIDER}:refund:${input.refundId}`,
-  } as never);
+  };
+
+  let { error: refundTxnError } = await db
+    .from("transactions")
+    .insert({ ...baseRefundPayload, status: "settled" } as never);
+
+  if (
+    refundTxnError &&
+    (refundTxnError.code === "23514" || /check constraint/i.test(refundTxnError.message))
+  ) {
+    const fallback = await db
+      .from("transactions")
+      .insert({ ...baseRefundPayload, status: "completed" } as never);
+    refundTxnError = fallback.error;
+  }
   if (refundTxnError && !/duplicate key/i.test(refundTxnError.message)) {
     throw new Error(refundTxnError.message);
   }

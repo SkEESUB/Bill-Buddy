@@ -11,12 +11,14 @@ const REPEAT_LABEL: Record<string, string> = {
   custom: "Custom",
 };
 
-/** Compute human-friendly due status text and badge styling */
+/** Compute human-friendly due status text, badge styling, and animation category */
 function getStatusDetails(dueDate: string, today: string, isSettled: boolean) {
   if (isSettled) {
     return {
+      statusType: "completed" as const,
       label: "Completed",
-      className: "bg-emerald-50 text-emerald-700 border-emerald-200/80",
+      className:
+        "bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60",
     };
   }
 
@@ -35,26 +37,34 @@ function getStatusDetails(dueDate: string, today: string, isSettled: boolean) {
   if (diffDays < 0) {
     const overdueDays = Math.abs(diffDays);
     return {
+      statusType: "overdue" as const,
       label: overdueDays === 1 ? "Overdue 1 day" : `Overdue ${overdueDays} days`,
-      className: "bg-rose-50 text-rose-700 border-rose-200/90 font-medium",
+      className:
+        "bg-rose-50 text-rose-700 border-rose-200/90 font-medium dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/60",
     };
   }
   if (diffDays === 0) {
     return {
+      statusType: "due-soon" as const,
       label: "Due today",
-      className: "bg-amber-50 text-amber-700 border-amber-200/90 font-medium",
+      className:
+        "bg-amber-50 text-amber-700 border-amber-200/90 font-medium dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60",
     };
   }
   if (diffDays === 1) {
     return {
+      statusType: "due-soon" as const,
       label: "Due tomorrow",
-      className: "bg-amber-50/80 text-amber-800 border-amber-200/70",
+      className:
+        "bg-amber-50/80 text-amber-800 border-amber-200/70 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-800/50",
     };
   }
   if (diffDays <= 7) {
     return {
+      statusType: "upcoming" as const,
       label: `Due in ${diffDays} days`,
-      className: "bg-sky-50 text-sky-700 border-sky-200/80",
+      className:
+        "bg-sky-50 text-sky-700 border-sky-200/80 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800/60",
     };
   }
 
@@ -74,18 +84,22 @@ function getStatusDetails(dueDate: string, today: string, isSettled: boolean) {
     "Dec",
   ];
   return {
+    statusType: "upcoming" as const,
     label: `Due ${d1} ${months[m1 - 1]}`,
-    className: "bg-slate-100/80 text-slate-700 border-slate-200/80",
+    className:
+      "bg-slate-100/80 text-slate-700 border-slate-200/80 dark:bg-slate-800/60 dark:text-slate-300 dark:border-slate-700/60",
   };
 }
 
 export function BillCard({
   occurrence,
   today,
+  index = 0,
   onSelect,
 }: {
   occurrence: OccurrenceView;
   today: string;
+  index?: number;
   onSelect?: (occurrence: OccurrenceView) => void;
   onPay?: (occurrence: OccurrenceView) => void;
   onEdit?: (occurrence: OccurrenceView) => void;
@@ -98,10 +112,15 @@ export function BillCard({
   const settled = occurrence.isSettled;
   const statusDetails = getStatusDetails(occurrence.dueDate, today, settled);
 
+  const statusClass = `status-${statusDetails.statusType}`;
+  const floatClass = !settled ? "bill-card-floating" : "";
+  const floatDelay = `${((index % 5) * 0.4).toFixed(1)}s`;
+
   return (
     <article
       onClick={() => onSelect?.(occurrence)}
-      className="group glass-card flex items-center justify-between gap-3.5 rounded-2xl border border-white/80 p-3.5 sm:p-4 transition-all duration-200 hover:border-blue-300 hover:shadow-md active:scale-[0.99] cursor-pointer"
+      className={`group bill-card-premium ${statusClass} ${floatClass} flex items-center justify-between gap-3.5 p-3.5 sm:p-4 cursor-pointer`}
+      style={{ animationDelay: floatDelay }}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
@@ -116,7 +135,7 @@ export function BillCard({
       <div className="flex items-center gap-3 min-w-0">
         <span
           aria-hidden="true"
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all duration-200 group-hover:scale-108 group-hover:shadow-sm"
           style={{ backgroundColor: `${cat.color}14`, color: cat.color }}
         >
           <Icon className="h-5 w-5 stroke-[2.2]" />
@@ -124,12 +143,12 @@ export function BillCard({
 
         {/* Title, Status & Metadata */}
         <div className="min-w-0">
-          <h3 className="truncate text-sm sm:text-[15px] font-semibold text-slate-900 group-hover:text-blue-600 transition-colors leading-snug">
+          <h3 className="truncate text-sm sm:text-[15px] font-semibold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-indigo-400 transition-colors leading-snug">
             {occurrence.title}
           </h3>
           <div className="mt-1 flex items-center gap-1.5 flex-wrap">
             <span
-              className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] border ${statusDetails.className}`}
+              className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] border transition-colors duration-200 ${statusDetails.className}`}
             >
               {settled ? (
                 <span className="inline-flex items-center gap-1">
@@ -142,15 +161,15 @@ export function BillCard({
 
             {/* Reminder indicator */}
             {occurrence.reminderTime && !settled && (
-              <span className="inline-flex items-center gap-0.5 text-[11px] text-slate-500 font-medium">
-                <Bell className="h-3 w-3 text-slate-400 stroke-[2]" />
+              <span className="inline-flex items-center gap-0.5 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                <Bell className="h-3 w-3 text-slate-400 dark:text-slate-500 stroke-[2]" />
                 <span>{occurrence.reminderTime.slice(0, 5)}</span>
               </span>
             )}
 
             {occurrence.isRecurring && (
-              <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 font-medium">
-                <Repeat className="h-3 w-3 text-slate-400 stroke-[2]" />
+              <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                <Repeat className="h-3 w-3 text-slate-400 dark:text-slate-500 stroke-[2]" />
                 {REPEAT_LABEL[occurrence.repeatType] ?? "Repeat"}
               </span>
             )}
@@ -161,13 +180,15 @@ export function BillCard({
       {/* Amount & Right Interaction */}
       <div className="flex items-center gap-2.5 shrink-0 text-right">
         <div>
-          <p className="text-sm sm:text-base font-bold tabular-nums text-slate-900">
+          <p className="text-sm sm:text-base font-bold tabular-nums text-slate-900 dark:text-slate-100">
             {formatAmount(occurrence.amount)}
           </p>
-          <p className="text-[11px] text-slate-500 font-medium mt-0.5">{cat.label}</p>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+            {cat.label}
+          </p>
         </div>
 
-        <div className="flex items-center text-slate-400 group-hover:text-blue-600 transition-colors pl-1">
+        <div className="flex items-center text-slate-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-indigo-400 transition-all duration-200 group-hover:translate-x-0.5 pl-1">
           <ChevronRight className="h-4 w-4 stroke-[2.2]" />
         </div>
       </div>

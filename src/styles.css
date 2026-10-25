@@ -430,6 +430,371 @@
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
+
+  /* ---------------------------------------------------------------- *
+   * Authentication Screen Redesign Styles                             *
+   * ---------------------------------------------------------------- */
+
+  .auth-root {
+    background-color: #fafbfc;
+  }
+
+  .dark .auth-root {
+    background-color: var(--background);
+  }
+
+  .auth-bg-glow {
+    position: absolute;
+    border-radius: 9999px;
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(80px);
+  }
+
+  .auth-bg-glow-1 {
+    top: -60px;
+    left: -50px;
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle, rgba(199, 210, 254, 0.5) 0%, rgba(199, 210, 254, 0) 70%);
+  }
+
+  .auth-bg-glow-2 {
+    top: 30%;
+    right: -80px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(221, 214, 254, 0.45) 0%, rgba(221, 214, 254, 0) 70%);
+  }
+
+  .auth-bg-glow-3 {
+    bottom: -60px;
+    left: 20%;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(238, 242, 255, 0.6) 0%, rgba(238, 242, 255, 0) 70%);
+  }
+
+  .auth-gradient-text {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .auth-btn-gradient {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 56px;
+    padding: 0 1.75rem;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #7c3aed 100%);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: -0.01em;
+    box-shadow: 0 10px 25px -4px rgba(99, 102, 241, 0.38), 0 4px 10px -2px rgba(99, 102, 241, 0.2);
+    transition: all 200ms ease;
+  }
+
+  .auth-btn-gradient:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px -4px rgba(99, 102, 241, 0.45), 0 6px 12px -2px rgba(99, 102, 241, 0.25);
+    filter: brightness(1.03);
+  }
+
+  .auth-btn-gradient:active:not(:disabled) {
+    transform: scale(0.985);
+  }
+
+  .auth-btn-gradient:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .auth-input {
+    width: 100%;
+    min-height: 54px;
+    border-radius: 16px;
+    border: 1.5px solid #e2e8f0;
+    background-color: #ffffff;
+    color: #0f172a;
+    padding: 0.75rem 1rem;
+    font-size: 0.9375rem;
+    outline: none;
+    box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .auth-input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+  }
+
+  .auth-input::placeholder {
+    color: #94a3b8;
+  }
+
+  .auth-otp-input {
+    width: 48px;
+    height: 56px;
+    border-radius: 16px;
+    border: 1.5px solid #e2e8f0;
+    background-color: #ffffff;
+    color: #0f172a;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    outline: none;
+    box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03);
+    transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+  }
+
+  @media (min-width: 640px) {
+    .auth-otp-input {
+      width: 52px;
+      height: 60px;
+    }
+  }
+
+  .auth-otp-input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    transform: translateY(-1px);
+  }
+
+  .auth-social-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    padding: 0.75rem 1rem;
+    min-height: 52px;
+    border-radius: 16px;
+    border: 1.5px solid #e2e8f0;
+    background-color: #ffffff;
+    box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03);
+    cursor: not-allowed;
+    opacity: 0.75;
+    transition: all 150ms ease;
+  }
+
+  .auth-illustration-container {
+    user-select: none;
+  }
+
+  /* ---------------------------------------------------------------- *
+   * Premium Bill Card Micro-Interactions & Animations                *
+   * ---------------------------------------------------------------- */
+
+  @keyframes bill-card-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-2.5px);
+    }
+  }
+
+  .bill-card-premium {
+    position: relative;
+    border-radius: 1.125rem;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow:
+      0 4px 20px -4px rgba(15, 39, 66, 0.05),
+      0 1px 3px 0 rgba(15, 39, 66, 0.03);
+    transition:
+      transform 240ms cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 240ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 200ms ease,
+      background-color 200ms ease,
+      opacity 200ms ease;
+    will-change: transform, box-shadow;
+    contain: layout style;
+  }
+
+  .dark .bill-card-premium {
+    background: rgba(15, 23, 42, 0.82);
+    border-color: rgba(51, 65, 85, 0.7);
+    box-shadow:
+      0 4px 20px -4px rgba(0, 0, 0, 0.4),
+      0 1px 3px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  /* Gentle idle floating for active bills */
+  .bill-card-premium.bill-card-floating {
+    animation: bill-card-float 4.8s ease-in-out infinite;
+  }
+
+  /* Pause floating on hover/focus and apply elevated lift */
+  .bill-card-premium:hover,
+  .bill-card-premium:focus-visible {
+    animation-play-state: paused;
+    transform: translateY(-3px) scale(1.006);
+    box-shadow:
+      0 14px 32px -8px rgba(15, 39, 66, 0.09),
+      0 4px 12px -2px rgba(99, 102, 241, 0.08);
+  }
+
+  .dark .bill-card-premium:hover,
+  .dark .bill-card-premium:focus-visible {
+    box-shadow:
+      0 14px 32px -8px rgba(0, 0, 0, 0.55),
+      0 4px 14px -2px rgba(129, 140, 248, 0.16);
+  }
+
+  /* Tactile press feedback */
+  .bill-card-premium:active {
+    transform: scale(0.985);
+    box-shadow:
+      0 2px 8px -2px rgba(15, 39, 66, 0.06),
+      0 1px 2px 0 rgba(15, 39, 66, 0.04);
+    transition-duration: 90ms;
+  }
+
+  /* Gentle neon edge highlights */
+  .bill-card-premium::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(
+      135deg,
+      rgba(99, 102, 241, 0.28) 0%,
+      rgba(59, 130, 246, 0.08) 50%,
+      rgba(147, 51, 234, 0.3) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.55;
+    transition:
+      opacity 240ms ease,
+      background 240ms ease;
+  }
+
+  .bill-card-premium:hover::before {
+    opacity: 1;
+    background: linear-gradient(
+      135deg,
+      rgba(99, 102, 241, 0.55) 0%,
+      rgba(59, 130, 246, 0.2) 50%,
+      rgba(147, 51, 234, 0.6) 100%
+    );
+  }
+
+  /* Status-specific neon edge highlights & ambient glows */
+  .bill-card-premium.status-overdue::before {
+    background: linear-gradient(
+      135deg,
+      rgba(244, 63, 94, 0.45) 0%,
+      rgba(244, 63, 94, 0.1) 50%,
+      rgba(225, 29, 72, 0.5) 100%
+    );
+    opacity: 0.75;
+  }
+  .bill-card-premium.status-overdue:hover::before {
+    opacity: 1;
+    background: linear-gradient(
+      135deg,
+      rgba(244, 63, 94, 0.75) 0%,
+      rgba(244, 63, 94, 0.25) 50%,
+      rgba(225, 29, 72, 0.8) 100%
+    );
+  }
+  .bill-card-premium.status-overdue {
+    box-shadow:
+      0 4px 20px -4px rgba(244, 63, 94, 0.08),
+      0 1px 3px 0 rgba(244, 63, 94, 0.04);
+  }
+  .bill-card-premium.status-overdue:hover {
+    box-shadow:
+      0 14px 32px -8px rgba(244, 63, 94, 0.16),
+      0 4px 14px -2px rgba(244, 63, 94, 0.12);
+  }
+
+  .bill-card-premium.status-due-soon::before {
+    background: linear-gradient(
+      135deg,
+      rgba(245, 158, 11, 0.45) 0%,
+      rgba(245, 158, 11, 0.1) 50%,
+      rgba(217, 119, 6, 0.5) 100%
+    );
+    opacity: 0.75;
+  }
+  .bill-card-premium.status-due-soon:hover::before {
+    opacity: 1;
+    background: linear-gradient(
+      135deg,
+      rgba(245, 158, 11, 0.75) 0%,
+      rgba(245, 158, 11, 0.25) 50%,
+      rgba(217, 119, 6, 0.8) 100%
+    );
+  }
+  .bill-card-premium.status-due-soon {
+    box-shadow:
+      0 4px 20px -4px rgba(245, 158, 11, 0.08),
+      0 1px 3px 0 rgba(245, 158, 11, 0.04);
+  }
+  .bill-card-premium.status-due-soon:hover {
+    box-shadow:
+      0 14px 32px -8px rgba(245, 158, 11, 0.16),
+      0 4px 14px -2px rgba(245, 158, 11, 0.12);
+  }
+
+  .bill-card-premium.status-completed::before {
+    background: linear-gradient(
+      135deg,
+      rgba(16, 185, 129, 0.35) 0%,
+      rgba(16, 185, 129, 0.08) 50%,
+      rgba(5, 150, 105, 0.4) 100%
+    );
+    opacity: 0.5;
+  }
+  .bill-card-premium.status-completed:hover::before {
+    opacity: 0.85;
+  }
+  .bill-card-premium.status-completed {
+    opacity: 0.88;
+  }
+  .bill-card-premium.status-completed:hover {
+    opacity: 1;
+  }
+
+  /* Full accessibility respect for reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .bill-card-premium,
+    .bill-card-premium.bill-card-floating,
+    .bill-card-premium:hover,
+    .bill-card-premium:active {
+      animation: none !important;
+      transform: none !important;
+      transition:
+        opacity 120ms ease,
+        border-color 120ms ease !important;
+    }
+  }
+
+  .reduce-motion .bill-card-premium,
+  .reduce-motion .bill-card-premium.bill-card-floating,
+  .reduce-motion .bill-card-premium:hover,
+  .reduce-motion .bill-card-premium:active {
+    animation: none !important;
+    transform: none !important;
+    transition:
+      opacity 120ms ease,
+      border-color 120ms ease !important;
+  }
 }
 
 /* ---------------------------------------------------------------- *

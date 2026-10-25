@@ -305,7 +305,7 @@ export const recordOccurrencePayment = createServerFn({ method: "POST" })
 
     const { data: occurrence, error: readError } = await supabase
       .from("bill_occurrences")
-      .select("*, bill:bills(title, category)")
+      .select("*, bill:bills(*)")
       .eq("id", data.occurrence_id)
       .eq("user_id", userId)
       .single();
@@ -317,26 +317,40 @@ export const recordOccurrencePayment = createServerFn({ method: "POST" })
       throw new Error("This bill instalment was cancelled or skipped.");
     }
 
-    const bill = occurrence.bill as { title: string; category: string } | null;
+    const bill = occurrence.bill as { title?: string; category?: string } | null;
 
-    const { data: txn, error: txnError } = await db
+    // Schema-tolerant insert: Try 'settled' first (matching live production check constraint
+    // status IN ('settled','pending','cancelled','reversed')), falling back to 'completed'.
+    const baseTxn = {
+      user_id: userId,
+      type: "bill_payment",
+      amount: data.amount,
+      category: bill?.category ?? "general",
+      description: bill?.title ?? "Bill payment",
+      date: data.paid_on,
+      payment_method: data.payment_method,
+      external_reference: data.external_reference ?? null,
+      notes: data.notes ?? null,
+      bill_occurrence_id: occurrence.id,
+    };
+
+    let { data: txn, error: txnError } = await db
       .from("transactions")
-      .insert({
-        user_id: userId,
-        type: "bill_payment",
-        amount: data.amount,
-        category: bill?.category ?? "general",
-        description: bill?.title ?? "Bill payment",
-        date: data.paid_on,
-        status: "completed",
-        payment_method: data.payment_method,
-        external_reference: data.external_reference ?? null,
-        notes: data.notes ?? null,
-        bill_occurrence_id: occurrence.id,
-      } as never)
+      .insert({ ...baseTxn, status: "settled" } as never)
       .select("*")
       .single();
+
+    if (txnError && (txnError.code === "23514" || /check constraint/i.test(txnError.message))) {
+      const fallback = await db
+        .from("transactions")
+        .insert({ ...baseTxn, status: "completed" } as never)
+        .select("*")
+        .single();
+      txn = fallback.data;
+      txnError = fallback.error;
+    }
     if (txnError) throw new Error(txnError.message);
+    if (!txn) throw new Error("Transaction could not be recorded.");
 
     const { data: updated, error: updateError } = await db
       .from("bill_occurrences")
