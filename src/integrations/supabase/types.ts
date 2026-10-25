@@ -250,6 +250,8 @@ export type Database = {
           notes: string | null;
           recurring_type: string | null;
           reminder_days_before: number;
+          reminder_email?: string | null;
+          reminder_time?: string | null;
           repeat_end_date: string | null;
           repeat_interval: number;
           repeat_type: string;
@@ -274,6 +276,8 @@ export type Database = {
           notes?: string | null;
           recurring_type?: string | null;
           reminder_days_before?: number;
+          reminder_email?: string | null;
+          reminder_time?: string | null;
           repeat_end_date?: string | null;
           repeat_interval?: number;
           repeat_type?: string;
@@ -298,6 +302,8 @@ export type Database = {
           notes?: string | null;
           recurring_type?: string | null;
           reminder_days_before?: number;
+          reminder_email?: string | null;
+          reminder_time?: string | null;
           repeat_end_date?: string | null;
           repeat_interval?: number;
           repeat_type?: string;

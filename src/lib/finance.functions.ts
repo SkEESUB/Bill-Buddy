@@ -62,7 +62,7 @@ export const getFinanceSnapshot = createServerFn({ method: "GET" })
           supabase
             .from("bill_occurrences")
             .select(
-              "id, bill_id, scheduled_date, expected_amount, actual_amount, status, paid_at, transaction_id, bill:bills(id, title, category, amount, upi_id, notes, repeat_type, repeat_interval, repeat_end_date, reminder_days_before, reminder_time, reminder_email, is_active, due_date, created_at)",
+              "id, bill_id, scheduled_date, expected_amount, actual_amount, status, paid_at, transaction_id, bill:bills(*)",
             )
             .eq("user_id", userId)
             .gte("scheduled_date", occFrom)

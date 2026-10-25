@@ -136,6 +136,8 @@ CREATE TABLE IF NOT EXISTS public.bills (
   repeat_interval integer NOT NULL DEFAULT 1,
   repeat_end_date date,
   reminder_days_before integer NOT NULL DEFAULT 3,
+  reminder_time time NOT NULL DEFAULT '09:00:00',
+  reminder_email text,
   is_active boolean NOT NULL DEFAULT true,
   amount_type text NOT NULL DEFAULT 'fixed' CHECK (amount_type IN ('fixed','variable')),
   currency text NOT NULL DEFAULT 'INR',

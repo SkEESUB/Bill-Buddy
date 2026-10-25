@@ -42,36 +42,73 @@ export const createBill = createServerFn({ method: "POST" })
 
     console.log(`[createBill] Creating bill for user ${userId}:`, data.title);
 
-    const { data: bill, error } = await supabase
+    const basePayload = {
+      user_id: userId,
+      title: data.title,
+      amount: data.amount,
+      category: data.category,
+      due_date: data.due_date,
+      repeat_type: data.repeat_type,
+      repeat_interval: data.repeat_interval,
+      repeat_end_date: data.repeat_end_date ?? null,
+      reminder_days_before: data.reminder_days_before,
+      upi_id: data.upi_id ?? null,
+      notes: data.notes ?? null,
+      amount_type: data.amount_type,
+      is_recurring: data.repeat_type !== "none",
+      recurring_type: data.repeat_type === "none" ? null : data.repeat_type,
+      is_active: true,
+    };
+
+    let { data: bill, error } = await supabase
       .from("bills")
       .insert({
-        user_id: userId,
-        title: data.title,
-        amount: data.amount,
-        category: data.category,
-        due_date: data.due_date,
-        repeat_type: data.repeat_type,
-        repeat_interval: data.repeat_interval,
-        repeat_end_date: data.repeat_end_date ?? null,
-        reminder_days_before: data.reminder_days_before,
+        ...basePayload,
         reminder_time: data.reminder_time ?? "09:00:00",
         reminder_email: data.reminder_email ?? null,
-        upi_id: data.upi_id ?? null,
-        notes: data.notes ?? null,
-        amount_type: data.amount_type,
-        is_recurring: data.repeat_type !== "none",
-        recurring_type: data.repeat_type === "none" ? null : data.repeat_type,
-        is_active: true,
       } as never)
       .select("*")
       .single();
-    if (error) {
-      console.error("[createBill] Supabase INSERT error:", error);
-      throw new Error(`Failed to create bill: ${error.message} (${error.code})`);
+
+    // Fallback if reminder_time or reminder_email columns are not yet in the DB schema cache
+    if (
+      error &&
+      (error.code === "PGRST204" ||
+        error.code === "42703" ||
+        error.message?.includes("reminder_time") ||
+        error.message?.includes("reminder_email"))
+    ) {
+      console.warn(
+        "[createBill] reminder columns not present in DB schema cache, retrying without them:",
+        error.message,
+      );
+      const retry = await supabase
+        .from("bills")
+        .insert(basePayload as never)
+        .select("*")
+        .single();
+      bill = retry.data;
+      error = retry.error;
     }
 
+    if (error || !bill) {
+      console.error("[createBill] Supabase INSERT error:", error);
+      throw new Error(
+        `Failed to create bill: ${error?.message || "Unknown error"} (${error?.code || "UNKNOWN"})`,
+      );
+    }
+
+    const finalBill = bill as any;
+    // Hydrate in-memory bill with reminder fields so occurrence and reminder sync has them
+    const hydratedBill = {
+      ...finalBill,
+      id: finalBill.id as string,
+      reminder_time: finalBill.reminder_time ?? data.reminder_time ?? "09:00:00",
+      reminder_email: finalBill.reminder_email ?? data.reminder_email ?? null,
+    };
+
     try {
-      await syncBillOccurrences(db, userId, bill);
+      await syncBillOccurrences(db, userId, hydratedBill as any);
     } catch (syncErr) {
       console.error("[createBill] syncBillOccurrences error:", syncErr);
       const msg = syncErr instanceof Error ? syncErr.message : String(syncErr);
@@ -79,12 +116,14 @@ export const createBill = createServerFn({ method: "POST" })
     }
 
     try {
-      await audit(supabase, userId, "bill.created", "bill", bill.id, { title: bill.title });
+      await audit(supabase, userId, "bill.created", "bill", hydratedBill.id, {
+        title: hydratedBill.title,
+      });
     } catch (auditErr) {
       console.warn("[createBill] Audit logging notice:", auditErr);
     }
 
-    return bill;
+    return hydratedBill;
   });
 
 const billUpdate = billInput.partial().extend({
@@ -110,18 +149,55 @@ export const updateBill = createServerFn({ method: "POST" })
       changes["recurring_type"] = patch.repeat_type === "none" ? null : patch.repeat_type;
     }
 
-    const { data: bill, error } = await supabase
+    let { data: bill, error } = await supabase
       .from("bills")
       .update(changes as never)
       .eq("id", id)
       .eq("user_id", userId)
       .select("*")
       .single();
-    if (error) throw new Error(error.message);
 
-    await syncBillOccurrences(db, userId, bill);
-    await audit(supabase, userId, "bill.updated", "bill", bill.id, changes);
-    return bill;
+    // Fallback if reminder columns are missing
+    if (
+      error &&
+      (error.code === "PGRST204" ||
+        error.code === "42703" ||
+        error.message?.includes("reminder_time") ||
+        error.message?.includes("reminder_email"))
+    ) {
+      console.warn(
+        "[updateBill] reminder columns not present in DB, retrying without them:",
+        error.message,
+      );
+      delete changes["reminder_time"];
+      delete changes["reminder_email"];
+      const retry = await supabase
+        .from("bills")
+        .update(changes as never)
+        .eq("id", id)
+        .eq("user_id", userId)
+        .select("*")
+        .single();
+      bill = retry.data;
+      error = retry.error;
+    }
+
+    if (error || !bill) {
+      console.error("[updateBill] Supabase UPDATE error:", error);
+      throw new Error(`Failed to update bill: ${error?.message || "Unknown error"}`);
+    }
+
+    const finalBill = bill as any;
+    const hydratedBill = {
+      ...finalBill,
+      id: (finalBill.id ?? id) as string,
+      ...(patch.reminder_time ? { reminder_time: patch.reminder_time } : {}),
+      ...(patch.reminder_email !== undefined ? { reminder_email: patch.reminder_email } : {}),
+    };
+
+    await syncBillOccurrences(db, userId, hydratedBill as any);
+    await audit(supabase, userId, "bill.updated", "bill", hydratedBill.id, changes);
+    return hydratedBill;
   });
 
 /**

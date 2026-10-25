@@ -256,7 +256,7 @@ export function HomePage() {
           <div className="rounded-2xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
-              <span>Unable to refresh bills. Check your connection.</span>
+              <span>{error || "Unable to refresh bills."}</span>
             </div>
             <button
               type="button"
