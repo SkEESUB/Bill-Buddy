@@ -82,7 +82,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover",
+      },
       { title: "BillBuddy — Smart Bill & Payment Manager" },
       {
         name: "description",
@@ -95,8 +98,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "Track bills, due dates and payments in one bright, simple dashboard.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "/billbuddy-logo.png" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@BillBuddy" },
+      { name: "twitter:image", content: "/billbuddy-logo.png" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -110,6 +115,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
     ],
   }),
   shellComponent: RootShell,

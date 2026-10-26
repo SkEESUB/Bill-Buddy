@@ -11,6 +11,8 @@ export const Route = createFileRoute("/login")({
         property: "og:description",
         content: "Sign in to manage your bills with BillBuddy.",
       },
+      { property: "og:image", content: "/billbuddy-logo.png" },
+      { name: "twitter:image", content: "/billbuddy-logo.png" },
     ],
   }),
   component: () => <LoginPage />,

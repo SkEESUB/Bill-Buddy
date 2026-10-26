@@ -17,6 +17,8 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content: "Track bills, due dates and payments in one simple dashboard.",
       },
+      { property: "og:image", content: "/billbuddy-logo.png" },
+      { name: "twitter:image", content: "/billbuddy-logo.png" },
     ],
   }),
   component: () => (

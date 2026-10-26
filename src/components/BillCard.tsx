@@ -135,9 +135,9 @@ export function BillCard({
       <div className="flex items-center gap-3 min-w-0">
         <span
           aria-hidden="true"
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/15 via-indigo-500/15 to-purple-500/15 text-blue-600 dark:text-indigo-400 border border-blue-200/50 dark:border-indigo-500/30 shadow-sm transition-all duration-200 group-hover:scale-108 group-hover:shadow-md group-hover:from-blue-600/25 group-hover:to-purple-600/25"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm border border-slate-200/60 overflow-hidden p-1 transition-all duration-200 group-hover:scale-108 group-hover:shadow-md"
         >
-          <BillBuddyLogo size={20} className="stroke-[2.3]" />
+          <BillBuddyLogo size={28} className="h-full w-full object-contain" />
         </span>
 
         {/* Title, Status & Metadata */}

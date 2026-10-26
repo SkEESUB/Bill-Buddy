@@ -41,7 +41,9 @@ describe("Email Reminder System", () => {
 
     expect(html).toContain("society@icici");
     expect(html).toContain("Pay ₹5,000.00 via UPI");
-    expect(html).toContain("upi://pay?pa=society%40icici&pn=Apartment%20Maintenance&am=5000&cu=INR");
+    expect(html).toContain(
+      "upi://pay?pa=society%40icici&pn=Apartment%20Maintenance&am=5000&cu=INR",
+    );
   });
 
   it("handles missing provider credentials gracefully without throwing", async () => {

@@ -1,11 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  Calendar,
-  ChevronDown,
-  Loader2,
-  Mail,
-  X,
-} from "lucide-react";
+import { Calendar, ChevronDown, Loader2, Mail, X } from "lucide-react";
 import { addDays, toDay } from "@/lib/format";
 import { useAuth } from "@/hooks/useAuth";
 import type { BillInput } from "@/lib/bills.functions";
@@ -196,7 +190,10 @@ export function BillFormModal({
         {/* Header */}
         <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
           <div>
-            <h2 id="modal-title" className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
+            <h2
+              id="modal-title"
+              className="text-base sm:text-lg font-bold text-slate-900 leading-tight"
+            >
               {isEdit ? "Edit Bill" : "Add Bill"}
             </h2>
             <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">
@@ -328,9 +325,7 @@ export function BillFormModal({
           {/* 5. Additional Advance Reminder */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-semibold text-slate-700">
-                Advance Reminder
-              </label>
+              <label className="text-xs font-semibold text-slate-700">Advance Reminder</label>
               <span className="text-[10px] text-slate-400 font-medium">
                 Due-date reminder is always sent
               </span>

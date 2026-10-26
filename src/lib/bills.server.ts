@@ -182,7 +182,14 @@ function toUtcIso(dayStr: string, timeStr = "09:00", timeZone = "Asia/Kolkata"):
 
     const parts = formatter.formatToParts(dateObj);
     const p = (type: string) => Number(parts.find((x) => x.type === type)?.value ?? 0);
-    const asInTzMs = Date.UTC(p("year"), p("month") - 1, p("day"), p("hour") % 24, p("minute"), p("second"));
+    const asInTzMs = Date.UTC(
+      p("year"),
+      p("month") - 1,
+      p("day"),
+      p("hour") % 24,
+      p("minute"),
+      p("second"),
+    );
     const offsetMs = asInTzMs - targetUtcMs;
     return new Date(targetUtcMs - offsetMs).toISOString();
   } catch {
@@ -250,7 +257,10 @@ export async function syncBillReminders(
     .eq("status", "pending");
 
   const existingReminders = existingList ?? [];
-  const remindersByOccId = new Map<string, Array<{ id: string; scheduled_for: string; status: string }>>();
+  const remindersByOccId = new Map<
+    string,
+    Array<{ id: string; scheduled_for: string; status: string }>
+  >();
   for (const r of existingReminders) {
     const list = remindersByOccId.get(r.bill_occurrence_id) ?? [];
     list.push(r);
@@ -286,7 +296,9 @@ export async function syncBillReminders(
     for (const targetIso of targetIsoDates) {
       // Find matching existing reminder within 1 hour
       const matching = occExisting.find((r) => {
-        const diffMs = Math.abs(new Date(r.scheduled_for).getTime() - new Date(targetIso).getTime());
+        const diffMs = Math.abs(
+          new Date(r.scheduled_for).getTime() - new Date(targetIso).getTime(),
+        );
         return diffMs < 3600 * 1000;
       });
 

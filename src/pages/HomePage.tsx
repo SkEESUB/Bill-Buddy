@@ -169,9 +169,13 @@ export function HomePage() {
       {/* ==================================================================== */}
       <header className="flex items-center justify-between pt-2 pb-1">
         <div className="flex items-center gap-2.5">
-          {/* BillBuddy Brand Symbol */}
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow-md shadow-blue-500/20">
-            <Wallet className="h-5 w-5 stroke-[2.3]" />
+          {/* BillBuddy Brand Mascot */}
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm border border-slate-200/60 overflow-hidden p-1">
+            <img
+              src="/billbuddy-icon.png"
+              alt="BillBuddy"
+              className="h-full w-full object-contain"
+            />
           </div>
           <div>
             <div className="flex items-center gap-1.5">

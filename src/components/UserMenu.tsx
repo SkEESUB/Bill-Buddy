@@ -16,7 +16,8 @@ export function UserMenu() {
   const { overview, updateProfile, refresh } = useAccount();
   const navigate = useNavigate();
 
-  const profile = overview?.profile as { full_name: string | null; avatar_url: string | null } | null | undefined;
+  const profile = overview?.profile as
+    { full_name: string | null; avatar_url: string | null } | null | undefined;
   const currentFullName = profile?.full_name?.trim() || "";
   const currentAvatar = profile?.avatar_url || "";
   const userInitials = initials(currentFullName || user?.email);

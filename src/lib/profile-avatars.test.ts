@@ -6,10 +6,7 @@ import { PRESET_AVATARS, getPresetAvatar } from "@/components/ProfileAvatars";
 describe("Phase 4: Premium Profile Avatars", () => {
   const avatarSrc = readFileSync(join(process.cwd(), "src/components/Avatar.tsx"), "utf8");
   const menuSrc = readFileSync(join(process.cwd(), "src/components/UserMenu.tsx"), "utf8");
-  const accountFnSrc = readFileSync(
-    join(process.cwd(), "src/lib/account.functions.ts"),
-    "utf8",
-  );
+  const accountFnSrc = readFileSync(join(process.cwd(), "src/lib/account.functions.ts"), "utf8");
 
   it("provides a consistent collection of coordinated blue, violet, and pastel avatars", () => {
     expect(PRESET_AVATARS.length).toBeGreaterThanOrEqual(6);

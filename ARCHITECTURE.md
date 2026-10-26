@@ -111,6 +111,7 @@ All tables are defined idempotently in [`supabase/migrations/001_billbuddy_schem
 ## 4. Rebuilt Minimal Single-Screen Footprint
 
 Following the repository cleanup, all obsolete pages, unreferenced UI primitives, and deprecated packages have been excised:
+
 - **Active Routes:** Single authenticated home route `/`, login `/login`, and background reminder webhooks.
 - **Retained UI Primitives (`src/components/ui`):** `button`, `dialog`, `input`, `label`, `separator`, `sheet`, `skeleton`, `sonner`, `toggle`, `tooltip`.
 - **Pruned Dependencies:** 29 unused packages removed (including `recharts`, `embla-carousel-react`, `react-resizable-panels`, `cmdk`, `vaul`, `react-day-picker`, and 20 unused Radix wrappers).

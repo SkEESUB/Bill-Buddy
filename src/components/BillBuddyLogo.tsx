@@ -1,26 +1,44 @@
+/**
+ * BillBuddy Official Branding Components
+ * Derived directly from the official mascot artwork and wordmark.
+ */
+
 export function BillBuddyLogo({
-  size = 20,
+  size = 24,
   className = "",
+  alt = "BillBuddy Mascot",
 }: {
   size?: number;
   className?: string;
+  alt?: string;
 }) {
   return (
-    <svg
+    <img
+      src="/billbuddy-icon.png"
+      alt={alt}
       width={size}
       height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <rect x="2" y="6" width="20" height="14" rx="3" />
-      <path d="M2 10h20" />
-      <circle cx="16" cy="14" r="1.5" fill="currentColor" stroke="none" />
-    </svg>
+      className={`shrink-0 object-contain select-none ${className}`}
+      loading="lazy"
+      decoding="async"
+    />
+  );
+}
+
+export function BillBuddyWordmark({
+  className = "",
+  alt = "BillBuddy — build by Eesub labs",
+}: {
+  className?: string;
+  alt?: string;
+}) {
+  return (
+    <img
+      src="/billbuddy-logo.png"
+      alt={alt}
+      className={`h-auto max-w-full object-contain select-none ${className}`}
+      loading="lazy"
+      decoding="async"
+    />
   );
 }

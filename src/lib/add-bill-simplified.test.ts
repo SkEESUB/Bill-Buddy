@@ -4,10 +4,7 @@ import { join } from "node:path";
 import { addDays } from "./format";
 
 describe("Phase 2: Simplified Add Bill Form & Reminder Scheduling", () => {
-  const modalSrc = readFileSync(
-    join(process.cwd(), "src/components/BillFormModal.tsx"),
-    "utf8",
-  );
+  const modalSrc = readFileSync(join(process.cwd(), "src/components/BillFormModal.tsx"), "utf8");
   const serverSrc = readFileSync(join(process.cwd(), "src/lib/bills.server.ts"), "utf8");
 
   it("removes the reminder time input from BillFormModal", () => {

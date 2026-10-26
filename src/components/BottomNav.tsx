@@ -26,7 +26,7 @@ export function BottomNav({ activeView = "home", onSelectView, onAddBill }: Bott
       aria-label="BillBuddy navigation"
       className="fixed bottom-3 sm:bottom-4 inset-x-0 z-40 flex justify-center px-3 sm:px-4 pointer-events-none safe-bottom"
     >
-      <div className="pointer-events-auto flex items-center justify-between gap-1 sm:gap-1.5 w-full max-w-[390px] p-1.5 rounded-full glass-nav border border-white/80 dark:border-slate-800/80 shadow-[0_12px_36px_-6px_rgba(15,35,75,0.14)]">
+      <div className="pointer-events-auto flex items-center justify-between gap-1.5 sm:gap-2 w-full max-w-[410px] p-2 rounded-full glass-nav border border-white/80 dark:border-slate-800/80 shadow-[0_16px_40px_-6px_rgba(15,35,75,0.16)]">
         {/* LEFT: Completed Button */}
         <button
           type="button"
@@ -36,7 +36,7 @@ export function BottomNav({ activeView = "home", onSelectView, onAddBill }: Bott
           aria-pressed={isCompleted}
         >
           <CheckCircle2
-            className={`w-4 h-4 transition-transform duration-200 stroke-[2.3] ${
+            className={`w-[18px] h-[18px] transition-transform duration-200 stroke-[2.3] ${
               isCompleted
                 ? "scale-110 text-indigo-600 dark:text-indigo-400"
                 : "text-slate-500 dark:text-slate-400"
@@ -50,10 +50,10 @@ export function BottomNav({ activeView = "home", onSelectView, onAddBill }: Bott
           <button
             type="button"
             onClick={onAddBill}
-            className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 text-white font-semibold text-xs shadow-md shadow-blue-500/25 transition-all duration-200 active:scale-95 hover:shadow-lg hover:shadow-blue-500/35 hover:brightness-105 cursor-pointer"
+            className="flex items-center gap-1.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 text-white font-bold text-xs sm:text-[13px] shadow-lg shadow-blue-500/30 transition-all duration-200 active:scale-95 hover:shadow-xl hover:shadow-blue-500/40 hover:brightness-105 cursor-pointer min-h-[44px]"
             aria-label="Add a new bill"
           >
-            <Plus className="w-4 h-4 stroke-[2.8]" />
+            <Plus className="w-[18px] h-[18px] stroke-[2.8]" />
             <span>Add Bill</span>
           </button>
         </div>
@@ -67,7 +67,7 @@ export function BottomNav({ activeView = "home", onSelectView, onAddBill }: Bott
           aria-pressed={isRemaining}
         >
           <Clock
-            className={`w-4 h-4 transition-transform duration-200 stroke-[2.3] ${
+            className={`w-[18px] h-[18px] transition-transform duration-200 stroke-[2.3] ${
               isRemaining
                 ? "scale-110 text-indigo-600 dark:text-indigo-400"
                 : "text-slate-500 dark:text-slate-400"

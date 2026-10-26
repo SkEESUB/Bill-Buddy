@@ -25,8 +25,14 @@ export function Layout({ children }: { children: ReactNode }) {
         aria-hidden="true"
       />
 
-      {/* Main Centered Application Frame */}
-      <div className="relative z-10 w-full max-w-lg min-h-screen flex flex-col px-4 sm:px-6 pt-3 pb-28">
+      {/* Main Centered Application Frame with Android Safe Area Insets */}
+      <div
+        className="relative z-10 w-full max-w-lg min-h-screen flex flex-col px-4 sm:px-6"
+        style={{
+          paddingTop: "max(0.75rem, env(safe-area-inset-top, 0px))",
+          paddingBottom: "max(7rem, calc(5.5rem + env(safe-area-inset-bottom, 0px)))",
+        }}
+      >
         {children}
       </div>
 

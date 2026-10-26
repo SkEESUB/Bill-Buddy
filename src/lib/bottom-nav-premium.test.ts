@@ -3,10 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 describe("Phase 3: Premium Completed and Remaining Bottom Nav Buttons", () => {
-  const navSrc = readFileSync(
-    join(process.cwd(), "src/components/BottomNav.tsx"),
-    "utf8",
-  );
+  const navSrc = readFileSync(join(process.cwd(), "src/components/BottomNav.tsx"), "utf8");
   const stylesSrc = readFileSync(join(process.cwd(), "src/styles.css"), "utf8");
 
   it("uses the nav-pill-btn class on Completed and Remaining buttons", () => {
