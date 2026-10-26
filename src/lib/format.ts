@@ -42,6 +42,23 @@ export function addDays(date: Date, days: number): Date {
   return next;
 }
 
+/**
+ * Pure timezone-safe date-string arithmetic on `YYYY-MM-DD`.
+ * Avoids any ISO/UTC string conversion or midnight timezone shifts.
+ */
+export function shiftDateString(dayStr: string, offsetDays: number): string {
+  const parts = dayStr.split("-").map(Number);
+  const year = parts[0];
+  const month = parts[1];
+  const day = parts[2];
+  if (!year || !month || !day) return dayStr;
+  const d = new Date(year, month - 1, day + offsetDays);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 /* ------------------------------ currency ------------------------------ */
 
 export const SUPPORTED_CURRENCIES = [

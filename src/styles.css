@@ -712,6 +712,22 @@
     }
   }
 
+  /* Subtle floating motion for mascot illustrations and prominent decorative icons */
+  @keyframes gentle-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-3.5px);
+    }
+  }
+
+  .animate-gentle-float {
+    animation: gentle-float 4.2s ease-in-out infinite;
+    will-change: transform;
+  }
+
   .bill-card-premium {
     position: relative;
     border-radius: 1.125rem;
@@ -889,7 +905,8 @@
     .bill-card-premium,
     .bill-card-premium.bill-card-floating,
     .bill-card-premium:hover,
-    .bill-card-premium:active {
+    .bill-card-premium:active,
+    .animate-gentle-float {
       animation: none !important;
       transform: none !important;
       transition:
@@ -901,7 +918,8 @@
   .reduce-motion .bill-card-premium,
   .reduce-motion .bill-card-premium.bill-card-floating,
   .reduce-motion .bill-card-premium:hover,
-  .reduce-motion .bill-card-premium:active {
+  .reduce-motion .bill-card-premium:active,
+  .reduce-motion .animate-gentle-float {
     animation: none !important;
     transform: none !important;
     transition:

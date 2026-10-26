@@ -70,13 +70,14 @@ Server-side mutations and aggregations are strictly partitioned into 12 dedicate
 | **`jobs`**             | [`src/lib/jobs.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/jobs.functions.ts)                   | Idempotent background job claim keys, recurrence synchronization, reminder sweeps.               |
 | **`notifications`**    | [`src/lib/notifications.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/notifications.functions.ts) | In-app alerts, read state toggles, notification channel preferences.                             |
 | **`payments`**         | [`src/lib/payments.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/payments.functions.ts)           | Payment orders, state transitions (`CREATED` → `CAPTURED`), webhook persistence.                 |
+| **`spends`**           | [`src/lib/spends.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/spends.functions.ts)               | Daily spend creation, updates, deletions, and date queries with resilient transactions fallback. |
 | **`transactions`**     | [`src/lib/transactions.functions.ts`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/src/lib/transactions.functions.ts)   | Ledger writes, idempotency enforcement (`client_request_id`), append-only reversals.             |
 
 ---
 
-## 3. Database Schema: Complete Inventory (22 Tables)
+## 3. Database Schema: Complete Inventory (23 Tables)
 
-All tables are defined idempotently in [`supabase/migrations/001_billbuddy_schema.sql`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/supabase/migrations/001_billbuddy_schema.sql) with enabled Row-Level Security:
+All tables are defined idempotently in [`supabase/migrations/001_billbuddy_schema.sql`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/supabase/migrations/001_billbuddy_schema.sql) and [`supabase/migrations/20261026000000_create_spends_table.sql`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/supabase/migrations/20261026000000_create_spends_table.sql) with enabled Row-Level Security:
 
 1. **`public.profiles`**: Core user records, full name, email, avatar URL, onboarding state, `account_status`.
 2. **`public.user_settings`**: Preferred currency, timezone, date format, UI theme.
@@ -98,8 +99,11 @@ All tables are defined idempotently in [`supabase/migrations/001_billbuddy_schem
 18. **`public.payment_orders`**: Strict state-machine tracked payment orders.
 19. **`public.payment_attempts`**: Individual gateway transaction attempts under a payment order.
 20. **`public.payment_events`**: Immutable webhook payloads received from payment providers.
-21. **`public.closed_accounts`**: Audit records of deactivated/deleted accounts.
-22. **`public.job_runs`**: Lock keys and execution tracking for scheduled recurring jobs.
+21. **`public.reconciliation_records`**: Automated ledger and statement verification logs.
+22. **`public.system_jobs`**: Job queue and scheduler execution state.
+23. **`public.spends`**: Dedicated daily spending records (`id`, `user_id`, `name`, `amount`, `spend_date`, `notes`, timestamps) with date indexes and strict owner-only RLS.
+24. **`public.closed_accounts`**: Audit records of deactivated/deleted accounts.
+25. **`public.job_runs`**: Lock keys and execution tracking for scheduled recurring jobs.
 
 ### Storage Buckets & Policies
 

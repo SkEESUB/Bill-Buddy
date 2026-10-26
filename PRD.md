@@ -61,15 +61,17 @@
 - **REQ-BILL-001 (Bill Lifecycle):** Full CRUD for recurring and one-time bills, including name, positive amount (₹), due date, reminder time, reminder email, repeat cadence, and notes.
 - **REQ-BILL-002 (Preserved Dashboard):** The Bills dashboard remains authoritative for upcoming, remaining, and completed liabilities with zero regression.
 
-### 3.3 Daily Spending Management (Spends Feature)
+### 3.3 Daily Spending Management (Spends Feature) & Unified 3-Action Navigation
 
 - **REQ-SPEND-001 (Separation of Concerns):** Daily expenses are kept strictly separated from bill liabilities. Daily spends do not mix into bills schedules, and bill occurrences do not pollute daily spends.
-- **REQ-SPEND-002 (Bills / Spends Segmented Navigation):** Directly beneath the dashboard header, a rounded segmented pill navigation allows instantaneous toggling between "Bills" (document icon) and "Spends" (official cartoon wallet mascot).
-- **REQ-SPEND-003 (Date-Scoped Spending Review):** Spends dashboard features a day selector (Previous, Selected Date with calendar picker, Next, with future date blocking). The selected date controls the displayed expense list and calculated daily total.
-- **REQ-SPEND-004 (Daily Spending Calculations):** Displays prominent summary card with exact calculated "TOTAL SPENT" for the active date and total expense count. An empty state displays when 0 expenses exist for that date.
-- **REQ-SPEND-005 (Daily Spends List):** Lists date-specific expenses (Spend name, amount in ₹, wallet icon, edit and delete actions) and presents an end-of-day total summary.
-- **REQ-SPEND-006 (Independent Add Modals):** Central add action triggers a compact selection modal ("What would you like to add?": Add Bill vs Add Spend). Add Spend modal accepts Spend Name (required), Amount in ₹ (required positive value), Date (required, defaults to active date, strictly NO time picker), and optional Note.
-- **REQ-SPEND-007 (Mascot Branding):** Official cartoon wallet character is utilized as the Spends identity across tabs, cards, and modal choices.
+- **REQ-NAV-001 (3-Action Floating Bottom Navigation):** Global navigation features exactly three actions: **[ Bills ] [ + ] [ Spends ]**. "Completed" and "Remaining" are removed from global navigation; the central button is a 3D raised circular plus button with blue-to-purple gradient.
+- **REQ-NAV-002 (Single-Point Section Switching):** The top segmented control below the header is removed. Navigation between Bills and Spends is accessible through the bottom navigation bar only.
+- **REQ-NAV-003 (In-Page Bills Status Controls):** Inside the Bills page, two dedicated controls (`[ Remaining ]` | `[ Completed ]`) with item counts and interactive summary card columns filter the bill list in-place without global navigation.
+- **REQ-SPEND-003 (Date-Scoped Spending Review):** Spends dashboard features a timezone-safe day selector (`shiftDateString`) with Previous-day arrow, Next-day arrow (disabled for today), calendar trigger, and picker restricted to `<= today`.
+- **REQ-SPEND-004 (Daily Spending Calculations):** Displays prominent summary card with exact calculated "TOTAL SPENT" for the active date, expense count, and official cartoon wallet mascot.
+- **REQ-SPEND-005 (Daily Spends List & Footer):** Lists date-specific expenses (Spend name, amount in ₹, wallet icon, edit and delete actions, strictly no categories or time fields) and presents an end-of-day total summary.
+- **REQ-SPEND-006 (Independent Add Modals):** Central `+` button opens `AddChoiceSheet` ("What would you like to add?": Add Bill vs Add Spend). Add Spend modal accepts Spend Name (required), Amount in ₹ (required positive value), Date (required, defaults to active date, strictly NO time picker), and optional Note.
+- **REQ-SPEND-007 (Mascot Branding & 3D Depth):** Official cartoon wallet mascot is utilized for Spends with gentle floating animations (`.animate-gentle-float`), 3D layered card shadows, and full reduced-motion accessibility support.
 
 - **REQ-BILL-001 (CRUD Operations):** Create, read, update, archive, and delete recurring bills with custom recurrence frequencies (daily, weekly, bi-weekly, monthly, quarterly, semi-annually, annually).
 - **REQ-BILL-002 (Status Lifecycle):** Mark bills and occurrences across states: `pending`, `paid`, `overdue`, or `skipped`.

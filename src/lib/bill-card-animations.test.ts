@@ -49,4 +49,10 @@ describe("Phase 2: Premium Bill Card Animations", () => {
     expect(stylesSrc).toContain("animation: none !important");
     expect(stylesSrc).toContain("transform: none !important");
   });
+
+  it("defines gentle-float animation for mascot and logo illustrations", () => {
+    expect(stylesSrc).toContain("@keyframes gentle-float");
+    expect(stylesSrc).toContain(".animate-gentle-float");
+    expect(stylesSrc).toContain(".reduce-motion .animate-gentle-float");
+  });
 });

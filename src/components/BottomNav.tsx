@@ -1,31 +1,29 @@
-import { CheckCircle2, Clock, Plus } from "lucide-react";
+import { Plus, ReceiptText } from "lucide-react";
 
-export type BottomNavAction = "completed" | "add" | "remaining";
+export type BottomNavSection = "bills" | "spends";
 
 interface BottomNavProps {
-  activeView?: "home" | "completed" | "remaining";
-  onSelectView?: (view: "home" | "completed" | "remaining") => void;
+  activeSection: BottomNavSection;
+  onSelectSection: (section: BottomNavSection) => void;
+  onOpenAddChoice: () => void;
   onAddBill?: () => void;
-  onOpenAddChoice?: () => void;
 }
 
 /**
- * Fixed Bottom Navigation for BillBuddy.
+ * Premium Floating Bottom Navigation for BillBuddy.
  * Exactly three primary actions:
- *  1. LEFT: Completed (Premium pill control, soft blue/lavender gradient, toggle view)
- *  2. CENTER: Add Bill / Spend (Prominent plus pill button, opens choice sheet)
- *  3. RIGHT: Remaining (Premium pill control, soft blue/lavender gradient, filter view)
- *
- * NOTE: Completed and Remaining buttons do NOT display numbers or balances.
+ *  1. LEFT: [ Bills ] (Receipt icon + "Bills", active indicator pill)
+ *  2. CENTER: [ + ] (Prominent 3D raised blue-to-purple plus button, opens choice sheet)
+ *  3. RIGHT: [ Spends ] (Cartoon wallet logo + "Spends", active indicator pill)
  */
 export function BottomNav({
-  activeView = "home",
-  onSelectView,
-  onAddBill,
+  activeSection,
+  onSelectSection,
   onOpenAddChoice,
+  onAddBill,
 }: BottomNavProps) {
-  const isCompleted = activeView === "completed";
-  const isRemaining = activeView === "remaining";
+  const isBills = activeSection === "bills";
+  const isSpends = activeSection === "spends";
 
   const handleCenterClick = () => {
     if (onOpenAddChoice) {
@@ -40,54 +38,62 @@ export function BottomNav({
       aria-label="BillBuddy navigation"
       className="fixed bottom-3 sm:bottom-4 inset-x-0 z-40 flex justify-center px-3 sm:px-4 pointer-events-none safe-bottom"
     >
-      <div className="pointer-events-auto flex items-center justify-between gap-1.5 sm:gap-2 w-full max-w-[410px] p-2 rounded-full glass-nav border border-white/80 dark:border-slate-800/80 shadow-[0_16px_40px_-6px_rgba(15,35,75,0.16)]">
-        {/* LEFT: Completed Button */}
+      <div className="pointer-events-auto flex items-center justify-between gap-2 w-full max-w-[390px] p-2 rounded-full glass-nav bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-white/80 dark:border-slate-800/80 shadow-[0_16px_40px_-6px_rgba(15,35,75,0.18)]">
+        {/* LEFT: Bills Section Button */}
         <button
           type="button"
-          onClick={() => onSelectView?.(isCompleted ? "home" : "completed")}
-          className={`nav-pill-btn flex-1 ${isCompleted ? "active" : ""}`}
-          aria-label="View Completed Bills"
-          aria-pressed={isCompleted}
+          onClick={() => onSelectSection("bills")}
+          className={`nav-pill-btn flex-1 ${isBills ? "active" : ""}`}
+          aria-label="Bills Section"
+          aria-pressed={isBills}
         >
-          <CheckCircle2
+          <ReceiptText
             className={`w-[18px] h-[18px] transition-transform duration-200 stroke-[2.3] ${
-              isCompleted
+              isBills
                 ? "scale-110 text-indigo-600 dark:text-indigo-400"
                 : "text-slate-500 dark:text-slate-400"
             }`}
           />
-          <span className="truncate">Completed</span>
+          <span className="truncate">Bills</span>
         </button>
 
-        {/* CENTER: Add Bill / Add Spend Action Button */}
-        <div className="px-1 sm:px-1.5 shrink-0">
+        {/* CENTER: Prominent 3D Plus Action Button */}
+        <div className="px-1 shrink-0 -my-1">
           <button
             type="button"
             onClick={handleCenterClick}
-            className="flex items-center gap-1.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 text-white font-bold text-xs sm:text-[13px] shadow-lg shadow-blue-500/30 transition-all duration-200 active:scale-95 hover:shadow-xl hover:shadow-blue-500/40 hover:brightness-105 cursor-pointer min-h-[44px]"
-            aria-label="Add Bill or Spend"
+            className="group relative flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white font-bold shadow-[0_10px_25px_-4px_rgba(79,70,229,0.5),0_4px_10px_-2px_rgba(37,99,235,0.35)] border border-white/30 transition-all duration-200 active:scale-95 hover:scale-105 hover:shadow-[0_14px_30px_-4px_rgba(79,70,229,0.6)] cursor-pointer"
+            aria-label="What would you like to add?"
+            title="Add Bill or Spend"
           >
-            <Plus className="w-[18px] h-[18px] stroke-[2.8]" />
-            <span>Add Bill</span>
+            {/* Subtle inner top highlight for 3D raised sheen */}
+            <span
+              className="absolute inset-x-2 top-0.5 h-3 rounded-full bg-gradient-to-b from-white/35 to-transparent pointer-events-none"
+              aria-hidden="true"
+            />
+            <Plus className="w-6 h-6 stroke-[2.8] transition-transform duration-200 group-hover:rotate-90 group-active:scale-90" />
           </button>
         </div>
 
-        {/* RIGHT: Remaining Button */}
+        {/* RIGHT: Spends Section Button */}
         <button
           type="button"
-          onClick={() => onSelectView?.(isRemaining ? "home" : "remaining")}
-          className={`nav-pill-btn flex-1 ${isRemaining ? "active" : ""}`}
-          aria-label="View Remaining Bills"
-          aria-pressed={isRemaining}
+          onClick={() => onSelectSection("spends")}
+          className={`nav-pill-btn flex-1 ${isSpends ? "active" : ""}`}
+          aria-label="Spends Section"
+          aria-pressed={isSpends}
         >
-          <Clock
-            className={`w-[18px] h-[18px] transition-transform duration-200 stroke-[2.3] ${
-              isRemaining
-                ? "scale-110 text-indigo-600 dark:text-indigo-400"
-                : "text-slate-500 dark:text-slate-400"
-            }`}
-          />
-          <span className="truncate">Remaining</span>
+          <div className="w-[19px] h-[19px] shrink-0 flex items-center justify-center">
+            <img
+              src="/spends-icon.png"
+              alt=""
+              className={`w-full h-full object-contain transition-transform duration-200 ${
+                isSpends ? "scale-110" : "opacity-80"
+              }`}
+              aria-hidden="true"
+            />
+          </div>
+          <span className="truncate">Spends</span>
         </button>
       </div>
     </nav>

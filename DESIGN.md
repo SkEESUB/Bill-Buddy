@@ -129,22 +129,30 @@ Badges communicate immediate operational status:
 
 ```mermaid
 flowchart TD
-    subgraph DesktopLayout ["Desktop Viewport (>= 1024px)"]
-        DTop["Header: App Logo, Global Currency Indicator, Theme Toggle, User Avatar"]
-        DSide["Left Sidebar Navigation: Dashboard, Bills, Money, Analytics, Settings"]
-        DMain["Main View Container: 3-Column Metric Cards, Data Tables, Charts"]
-        DTop --- DSide
-        DSide --- DMain
-    end
+    subgraph MobileAndDesktopShell ["BillBuddy Single-Screen Shell"]
+        Header["Header: Brand Icon (gentle float) + Dynamic Greeting + User Menu"]
 
-    subgraph MobileLayout ["Mobile Viewport (< 768px)"]
-        MTop["Sticky Header: Brand Mark, Avatar, Notification Bell"]
-        MMain["Single-Column Scrollable Feed: Metric Cards -> Action Carousel -> Recent Items"]
-        MBottom["Fixed Bottom Navigation Bar: Home, Bills, Add (+), Money, Profile"]
-        MTop --- MMain
-        MMain --- MBottom
+        subgraph SectionSwitch ["Section Managed via Bottom Navigation"]
+            BillsSection["Bills Section: Summary Card + [Remaining | Completed] Tabs + Urgency Bill Cards"]
+            SpendsSection["Spends Section: Date Selector Header + Total Spent Card + Daily Expense Cards + Total Footer"]
+        end
+
+        BottomNav["Floating 3-Action Bottom Nav: [ Bills ] [ + ] [ Spends ]"]
+        AddSheet["What would you like to add? Bottom Sheet: Add Bill / Add Spend"]
+
+        Header --> SectionSwitch
+        BottomNav --> |Taps Bills| BillsSection
+        BottomNav --> |Taps Spends| SpendsSection
+        BottomNav --> |Taps +| AddSheet
     end
 ```
+
+### 5.1 3D Styling, Depth & Micro-Interactions
+
+- **Floating 3-Action Bottom Navigation:** Translucent frosted-glass pill (`glass-nav`, `bg-white/90 backdrop-blur-xl`), soft diffuse shadow (`shadow-[0_16px_40px_-6px_rgba(15,35,75,0.18)]`), with an active pill indicator (`nav-pill-btn active`) and raised 3D center circular plus button (`from-blue-600 via-indigo-600 to-purple-600`).
+- **Layered Cards & Sheen:** Bill cards, expense cards, and summary cards feature multi-tier soft ambient shadows, delicate semi-transparent borders, and subtle inner specular top highlights (`border border-white/90`).
+- **Gentle Float Animations:** Selected visual elements (BillBuddy brand icon, cartoon wallet mascot, empty state illustrations) feature subtle floating motion (`.animate-gentle-float` over 4.2s ease-in-out).
+- **Reduced Motion Respect:** When `prefers-reduced-motion: reduce` or `.reduce-motion` is active, all floating keyframe motions and transforms are strictly suppressed.
 
 ### Accessibility (a11y) Standards
 

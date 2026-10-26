@@ -61,13 +61,18 @@ BillBuddy was initiated to solve recurring personal expense management, subscrip
 ### ADR-007: Spends Feature Introduction & Domain Separation
 
 - **Context:** The user requested adding daily expense tracking without altering or complicating the existing, carefully polished Bills dashboard.
+- **Decision:** Establish dedicated `public.spends` table (`id`, `user_id`, `name`, `amount`, `spend_date`, `notes`) with strict user isolation RLS, and provide resilient fallback to `public.transactions` if remote table migration is pending.
+
+### ADR-008: 3-Action Bottom Navigation, Spends Separation, and In-Page Bills Status Controls
+
+- **Context:** The application previously had `Completed` (left), `Add Bill` (center), and `Remaining` (right) in the bottom navigation bar and a duplicate `Bills` / `Spends` segmented pill control at the top below the header. The user required a cleaner structure where Bills and Spends are separate sections accessed solely via the bottom bar.
 - **Decision:**
-  1. Strict preservation of the existing Bills screen, components, and bottom navigation.
-  2. Sub-header segmented navigation toggling between Bills (document icon) and Spends (cartoon wallet mascot).
-  3. Spends dashboard with date selection (previous, active date, next, date picker, blocking future dates), daily spending summary ("TOTAL SPENT ₹X.XX"), daily expense list, and daily total.
-  4. Central plus action opens a compact selection sheet ("What would you like to add?") branching into "Add Bill" or "Add Spend".
-  5. Add Spend modal requires Spend Name, Amount in ₹, Date (defaults to active date, strictly NO time picker), and optional Note.
-  6. Multi-phase execution: Phase 1 (UI & Navigation), Phase 2 (Add Spend Form & DB Persistence), Phase 3 (Edit/Delete & Date Navigation), Phase 4 (Integration & Regression Testing). Stopping after Phase 1 for user approval.
+  1. Redesigned bottom navigation to contain exactly three primary actions: `[ Bills ] [ + ] [ Spends ]`.
+  2. Removed `Completed` and `Remaining` from the global bottom navigation, relocating them as dedicated toggle controls inside the Bills page with live counts.
+  3. Made the central button a prominent 3D raised circular plus button (`from-blue-600 via-indigo-600 to-purple-600`) that triggers `AddChoiceSheet` ("What would you like to add?": Add Bill vs Add Spend).
+  4. Removed the top segmented control; section switching is exclusively handled by the bottom navigation.
+  5. Implemented timezone-safe date-string arithmetic (`shiftDateString`) to ensure date navigation and expense filtering are immune to UTC midnight drift.
+  6. Added restrained 3D card depth, soft shadows, and gentle floating animations (`.animate-gentle-float`) on logos and illustrations with full reduced-motion accessibility.
 
 ---
 

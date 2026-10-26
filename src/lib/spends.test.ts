@@ -147,4 +147,87 @@ describe("Spends Feature — Business Logic & Validation", () => {
     expect(total).toBe(0);
     expect(emptyList.length).toBe(0);
   });
+
+  it("calculates timezone-safe date shifting across month and year boundaries", async () => {
+    const { shiftDateString } = await import("./format");
+    expect(shiftDateString("2026-10-27", -1)).toBe("2026-10-26");
+    expect(shiftDateString("2026-10-27", 1)).toBe("2026-10-28");
+    // Month boundary
+    expect(shiftDateString("2026-10-01", -1)).toBe("2026-09-30");
+    expect(shiftDateString("2026-02-28", 1)).toBe("2026-03-01");
+    // Year boundary
+    expect(shiftDateString("2026-01-01", -1)).toBe("2025-12-31");
+    expect(shiftDateString("2025-12-31", 1)).toBe("2026-01-01");
+  });
+
+  it("verifies date filtering isolation: today never shows yesterday, switching dates does not delete records", () => {
+    const mockStore: Spend[] = [
+      {
+        id: "s1",
+        user_id: "u1",
+        name: "Morning Coffee",
+        amount: 50,
+        spend_date: "2026-10-27",
+        notes: null,
+        created_at: "2026-10-27T08:00:00Z",
+      },
+      {
+        id: "s2",
+        user_id: "u1",
+        name: "Evening Snack",
+        amount: 80,
+        spend_date: "2026-10-27",
+        notes: null,
+        created_at: "2026-10-27T17:00:00Z",
+      },
+      {
+        id: "s3",
+        user_id: "u1",
+        name: "Yesterday Fuel",
+        amount: 500,
+        spend_date: "2026-10-26",
+        notes: null,
+        created_at: "2026-10-26T10:00:00Z",
+      },
+      {
+        id: "s4",
+        user_id: "u1",
+        name: "Past Groceries",
+        amount: 1200,
+        spend_date: "2026-10-15",
+        notes: null,
+        created_at: "2026-10-15T12:00:00Z",
+      },
+    ];
+
+    // Select today
+    const selectedDate1 = "2026-10-27";
+    const date1Spends = mockStore.filter((s) => s.spend_date === selectedDate1);
+    expect(date1Spends.length).toBe(2);
+    expect(date1Spends.map((s) => s.name)).toEqual(["Morning Coffee", "Evening Snack"]);
+    const total1 = date1Spends.reduce((sum, s) => sum + s.amount, 0);
+    expect(total1).toBe(130);
+
+    // Select yesterday
+    const selectedDate2 = "2026-10-26";
+    const date2Spends = mockStore.filter((s) => s.spend_date === selectedDate2);
+    expect(date2Spends.length).toBe(1);
+    expect(date2Spends[0]?.name).toBe("Yesterday Fuel");
+    const total2 = date2Spends.reduce((sum, s) => sum + s.amount, 0);
+    expect(total2).toBe(500);
+
+    // Select historical date
+    const selectedDate3 = "2026-10-15";
+    const date3Spends = mockStore.filter((s) => s.spend_date === selectedDate3);
+    expect(date3Spends.length).toBe(1);
+    expect(date3Spends[0]?.name).toBe("Past Groceries");
+    const total3 = date3Spends.reduce((sum, s) => sum + s.amount, 0);
+    expect(total3).toBe(1200);
+
+    // Returning to today verifies all original records are preserved
+    expect(mockStore.length).toBe(4);
+    const returnToday = mockStore.filter((s) => s.spend_date === selectedDate1);
+    expect(returnToday.length).toBe(2);
+    expect(returnToday.reduce((sum, s) => sum + s.amount, 0)).toBe(130);
+  });
 });

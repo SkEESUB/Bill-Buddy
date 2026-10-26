@@ -2,43 +2,55 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-describe("Phase 3: Premium Completed and Remaining Bottom Nav Buttons", () => {
+describe("Phase 1: Three-Action Premium Bottom Navigation (Bills, +, Spends)", () => {
   const navSrc = readFileSync(join(process.cwd(), "src/components/BottomNav.tsx"), "utf8");
+  const homeSrc = readFileSync(join(process.cwd(), "src/pages/HomePage.tsx"), "utf8");
   const stylesSrc = readFileSync(join(process.cwd(), "src/styles.css"), "utf8");
 
-  it("uses the nav-pill-btn class on Completed and Remaining buttons", () => {
+  it("redesigns bottom navigation to contain exactly three primary actions: Bills, +, Spends", () => {
+    // Contains Bills and Spends labels
+    expect(navSrc).toContain("Bills");
+    expect(navSrc).toContain("Spends");
+    // Does not contain Completed or Remaining in BottomNav
+    expect(navSrc).not.toContain("Completed");
+    expect(navSrc).not.toContain("Remaining");
+    // No central button labelled 'Add Bill' in bottom nav
+    expect(navSrc).not.toContain("<span>Add Bill</span>");
+  });
+
+  it("renders a receipt/document icon for Bills and cartoon wallet logo for Spends", () => {
+    expect(navSrc).toContain("ReceiptText");
+    expect(navSrc).toContain("/spends-icon.png");
+  });
+
+  it("provides a prominent 3D raised central plus button with blue-to-purple gradient", () => {
+    expect(navSrc).toContain("Plus");
+    expect(navSrc).toContain("bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600");
+    // Has 3D highlight / sheen and rounded-full shape
+    expect(navSrc).toContain("rounded-full");
+    expect(navSrc).toContain("handleCenterClick");
+  });
+
+  it("highlights active state using nav-pill-btn with soft lavender and blue gradient", () => {
     expect(navSrc).toContain("nav-pill-btn");
-    expect(navSrc).toContain('isCompleted ? "active" : ""');
-    expect(navSrc).toContain('isRemaining ? "active" : ""');
-  });
-
-  it("does not render any counts or amounts in Completed and Remaining buttons", () => {
-    // Should NOT contain count or currency interpolation
-    expect(navSrc).not.toContain("count");
-    expect(navSrc).not.toContain("amount");
-    expect(navSrc).not.toContain("₹");
-    expect(navSrc).not.toContain("formatAmount");
-  });
-
-  it("defines soft blue and lavender gradients for the active pill state", () => {
+    expect(navSrc).toContain('isBills ? "active" : ""');
+    expect(navSrc).toContain('isSpends ? "active" : ""');
     expect(stylesSrc).toContain(".nav-pill-btn.active");
-    expect(stylesSrc).toContain("rgba(224, 231, 255"); // Soft lavender/blue
-    expect(stylesSrc).toContain("rgba(243, 232, 255"); // Soft lilac/lavender
   });
 
-  it("features subtle inner highlights and gentle glow in CSS", () => {
-    expect(stylesSrc).toContain("inset 0 1px 1px 0 rgba(255, 255, 255");
-    expect(stylesSrc).toContain("0 4px 14px -2px rgba(99, 102, 241");
+  it("relocates Remaining and Completed controls inside the Bills page content", () => {
+    // Remaining and Completed controls are within HomePage Bills panel
+    expect(homeSrc).toContain('role="tab"');
+    expect(homeSrc).toContain('billsFilter === "remaining"');
+    expect(homeSrc).toContain('billsFilter === "completed"');
+    // Top-level segmented control between bills/spends removed
+    expect(homeSrc).not.toContain('id="bills-tab"');
+    expect(homeSrc).not.toContain('id="spends-tab"');
   });
 
-  it("provides tactile active press state and smooth transitions", () => {
-    expect(stylesSrc).toContain(".nav-pill-btn:active");
-    expect(stylesSrc).toContain("scale(0.97)");
-    expect(stylesSrc).toContain("transition: all 220ms");
-  });
-
-  it("preserves prominent Add Bill button with sufficient surrounding space", () => {
-    expect(navSrc).toContain("Add Bill");
-    expect(navSrc).toContain("px-1 sm:px-1.5 shrink-0");
+  it("opens AddChoiceSheet when central plus button is clicked with independent options", () => {
+    expect(homeSrc).toContain("onOpenAddChoice={() => setChoiceSheetOpen(true)}");
+    expect(homeSrc).toContain("onSelectAddBill");
+    expect(homeSrc).toContain("onSelectAddSpend");
   });
 });

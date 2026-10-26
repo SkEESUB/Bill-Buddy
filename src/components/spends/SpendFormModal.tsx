@@ -151,7 +151,7 @@ export function SpendFormModal({
         <form onSubmit={handleSubmit} className="mt-3 flex flex-col gap-3">
           {/* 1. Spend Name */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Spend Name <span className="text-rose-500">*</span>
             </label>
             <input
@@ -162,8 +162,10 @@ export function SpendFormModal({
                 if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }));
               }}
               placeholder="e.g. Breakfast, Petrol, Bus fare, Coffee, Shopping"
-              className={`w-full h-10 px-3 rounded-xl border text-xs sm:text-sm font-medium bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${
-                errors.name ? "border-rose-400 ring-rose-200" : "border-slate-200"
+              className={`w-full h-10 px-3 rounded-xl border text-xs sm:text-sm font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 bg-slate-50/70 dark:bg-slate-800/60 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${
+                errors.name
+                  ? "border-rose-400 ring-rose-200"
+                  : "border-slate-200 dark:border-slate-700"
               }`}
               autoFocus
             />
@@ -176,7 +178,7 @@ export function SpendFormModal({
           <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
             {/* Amount (₹) */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Amount (₹) <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
@@ -193,8 +195,10 @@ export function SpendFormModal({
                     if (errors.amount) setErrors((prev) => ({ ...prev, amount: undefined }));
                   }}
                   placeholder="0.00"
-                  className={`w-full h-10 pl-7 pr-2.5 rounded-xl border text-xs sm:text-sm font-semibold tabular-nums bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${
-                    errors.amount ? "border-rose-400 ring-rose-200" : "border-slate-200"
+                  className={`w-full h-10 pl-7 pr-2.5 rounded-xl border text-xs sm:text-sm font-bold tabular-nums text-slate-900 dark:text-white placeholder:text-slate-400 bg-slate-50/70 dark:bg-slate-800/60 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${
+                    errors.amount
+                      ? "border-rose-400 ring-rose-200"
+                      : "border-slate-200 dark:border-slate-700"
                   }`}
                 />
               </div>
@@ -205,7 +209,7 @@ export function SpendFormModal({
 
             {/* Date (strictly NO time field) */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Date <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
@@ -217,8 +221,10 @@ export function SpendFormModal({
                     setSpendDate(e.target.value);
                     if (errors.spendDate) setErrors((prev) => ({ ...prev, spendDate: undefined }));
                   }}
-                  className={`w-full h-10 px-2.5 rounded-xl border text-xs sm:text-sm font-medium bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${
-                    errors.spendDate ? "border-rose-400 ring-rose-200" : "border-slate-200"
+                  className={`w-full h-10 px-2.5 rounded-xl border text-xs sm:text-sm font-semibold text-slate-900 dark:text-white bg-slate-50/70 dark:bg-slate-800/60 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${
+                    errors.spendDate
+                      ? "border-rose-400 ring-rose-200"
+                      : "border-slate-200 dark:border-slate-700"
                   }`}
                 />
               </div>
@@ -230,7 +236,7 @@ export function SpendFormModal({
 
           {/* 3. Note (Optional) */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Note <span className="text-slate-400 font-normal">(optional)</span>
             </label>
             <input
@@ -239,7 +245,7 @@ export function SpendFormModal({
               onChange={(e) => setNotes(e.target.value)}
               placeholder="e.g. Paid with UPI, snacks with friends"
               maxLength={200}
-              className="w-full h-10 px-3 rounded-xl border border-slate-200 text-xs sm:text-sm bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400 bg-slate-50/70 dark:bg-slate-800/60 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
             />
           </div>
 
@@ -248,7 +254,7 @@ export function SpendFormModal({
             <button
               type="submit"
               disabled={submitting}
-              className="w-full h-11 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 text-white font-bold text-sm shadow-md shadow-blue-500/25 hover:shadow-lg hover:shadow-blue-500/35 transition-all duration-200 active:scale-[0.99] disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full h-11 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 text-white font-bold text-sm shadow-[0_8px_20px_-4px_rgba(79,70,229,0.4)] hover:shadow-[0_12px_24px_-4px_rgba(79,70,229,0.5)] transition-all duration-200 active:scale-[0.99] disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer"
             >
               {submitting ? (
                 <>

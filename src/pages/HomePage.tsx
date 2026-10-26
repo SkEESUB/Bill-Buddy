@@ -36,11 +36,11 @@ export function HomePage() {
   const finance = useFinance();
   const { snapshot, today, loading, error, reload, actions } = finance;
 
-  // Top-level Navigation: "bills" = existing Bills dashboard, "spends" = new Spends dashboard
+  // Top-level Navigation: "bills" = existing Bills dashboard, "spends" = dedicated Spends dashboard
   const [activeTab, setActiveTab] = useState<"bills" | "spends">("bills");
 
-  // View state: "home" = default outstanding list, "completed" = completed view, "remaining" = remaining view
-  const [activeView, setActiveView] = useState<"home" | "completed" | "remaining">("home");
+  // In-page Bills View filter: "remaining" = unpaid/due bills, "completed" = paid/settled bills
+  const [billsFilter, setBillsFilter] = useState<"remaining" | "completed">("remaining");
 
   // Spends State
   const [selectedSpendDate, setSelectedSpendDate] = useState<string>(today);
@@ -130,19 +130,15 @@ export function HomePage() {
   );
   const completedCount = completedOccurrences.length;
 
-  // Filtered and Sorted Bill List
+  // Filtered and Sorted Bill List (Controlled by in-page Bills filter)
   const displayedBills = useMemo(() => {
-    if (activeView === "completed") {
+    if (billsFilter === "completed") {
       // Completed bills sorted most recent payment or date first
       return [...completedOccurrences].sort((a, b) => b.dueDate.localeCompare(a.dueDate));
     }
-    if (activeView === "remaining") {
-      // All primary outstanding bills sorted strictly by urgency/due date
-      return [...primaryRemainingOccurrences].sort(byUrgency);
-    }
-    // Default home list: Outstanding primary bills (one per recurring series)
+    // All primary outstanding bills sorted strictly by urgency/due date
     return [...primaryRemainingOccurrences].sort(byUrgency);
-  }, [activeView, completedOccurrences, primaryRemainingOccurrences]);
+  }, [billsFilter, completedOccurrences, primaryRemainingOccurrences]);
 
   // Handlers for Bill operations
   const handleSubmitBill = async (values: BillInput) => {
@@ -209,6 +205,10 @@ export function HomePage() {
         await actions.createSpend(values);
         toast.success("Spend added successfully");
       }
+      // If the saved expense has a different date, switch to that date to display it
+      if (values.spend_date && values.spend_date !== selectedSpendDate) {
+        setSelectedSpendDate(values.spend_date);
+      }
       setEditingSpend(null);
       setSpendModalOpen(false);
     } catch (e) {
@@ -243,7 +243,7 @@ export function HomePage() {
             <img
               src="/billbuddy-icon.png"
               alt="BillBuddy"
-              className="h-full w-full object-contain"
+              className="h-full w-full object-contain animate-gentle-float"
             />
           </div>
           <div>
@@ -282,68 +282,14 @@ export function HomePage() {
       </header>
 
       {/* ==================================================================== */}
-      {/* SECTION NAVIGATION — BILLS / SPENDS SEGMENTED CONTROL                */}
-      {/* ==================================================================== */}
-      <div
-        className="grid grid-cols-2 p-1.5 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-[0_2px_10px_-2px_rgba(15,35,75,0.05)]"
-        role="tablist"
-        aria-label="Section selector"
-      >
-        {/* Bills Tab */}
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === "bills"}
-          aria-controls="bills-panel"
-          id="bills-tab"
-          onClick={() => setActiveTab("bills")}
-          className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer min-h-[42px] ${
-            activeTab === "bills"
-              ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 text-white shadow-md shadow-blue-500/25"
-              : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/60"
-          }`}
-        >
-          <ReceiptText
-            className={`w-4 h-4 transition-colors ${
-              activeTab === "bills" ? "text-white" : "text-slate-500"
-            }`}
-          />
-          <span>Bills</span>
-        </button>
-
-        {/* Spends Tab */}
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === "spends"}
-          aria-controls="spends-panel"
-          id="spends-tab"
-          onClick={() => setActiveTab("spends")}
-          className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer min-h-[42px] ${
-            activeTab === "spends"
-              ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 text-white shadow-md shadow-blue-500/25"
-              : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/60"
-          }`}
-        >
-          <img
-            src="/spends-icon.png"
-            alt=""
-            className="w-4 h-4 object-contain"
-            aria-hidden="true"
-          />
-          <span>Spends</span>
-        </button>
-      </div>
-
-      {/* ==================================================================== */}
-      {/* SECTION VIEW RENDERING                                               */}
+      {/* SECTION VIEW RENDERING (BILLS vs SPENDS VIA BOTTOM NAV ONLY)         */}
       {/* ==================================================================== */}
       {activeTab === "bills" ? (
         <div
           id="bills-panel"
           role="tabpanel"
-          aria-labelledby="bills-tab"
-          className="flex flex-col gap-4"
+          aria-label="Bills Section"
+          className="flex flex-col gap-4 animate-fade-in"
         >
           {/* ==================================================================== */}
           {/* SECTION B — COMPACT MONEY SUMMARY CONTAINER                           */}
@@ -356,8 +302,18 @@ export function HomePage() {
             />
 
             <div className="grid grid-cols-2 divide-x divide-slate-200/80">
-              {/* Remaining (Outstanding) Column */}
-              <div className="pr-3 sm:pr-4">
+              {/* Remaining (Outstanding) Column - Interactive */}
+              <button
+                type="button"
+                onClick={() => setBillsFilter("remaining")}
+                className={`text-left pr-3 sm:pr-4 rounded-2xl p-1.5 -m-1.5 transition-all cursor-pointer ${
+                  billsFilter === "remaining"
+                    ? "bg-blue-50/70 ring-1 ring-blue-200/60"
+                    : "hover:bg-slate-50/60"
+                }`}
+                aria-label="Filter Remaining Bills"
+                aria-pressed={billsFilter === "remaining"}
+              >
                 <div className="flex items-center gap-1.5 mb-1">
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600">
                     <Clock className="h-3 w-3 stroke-[2.5]" />
@@ -372,10 +328,20 @@ export function HomePage() {
                 <p className="text-xs text-slate-500 mt-0.5 font-medium">
                   {remainingCount} {remainingCount === 1 ? "bill" : "bills"} due
                 </p>
-              </div>
+              </button>
 
-              {/* Completed Column */}
-              <div className="pl-3 sm:pr-2 sm:pl-4">
+              {/* Completed Column - Interactive */}
+              <button
+                type="button"
+                onClick={() => setBillsFilter("completed")}
+                className={`text-left pl-3 sm:pr-2 sm:pl-4 rounded-2xl p-1.5 -my-1.5 -mr-1.5 transition-all cursor-pointer ${
+                  billsFilter === "completed"
+                    ? "bg-emerald-50/70 ring-1 ring-emerald-200/60"
+                    : "hover:bg-slate-50/60"
+                }`}
+                aria-label="Filter Completed Bills"
+                aria-pressed={billsFilter === "completed"}
+              >
                 <div className="flex items-center gap-1.5 mb-1">
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
                     <CheckCircle2 className="h-3 w-3 stroke-[2.5]" />
@@ -390,40 +356,81 @@ export function HomePage() {
                 <p className="text-xs text-slate-500 mt-0.5 font-medium">
                   {completedCount} {completedCount === 1 ? "bill" : "bills"} paid
                 </p>
-              </div>
+              </button>
             </div>
           </div>
 
           {/* ==================================================================== */}
-          {/* SECTION C — MAIN BILL LIST & IN-PLACE VIEW FILTER                     */}
+          {/* SECTION B.2 — IN-PAGE REMAINING & COMPLETED CONTROLS                  */}
           {/* ==================================================================== */}
-          <div className="flex flex-col gap-2.5 mt-1">
-            {/* List Header and Active Filter Pill */}
+          <div
+            className="grid grid-cols-2 p-1.5 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-[0_2px_10px_-2px_rgba(15,35,75,0.05)]"
+            role="tablist"
+            aria-label="Bill status filter"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={billsFilter === "remaining"}
+              onClick={() => setBillsFilter("remaining")}
+              className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer min-h-[40px] ${
+                billsFilter === "remaining"
+                  ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 text-white shadow-md shadow-blue-500/25"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/60"
+              }`}
+            >
+              <Clock className="w-4 h-4 stroke-[2.2]" />
+              <span>Remaining</span>
+              <span
+                className={`text-[11px] px-1.5 py-0.5 rounded-full font-semibold transition-colors ${
+                  billsFilter === "remaining"
+                    ? "bg-white/25 text-white"
+                    : "bg-slate-200/80 text-slate-700"
+                }`}
+              >
+                {remainingCount}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              role="tab"
+              aria-selected={billsFilter === "completed"}
+              onClick={() => setBillsFilter("completed")}
+              className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer min-h-[40px] ${
+                billsFilter === "completed"
+                  ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 text-white shadow-md shadow-blue-500/25"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/60"
+              }`}
+            >
+              <CheckCircle2 className="w-4 h-4 stroke-[2.2]" />
+              <span>Completed</span>
+              <span
+                className={`text-[11px] px-1.5 py-0.5 rounded-full font-semibold transition-colors ${
+                  billsFilter === "completed"
+                    ? "bg-white/25 text-white"
+                    : "bg-slate-200/80 text-slate-700"
+                }`}
+              >
+                {completedCount}
+              </span>
+            </button>
+          </div>
+
+          {/* ==================================================================== */}
+          {/* SECTION C — MAIN BILL LIST                                           */}
+          {/* ==================================================================== */}
+          <div className="flex flex-col gap-2.5 mt-0.5">
+            {/* List Header */}
             <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-2">
                 <h2 className="text-sm sm:text-base font-bold text-slate-900">
-                  {activeView === "completed"
-                    ? "Completed Bills"
-                    : activeView === "remaining"
-                      ? "Remaining Bills"
-                      : "Upcoming Bills"}
+                  {billsFilter === "completed" ? "Completed Bills" : "Remaining Bills"}
                 </h2>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-700">
                   {displayedBills.length}
                 </span>
               </div>
-
-              {/* If filtering by Completed or Remaining, show quick "Back to all" return button */}
-              {activeView !== "home" && (
-                <button
-                  type="button"
-                  onClick={() => setActiveView("home")}
-                  className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100/70 px-2.5 py-1 rounded-full transition-colors cursor-pointer"
-                >
-                  <X className="h-3 w-3" />
-                  <span>Back to all</span>
-                </button>
-              )}
             </div>
 
             {/* Error State Banner */}
@@ -453,18 +460,16 @@ export function HomePage() {
                   <Calendar className="h-6 w-6 stroke-[1.8]" />
                 </div>
                 <h3 className="text-sm font-bold text-slate-900 mb-1">
-                  {activeView === "completed"
+                  {billsFilter === "completed"
                     ? "No completed bills yet"
-                    : activeView === "remaining"
-                      ? "No remaining bills due"
-                      : "No bills scheduled"}
+                    : "No remaining bills due"}
                 </h3>
                 <p className="text-xs text-slate-500 max-w-xs mb-4">
-                  {activeView === "completed"
+                  {billsFilter === "completed"
                     ? "Bills you mark as completed will appear here for your records."
                     : "Add your electricity, internet, rent, or credit card bills to receive timely reminders."}
                 </p>
-                {activeView === "home" && (
+                {billsFilter === "remaining" && (
                   <button
                     type="button"
                     onClick={() => {
@@ -497,7 +502,7 @@ export function HomePage() {
           </div>
         </div>
       ) : (
-        <div id="spends-panel" role="tabpanel" aria-labelledby="spends-tab">
+        <div id="spends-panel" role="tabpanel" aria-label="Spends Section">
           <SpendsDashboard
             selectedDate={selectedSpendDate}
             onDateChange={(d) => setSelectedSpendDate(d)}
@@ -521,17 +526,8 @@ export function HomePage() {
       {/* SECTION D — FIXED BOTTOM NAVIGATION (EXACTLY THREE ACTIONS)           */}
       {/* ==================================================================== */}
       <BottomNav
-        activeView={activeTab === "bills" ? activeView : "home"}
-        onSelectView={(view) => {
-          if (activeTab !== "bills") {
-            setActiveTab("bills");
-          }
-          setActiveView(view);
-        }}
-        onAddBill={() => {
-          setEditing(null);
-          setFormOpen(true);
-        }}
+        activeSection={activeTab}
+        onSelectSection={(section) => setActiveTab(section)}
         onOpenAddChoice={() => setChoiceSheetOpen(true)}
       />
 
@@ -584,6 +580,7 @@ export function HomePage() {
         open={choiceSheetOpen}
         onClose={() => setChoiceSheetOpen(false)}
         onSelectAddBill={() => {
+          setActiveTab("bills");
           setEditing(null);
           setFormOpen(true);
         }}
