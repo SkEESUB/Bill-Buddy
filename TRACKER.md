@@ -3,21 +3,25 @@
 **Document Version:** 2.1.0  
 **Status:** Living Document / Authoritative Rebuild Tracker  
 **Target Architecture:** Minimal, Premium, Single-Screen Bill Reminder App  
-**Current Verification:** 189/189 Unit Tests Passing | TypeScript: 0 Errors | ESLint: 0 Errors | Production Build: Succeeded  
-**Last Updated:** 2026-10-25
+**Current Verification:** 253/253 Unit Tests Passing | TypeScript: 0 Errors | ESLint: 0 Errors | Production Build: Succeeded  
+**Last Updated:** 2026-10-26
 
 ---
 
 ## 1. Product Rebuild Phases
 
-| Phase       | Description                      | Status       | Verification                                                                                                                                                                         |
-| :---------- | :------------------------------- | :----------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Phase 1** | Project Audit & Cleanup Plan     | ✅ Completed | Architecture mapped, dead code inventory confirmed                                                                                                                                   |
-| **Phase 2** | Architecture & Design Foundation | ✅ Completed | Dead routes & pages pruned; Glassmorphic/Neumorphic design tokens added; DB migration created; 186/186 tests passing                                                                 |
-| **Phase 3** | Single-Screen UI                 | ✅ Completed | Header & greeting ("Hi, [User]"), compact Money Summary box, sorted bill list, 3-action bottom navigation; 186/186 tests passing                                                     |
-| **Phase 4** | Add Bill & Bill Details          | ✅ Completed | Reusable bill form (Name, ₹ Amount, Due Date, Reminder Time, Reminder Email, Repeat, Reminder Before, Notes); Details sheet (Mark as Completed, Edit, Delete); 186/186 tests passing |
-| **Phase 5** | Real Email Reminders             | ✅ Completed | Server-side email delivery service, HTML reminder templates, scheduler integration, automated reminder sync and cancellation; 189/189 tests passing                                  |
-| **Phase 6** | Final Polish & Verification      | ✅ Completed | Full responsive audit, interaction verification, 0 TypeScript errors, 0 ESLint errors, 189/189 tests passing, production build succeeded                                             |
+| Phase        | Description                       | Status       | Verification                                                                                                                                                                         |
+| :----------- | :-------------------------------- | :----------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Phase 1**  | Project Audit & Cleanup Plan      | ✅ Completed | Architecture mapped, dead code inventory confirmed                                                                                                                                   |
+| **Phase 2**  | Architecture & Design Foundation  | ✅ Completed | Dead routes & pages pruned; Glassmorphic/Neumorphic design tokens added; DB migration created; 186/186 tests passing                                                                 |
+| **Phase 3**  | Single-Screen UI                  | ✅ Completed | Header & greeting ("Hi, [User]"), compact Money Summary box, sorted bill list, 3-action bottom navigation; 186/186 tests passing                                                     |
+| **Phase 4**  | Add Bill & Bill Details           | ✅ Completed | Reusable bill form (Name, ₹ Amount, Due Date, Reminder Time, Reminder Email, Repeat, Reminder Before, Notes); Details sheet (Mark as Completed, Edit, Delete); 186/186 tests passing |
+| **Phase 5**  | Real Email Reminders              | ✅ Completed | Server-side email delivery service, HTML reminder templates, scheduler integration, automated reminder sync and cancellation; 189/189 tests passing                                  |
+| **Phase 6**  | Final Polish & Verification       | ✅ Completed | Full responsive audit, interaction verification, 0 TypeScript errors, 0 ESLint errors, 189/189 tests passing, production build succeeded                                             |
+| **Phase 7**  | Spends: Navigation & UI (Phase 1) | ✅ Completed | Bills / Spends navigation, cartoon wallet logo asset, Spends dashboard UI, Add Choice sheet                                                                                          |
+| **Phase 8**  | Spends: Add Form & DB (Phase 2)   | ✅ Completed | Dedicated Add Spend modal, database table & migrations, persistence logic                                                                                                            |
+| **Phase 9**  | Spends: Edit, Delete, Totals (3)  | ✅ Completed | Mutation operations, date selector filtering, accurate daily totals calculations                                                                                                     |
+| **Phase 10** | Spends: Testing & QA (Phase 4)    | ✅ Completed | 17/17 Vitest test suites passing (253/253 tests), 0 TS errors, 0 ESLint errors, production build verified                                                                            |
 
 ---
 
@@ -172,7 +176,31 @@
 
 ---
 
-## 4. Acceptance Criteria Status
+---
+
+## 5. Spends Feature Register — Phase 1: Navigation & Spends Dashboard UI
+
+- [x] **SPEND-01:** Inspect project architecture, configuration, routing, and database schema.
+- [x] **SPEND-02:** Process supplied cartoon wallet character into clean, high-DPI, transparent square assets (`public/spends-icon.png`, `public/spends-character-crop.png`, `public/spends-character.png`).
+- [x] **SPEND-03:** Implement Bills / Spends rounded segmented navigation pill directly beneath the dashboard header.
+- [x] **SPEND-04:** Implement `SpendsDashboard` component:
+  - Date selector with Previous Day, Next Day (blocking future dates), Selected Date, and native date picker.
+  - Daily spending summary card (`TOTAL SPENT ₹0.00`, expense count, glassmorphic styling).
+  - Daily expense list ("Today's Spends" / date-specific title, friendly empty state with cartoon mascot, spend cards with spend name, amount, wallet icon, action triggers).
+  - Daily total summary footer (`Total spent today: ₹[amount]`).
+- [x] **SPEND-05:** Implement `AddChoiceSheet` modal ("What would you like to add?" -> "Add Bill" vs "Add Spend").
+- [x] **SPEND-06:** Wire `BottomNav` central plus action to open `AddChoiceSheet`, maintaining complete preservation of existing Bills functionality and unit test compatibility.
+- [x] **SPEND-07:** Run type checks, linting, Vitest unit tests (244/244 passing), and production build to verify 0 regressions.
+
+## 6. Spends Feature Register — Phase 2 & 3: Database, Form, Editing & Daily Totals
+
+- [x] **SPEND-08:** Create database migration `supabase/migrations/20261026000000_create_spends_table.sql` with user isolation RLS policies and performance indexes.
+- [x] **SPEND-09:** Add `spends` table types to `src/integrations/supabase/types.ts` and `src/types/database.ts`.
+- [x] **SPEND-10:** Build server-authoritative server functions in `src/lib/spends.functions.ts` (`createSpend`, `updateSpend`, `deleteSpend`, `listSpends`) with Zod input validation and resilient fallback handling.
+- [x] **SPEND-11:** Build `SpendFormModal.tsx` matching Add Bill styling with Spend Name, Amount (₹), Date (strictly no time field), Note, and loading button state.
+- [x] **SPEND-12:** Integrate Spends into `useFinance.ts` and `finance.functions.ts` for unified snapshot state and instant mutation refreshes.
+- [x] **SPEND-13:** Wire editing, deletion confirmation dialogs, date switching, and accurate daily total calculation in `HomePage.tsx`.
+- [x] **SPEND-14:** Add comprehensive Vitest unit tests in `src/lib/spends.test.ts` (8/8 tests passing, 253/253 total passing).
 
 - [x] All six documentation files exist and are accurate (`PRD.md`, `ARCHITECTURE.md`, `DESIGN.md`, `MEMORY.md`, `RULES.md`, `TRACKER.md`).
 - [x] Required database schema is consolidated in [`001_billbuddy_schema.sql`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/supabase/migrations/001_billbuddy_schema.sql) covering all 22 tables.

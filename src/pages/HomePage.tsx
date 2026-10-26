@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Clock,
   Plus,
+  ReceiptText,
   RefreshCw,
   Sparkles,
   Wallet,
@@ -24,17 +25,31 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyState } from "@/components/EmptyState";
 import { BillListSkeleton } from "@/components/Skeletons";
 import { UserMenu } from "@/components/UserMenu";
-import type { Bill } from "@/types/database";
+import { AddChoiceSheet } from "@/components/AddChoiceSheet";
+import { SpendsDashboard } from "@/components/spends/SpendsDashboard";
+import { SpendFormModal } from "@/components/spends/SpendFormModal";
+import type { Bill, Spend } from "@/types/database";
+import type { SpendInput } from "@/lib/spends.functions";
 
 export function HomePage() {
   const { user } = useAuth();
   const finance = useFinance();
   const { snapshot, today, loading, error, reload, actions } = finance;
 
+  // Top-level Navigation: "bills" = existing Bills dashboard, "spends" = new Spends dashboard
+  const [activeTab, setActiveTab] = useState<"bills" | "spends">("bills");
+
   // View state: "home" = default outstanding list, "completed" = completed view, "remaining" = remaining view
   const [activeView, setActiveView] = useState<"home" | "completed" | "remaining">("home");
 
+  // Spends State
+  const [selectedSpendDate, setSelectedSpendDate] = useState<string>(today);
+  const [spendModalOpen, setSpendModalOpen] = useState(false);
+  const [editingSpend, setEditingSpend] = useState<Spend | null>(null);
+  const [deleteSpendTarget, setDeleteSpendTarget] = useState<Spend | null>(null);
+
   // Modals & Action Targets
+  const [choiceSheetOpen, setChoiceSheetOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Bill | null>(null);
   const [detailsTarget, setDetailsTarget] = useState<OccurrenceView | null>(null);
@@ -44,6 +59,28 @@ export function HomePage() {
   // Authenticated User Greeting: Use actual saved name, fallback to "there"
   const profileName = snapshot.profile?.full_name?.trim();
   const userName = profileName || "there";
+
+  // Spends for selected date (derived authoritatively from snapshot.spends or transactions fallback)
+  const dateSpends = useMemo<Spend[]>(() => {
+    const allSpends: Spend[] =
+      snapshot.spends && snapshot.spends.length > 0
+        ? snapshot.spends
+        : (snapshot.transactions || [])
+            .filter((t: any) => t.type === "expense")
+            .map((t: any) => ({
+              id: t.id,
+              user_id: t.user_id,
+              name: t.description || t.category || "Expense",
+              amount: Number(t.amount) || 0,
+              spend_date: t.date,
+              notes: t.notes ?? null,
+              created_at: t.created_at,
+            }));
+
+    return allSpends
+      .filter((s) => s.spend_date === selectedSpendDate)
+      .sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""));
+  }, [snapshot.spends, snapshot.transactions, selectedSpendDate]);
 
   // Bill occurrence views
   const views = useMemo(() => toViews(snapshot.occurrences, today), [snapshot.occurrences, today]);
@@ -162,6 +199,38 @@ export function HomePage() {
     }
   };
 
+  // Handlers for Spend operations
+  const handleSubmitSpend = async (values: SpendInput) => {
+    try {
+      if (editingSpend) {
+        await actions.updateSpend({ ...values, id: editingSpend.id });
+        toast.success("Spend updated successfully");
+      } else {
+        await actions.createSpend(values);
+        toast.success("Spend added successfully");
+      }
+      setEditingSpend(null);
+      setSpendModalOpen(false);
+    } catch (e) {
+      toast.error(toUserMessage(e));
+      throw e;
+    }
+  };
+
+  const handleDeleteSpend = async () => {
+    if (!deleteSpendTarget || working) return;
+    setWorking(true);
+    try {
+      await actions.deleteSpend(deleteSpendTarget.id);
+      toast.success("Spend deleted successfully");
+      setDeleteSpendTarget(null);
+    } catch (e) {
+      toast.error(toUserMessage(e));
+    } finally {
+      setWorking(false);
+    }
+  };
+
   return (
     <section className="flex flex-col gap-4 w-full" aria-label="BillBuddy Home">
       {/* ==================================================================== */}
@@ -213,166 +282,257 @@ export function HomePage() {
       </header>
 
       {/* ==================================================================== */}
-      {/* SECTION B — COMPACT MONEY SUMMARY CONTAINER                           */}
+      {/* SECTION NAVIGATION — BILLS / SPENDS SEGMENTED CONTROL                */}
       {/* ==================================================================== */}
-      <div className="glass-panel rounded-3xl p-4 sm:p-5 border border-white/90 shadow-[0_10px_30px_-8px_rgba(15,39,66,0.06)] relative overflow-hidden">
-        {/* Subtle decorative glow */}
-        <div
-          className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-blue-400/10 blur-2xl pointer-events-none"
-          aria-hidden="true"
-        />
+      <div
+        className="grid grid-cols-2 p-1.5 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-[0_2px_10px_-2px_rgba(15,35,75,0.05)]"
+        role="tablist"
+        aria-label="Section selector"
+      >
+        {/* Bills Tab */}
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "bills"}
+          aria-controls="bills-panel"
+          id="bills-tab"
+          onClick={() => setActiveTab("bills")}
+          className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer min-h-[42px] ${
+            activeTab === "bills"
+              ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 text-white shadow-md shadow-blue-500/25"
+              : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/60"
+          }`}
+        >
+          <ReceiptText
+            className={`w-4 h-4 transition-colors ${
+              activeTab === "bills" ? "text-white" : "text-slate-500"
+            }`}
+          />
+          <span>Bills</span>
+        </button>
 
-        <div className="grid grid-cols-2 divide-x divide-slate-200/80">
-          {/* Remaining (Outstanding) Column */}
-          <div className="pr-3 sm:pr-4">
-            <div className="flex items-center gap-1.5 mb-1">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                <Clock className="h-3 w-3 stroke-[2.5]" />
-              </span>
-              <span className="text-[11px] font-semibold tracking-wide uppercase text-slate-500">
-                Remaining
-              </span>
-            </div>
-            <p className="text-xl sm:text-2xl font-bold tracking-tight tabular-nums text-slate-900">
-              {formatAmount(remainingAmount)}
-            </p>
-            <p className="text-xs text-slate-500 mt-0.5 font-medium">
-              {remainingCount} {remainingCount === 1 ? "bill" : "bills"} due
-            </p>
-          </div>
-
-          {/* Completed Column */}
-          <div className="pl-3 sm:pr-2 sm:pl-4">
-            <div className="flex items-center gap-1.5 mb-1">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-                <CheckCircle2 className="h-3 w-3 stroke-[2.5]" />
-              </span>
-              <span className="text-[11px] font-semibold tracking-wide uppercase text-slate-500">
-                Completed
-              </span>
-            </div>
-            <p className="text-xl sm:text-2xl font-bold tracking-tight tabular-nums text-slate-900">
-              {formatAmount(completedAmount)}
-            </p>
-            <p className="text-xs text-slate-500 mt-0.5 font-medium">
-              {completedCount} {completedCount === 1 ? "bill" : "bills"} paid
-            </p>
-          </div>
-        </div>
+        {/* Spends Tab */}
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "spends"}
+          aria-controls="spends-panel"
+          id="spends-tab"
+          onClick={() => setActiveTab("spends")}
+          className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer min-h-[42px] ${
+            activeTab === "spends"
+              ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 text-white shadow-md shadow-blue-500/25"
+              : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/60"
+          }`}
+        >
+          <img
+            src="/spends-icon.png"
+            alt=""
+            className="w-4 h-4 object-contain"
+            aria-hidden="true"
+          />
+          <span>Spends</span>
+        </button>
       </div>
 
       {/* ==================================================================== */}
-      {/* SECTION C — MAIN BILL LIST & IN-PLACE VIEW FILTER                     */}
+      {/* SECTION VIEW RENDERING                                               */}
       {/* ==================================================================== */}
-      <div className="flex flex-col gap-2.5 mt-1">
-        {/* List Header and Active Filter Pill */}
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2">
-            <h2 className="text-sm sm:text-base font-bold text-slate-900">
-              {activeView === "completed"
-                ? "Completed Bills"
-                : activeView === "remaining"
-                  ? "Remaining Bills"
-                  : "Upcoming Bills"}
-            </h2>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-700">
-              {displayedBills.length}
-            </span>
+      {activeTab === "bills" ? (
+        <div
+          id="bills-panel"
+          role="tabpanel"
+          aria-labelledby="bills-tab"
+          className="flex flex-col gap-4"
+        >
+          {/* ==================================================================== */}
+          {/* SECTION B — COMPACT MONEY SUMMARY CONTAINER                           */}
+          {/* ==================================================================== */}
+          <div className="glass-panel rounded-3xl p-4 sm:p-5 border border-white/90 shadow-[0_10px_30px_-8px_rgba(15,39,66,0.06)] relative overflow-hidden">
+            {/* Subtle decorative glow */}
+            <div
+              className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-blue-400/10 blur-2xl pointer-events-none"
+              aria-hidden="true"
+            />
+
+            <div className="grid grid-cols-2 divide-x divide-slate-200/80">
+              {/* Remaining (Outstanding) Column */}
+              <div className="pr-3 sm:pr-4">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                    <Clock className="h-3 w-3 stroke-[2.5]" />
+                  </span>
+                  <span className="text-[11px] font-semibold tracking-wide uppercase text-slate-500">
+                    Remaining
+                  </span>
+                </div>
+                <p className="text-xl sm:text-2xl font-bold tracking-tight tabular-nums text-slate-900">
+                  {formatAmount(remainingAmount)}
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                  {remainingCount} {remainingCount === 1 ? "bill" : "bills"} due
+                </p>
+              </div>
+
+              {/* Completed Column */}
+              <div className="pl-3 sm:pr-2 sm:pl-4">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                    <CheckCircle2 className="h-3 w-3 stroke-[2.5]" />
+                  </span>
+                  <span className="text-[11px] font-semibold tracking-wide uppercase text-slate-500">
+                    Completed
+                  </span>
+                </div>
+                <p className="text-xl sm:text-2xl font-bold tracking-tight tabular-nums text-slate-900">
+                  {formatAmount(completedAmount)}
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                  {completedCount} {completedCount === 1 ? "bill" : "bills"} paid
+                </p>
+              </div>
+            </div>
           </div>
 
-          {/* If filtering by Completed or Remaining, show quick "Back to all" return button */}
-          {activeView !== "home" && (
-            <button
-              type="button"
-              onClick={() => setActiveView("home")}
-              className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100/70 px-2.5 py-1 rounded-full transition-colors cursor-pointer"
-            >
-              <X className="h-3 w-3" />
-              <span>Back to all</span>
-            </button>
-          )}
-        </div>
+          {/* ==================================================================== */}
+          {/* SECTION C — MAIN BILL LIST & IN-PLACE VIEW FILTER                     */}
+          {/* ==================================================================== */}
+          <div className="flex flex-col gap-2.5 mt-1">
+            {/* List Header and Active Filter Pill */}
+            <div className="flex items-center justify-between px-1">
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm sm:text-base font-bold text-slate-900">
+                  {activeView === "completed"
+                    ? "Completed Bills"
+                    : activeView === "remaining"
+                      ? "Remaining Bills"
+                      : "Upcoming Bills"}
+                </h2>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-700">
+                  {displayedBills.length}
+                </span>
+              </div>
 
-        {/* Error State Banner */}
-        {error && (
-          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
-              <span>{error || "Unable to refresh bills."}</span>
+              {/* If filtering by Completed or Remaining, show quick "Back to all" return button */}
+              {activeView !== "home" && (
+                <button
+                  type="button"
+                  onClick={() => setActiveView("home")}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100/70 px-2.5 py-1 rounded-full transition-colors cursor-pointer"
+                >
+                  <X className="h-3 w-3" />
+                  <span>Back to all</span>
+                </button>
+              )}
             </div>
-            <button
-              type="button"
-              onClick={() => reload()}
-              className="px-2 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-800 font-semibold cursor-pointer"
-            >
-              Retry
-            </button>
-          </div>
-        )}
 
-        {/* Loading Skeletons */}
-        {loading && <BillListSkeleton />}
+            {/* Error State Banner */}
+            {error && (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
+                  <span>{error || "Unable to refresh bills."}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => reload()}
+                  className="px-2 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-800 font-semibold cursor-pointer"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
 
-        {/* Empty State */}
-        {!loading && displayedBills.length === 0 && (
-          <div className="glass-card rounded-3xl p-8 border border-white/80 text-center flex flex-col items-center justify-center my-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 mb-3">
-              <Calendar className="h-6 w-6 stroke-[1.8]" />
-            </div>
-            <h3 className="text-sm font-bold text-slate-900 mb-1">
-              {activeView === "completed"
-                ? "No completed bills yet"
-                : activeView === "remaining"
-                  ? "No remaining bills due"
-                  : "No bills scheduled"}
-            </h3>
-            <p className="text-xs text-slate-500 max-w-xs mb-4">
-              {activeView === "completed"
-                ? "Bills you mark as completed will appear here for your records."
-                : "Add your electricity, internet, rent, or credit card bills to receive timely reminders."}
-            </p>
-            {activeView === "home" && (
-              <button
-                type="button"
-                onClick={() => {
-                  setEditing(null);
-                  setFormOpen(true);
-                }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-transform active:scale-95 cursor-pointer"
-              >
-                <Plus className="h-4 w-4 stroke-[2.5]" />
-                <span>Add Your First Bill</span>
-              </button>
+            {/* Loading Skeletons */}
+            {loading && <BillListSkeleton />}
+
+            {/* Empty State */}
+            {!loading && displayedBills.length === 0 && (
+              <div className="glass-card rounded-3xl p-8 border border-white/80 text-center flex flex-col items-center justify-center my-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 mb-3">
+                  <Calendar className="h-6 w-6 stroke-[1.8]" />
+                </div>
+                <h3 className="text-sm font-bold text-slate-900 mb-1">
+                  {activeView === "completed"
+                    ? "No completed bills yet"
+                    : activeView === "remaining"
+                      ? "No remaining bills due"
+                      : "No bills scheduled"}
+                </h3>
+                <p className="text-xs text-slate-500 max-w-xs mb-4">
+                  {activeView === "completed"
+                    ? "Bills you mark as completed will appear here for your records."
+                    : "Add your electricity, internet, rent, or credit card bills to receive timely reminders."}
+                </p>
+                {activeView === "home" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditing(null);
+                      setFormOpen(true);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-transform active:scale-95 cursor-pointer"
+                  >
+                    <Plus className="h-4 w-4 stroke-[2.5]" />
+                    <span>Add Your First Bill</span>
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Bill Rows */}
+            {!loading && displayedBills.length > 0 && (
+              <div className="flex flex-col gap-2.5">
+                {displayedBills.map((occurrence, index) => (
+                  <BillCard
+                    key={occurrence.id}
+                    index={index}
+                    occurrence={occurrence}
+                    today={today}
+                    onSelect={(o) => setDetailsTarget(o)}
+                  />
+                ))}
+              </div>
             )}
           </div>
-        )}
-
-        {/* Bill Rows */}
-        {!loading && displayedBills.length > 0 && (
-          <div className="flex flex-col gap-2.5">
-            {displayedBills.map((occurrence, index) => (
-              <BillCard
-                key={occurrence.id}
-                index={index}
-                occurrence={occurrence}
-                today={today}
-                onSelect={(o) => setDetailsTarget(o)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div id="spends-panel" role="tabpanel" aria-labelledby="spends-tab">
+          <SpendsDashboard
+            selectedDate={selectedSpendDate}
+            onDateChange={(d) => setSelectedSpendDate(d)}
+            today={today}
+            spends={dateSpends}
+            loading={loading}
+            onAddSpend={() => {
+              setEditingSpend(null);
+              setSpendModalOpen(true);
+            }}
+            onEditSpend={(spend) => {
+              setEditingSpend(spend);
+              setSpendModalOpen(true);
+            }}
+            onDeleteSpend={(spend) => setDeleteSpendTarget(spend)}
+          />
+        </div>
+      )}
 
       {/* ==================================================================== */}
       {/* SECTION D — FIXED BOTTOM NAVIGATION (EXACTLY THREE ACTIONS)           */}
       {/* ==================================================================== */}
       <BottomNav
-        activeView={activeView}
-        onSelectView={(view) => setActiveView(view)}
+        activeView={activeTab === "bills" ? activeView : "home"}
+        onSelectView={(view) => {
+          if (activeTab !== "bills") {
+            setActiveTab("bills");
+          }
+          setActiveView(view);
+        }}
         onAddBill={() => {
           setEditing(null);
           setFormOpen(true);
         }}
+        onOpenAddChoice={() => setChoiceSheetOpen(true)}
       />
 
       {/* ==================================================================== */}
@@ -409,7 +569,7 @@ export function HomePage() {
         onSubmit={handleSubmitBill}
       />
 
-      {/* Permanent Delete Confirmation Dialog */}
+      {/* Permanent Delete Confirmation Dialog for Bills */}
       <ConfirmDialog
         open={!!deleteTarget}
         title="Delete bill?"
@@ -417,6 +577,44 @@ export function HomePage() {
         busy={working}
         onCancel={() => setDeleteTarget(null)}
         onConfirm={() => void handleDeleteBill()}
+      />
+
+      {/* Add Action Choice Sheet: Add Bill vs Add Spend */}
+      <AddChoiceSheet
+        open={choiceSheetOpen}
+        onClose={() => setChoiceSheetOpen(false)}
+        onSelectAddBill={() => {
+          setEditing(null);
+          setFormOpen(true);
+        }}
+        onSelectAddSpend={() => {
+          setActiveTab("spends");
+          setEditingSpend(null);
+          setSpendModalOpen(true);
+        }}
+      />
+
+      {/* Add / Edit Spend Form Modal */}
+      <SpendFormModal
+        open={spendModalOpen}
+        spend={editingSpend}
+        defaultDate={selectedSpendDate}
+        today={today}
+        onClose={() => {
+          setSpendModalOpen(false);
+          setEditingSpend(null);
+        }}
+        onSubmit={handleSubmitSpend}
+      />
+
+      {/* Permanent Delete Confirmation Dialog for Spends */}
+      <ConfirmDialog
+        open={!!deleteSpendTarget}
+        title="Delete spend?"
+        message={`Are you sure you want to delete ${deleteSpendTarget?.name ?? "this spend"} of ₹${deleteSpendTarget?.amount ?? 0}?`}
+        busy={working}
+        onCancel={() => setDeleteSpendTarget(null)}
+        onConfirm={() => void handleDeleteSpend()}
       />
     </section>
   );

@@ -66,6 +66,17 @@ export type Budget = {
   created_at: string;
 };
 
+export type Spend = {
+  id: string;
+  user_id: string;
+  name: string;
+  amount: number;
+  spend_date: string;
+  notes?: string | null;
+  created_at: string;
+  updated_at?: string;
+};
+
 /*
 SQL SCHEMA
 ----------

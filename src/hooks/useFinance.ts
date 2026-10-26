@@ -35,6 +35,13 @@ import {
   type UpdateTransactionInput,
 } from "@/lib/transactions.functions";
 import {
+  createSpend as createSpendFn,
+  updateSpend as updateSpendFn,
+  deleteSpend as deleteSpendFn,
+  type SpendInput,
+  type SpendUpdateInput,
+} from "@/lib/spends.functions";
+import {
   budgetProgress,
   daysRemainingInMonth,
   monthBounds,
@@ -59,6 +66,7 @@ const EMPTY: Snapshot = {
   bills: [],
   occurrences: [] as OccurrenceWithBill[],
   transactions: [],
+  spends: [],
   ledgerDelta: 0,
   budgets: [],
   settings: null,
@@ -166,11 +174,17 @@ export function useFinance() {
   const reverseTransaction = useServerFn(reverseTransactionFn);
   const saveBudget = useServerFn(saveBudgetFn);
   const removeBudget = useServerFn(removeBudgetFn);
+  const createSpend = useServerFn(createSpendFn);
+  const updateSpend = useServerFn(updateSpendFn);
+  const deleteSpend = useServerFn(deleteSpendFn);
 
   const actions = useMemo(
     () => ({
       createBill: (data: BillInput) => mutate(() => createBill({ data })),
       updateBill: (data: BillUpdateInput) => mutate(() => updateBill({ data })),
+      createSpend: (data: SpendInput) => mutate(() => createSpend({ data })),
+      updateSpend: (data: SpendUpdateInput) => mutate(() => updateSpend({ data })),
+      deleteSpend: (id: string) => mutate(() => deleteSpend({ data: { id } })),
       deleteBill: async (id: string) => {
         const prev = snapshotRef.current;
         // Optimistically remove bill and future occurrences
@@ -271,6 +285,9 @@ export function useFinance() {
       reverseTransaction,
       saveBudget,
       removeBudget,
+      createSpend,
+      updateSpend,
+      deleteSpend,
     ],
   );
 

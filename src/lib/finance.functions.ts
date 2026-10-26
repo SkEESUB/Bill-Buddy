@@ -7,6 +7,7 @@ import { requireActiveAccount } from "@/lib/auth/active-account";
 import { fetchAllRows } from "@/lib/paged";
 import { addDays, monthBounds, previousMonthBounds, todayInTimeZone } from "@/lib/money";
 import { z } from "zod";
+import type { Spend } from "@/types/database";
 
 const dayString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected a YYYY-MM-DD date");
 
@@ -55,7 +56,7 @@ export const getFinanceSnapshot = createServerFn({ method: "GET" })
     const occFrom = addDays(today, -400);
     const occTo = addDays(today, 400);
 
-    const [bills, occurrences, transactions, budgets, settings, profile, balance] =
+    const [bills, occurrences, transactions, budgets, settings, profile, balance, spendsResult] =
       await Promise.all([
         supabase.from("bills").select("*").eq("user_id", userId).order("due_date").limit(1000),
         fetchAllRows((from, to) =>
@@ -84,16 +85,42 @@ export const getFinanceSnapshot = createServerFn({ method: "GET" })
         supabase.from("user_settings").select("*").eq("user_id", userId).maybeSingle(),
         supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
         supabase.rpc("ledger_balance_delta"),
+        supabase
+          .from("spends" as any)
+          .select("*")
+          .eq("user_id", userId)
+          .order("spend_date", { ascending: false })
+          .order("created_at", { ascending: false })
+          .limit(2000),
       ]);
 
     const firstError =
       bills.error ?? budgets.error ?? settings.error ?? profile.error ?? balance.error;
     if (firstError) throw new Error(firstError.message);
 
+    // Derive spends from dedicated public.spends table, falling back to transactions if table is unmigrated
+    let spends: Spend[] = [];
+    if (!spendsResult.error && spendsResult.data) {
+      spends = spendsResult.data as unknown as Spend[];
+    } else if (transactions && transactions.length > 0) {
+      spends = transactions
+        .filter((t: any) => t.type === "expense")
+        .map((t: any) => ({
+          id: t.id,
+          user_id: t.user_id,
+          name: t.description || t.category || "Expense",
+          amount: Number(t.amount) || 0,
+          spend_date: t.date,
+          notes: t.notes ?? null,
+          created_at: t.created_at,
+        }));
+    }
+
     return {
       bills: bills.data ?? [],
       occurrences: occurrences as unknown as OccurrenceWithBill[],
       transactions,
+      spends,
       /** All-time settled inflow minus outflow, aggregated in the database. */
       ledgerDelta: Number(balance.data ?? 0),
       budgets: budgets.data ?? [],

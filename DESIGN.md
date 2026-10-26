@@ -58,6 +58,37 @@ The typographic scale uses system font stacks for native performance, zero flash
 ### 3.1 Font Families
 
 - **Primary Interface Font:** System UI stack (`system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif`).
+
+---
+
+## 4. Spends Feature Design Tokens & Visual Assets
+
+### 4.1 Official Mascot & Wallet Iconography
+
+- **Spends Mascot (`/spends-icon.png`):** The cartoon wallet character carrying shopping bags is the authoritative symbol for the Spends feature.
+  - Full Asset: `/spends-character.png`
+  - High-DPI Square Cropped Icon: `/spends-character-crop.png`
+  - Crisp Transparent Icon: `/spends-icon.png`
+- **Strict Prohibition:** Never replace the cartoon wallet character with generic bar charts, generic pie charts, or basic wallet emojis.
+- **Aspect Ratio & Sharpness:** The character must always render in its natural proportions, free from vertical elongation, horizontal squeezing, or excessive empty canvas borders.
+
+### 4.2 Bills / Spends Segmented Navigation
+
+- **Placement:** Immediately below the header greeting container on `HomePage`.
+- **Form Factor:** Rounded pill segmented container (`rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200/80 p-1.5 shadow-[0_2px_10px_-2px_rgba(15,35,75,0.05)]`).
+- **Active Tab State:**
+  - Gradient: `bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700`
+  - Text & Icon: Solid crisp white (`text-white`), subtle shadow `shadow-md shadow-blue-500/25`.
+- **Inactive Tab State:**
+  - Background: Transparent / light hover background (`hover:bg-slate-100/60`).
+  - Text & Icon: Muted slate (`text-slate-600 hover:text-slate-900`).
+
+### 4.3 Spends Summary & Card Styling
+
+- **Daily Spending Summary Card:** Glassmorphic panel with soft radial glow, uppercase label `TOTAL SPENT`, formatted currency with tabular numbers (`tabular-nums`), and accurate count of expenses.
+- **Date Selector:** Inline pill control with chevron controls and date picker trigger. Disabled state for future dates.
+- **Daily Expense Cards:** Frosted glass cards showcasing the cartoon wallet avatar, expense title, formatted amount, and contextual edit/delete actions.
+- **Daily Total Footer:** High-contrast summary bar displaying `Total spent today: ₹[total]`.
 - **Monospace & Numerical Stack:** `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`.
 
 ### 3.2 Strict Financial Formatting Rules

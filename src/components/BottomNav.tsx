@@ -6,20 +6,34 @@ interface BottomNavProps {
   activeView?: "home" | "completed" | "remaining";
   onSelectView?: (view: "home" | "completed" | "remaining") => void;
   onAddBill?: () => void;
+  onOpenAddChoice?: () => void;
 }
 
 /**
  * Fixed Bottom Navigation for BillBuddy.
  * Exactly three primary actions:
  *  1. LEFT: Completed (Premium pill control, soft blue/lavender gradient, toggle view)
- *  2. CENTER: Add Bill (Prominent plus pill button, opens Add Bill modal)
+ *  2. CENTER: Add Bill / Spend (Prominent plus pill button, opens choice sheet)
  *  3. RIGHT: Remaining (Premium pill control, soft blue/lavender gradient, filter view)
  *
  * NOTE: Completed and Remaining buttons do NOT display numbers or balances.
  */
-export function BottomNav({ activeView = "home", onSelectView, onAddBill }: BottomNavProps) {
+export function BottomNav({
+  activeView = "home",
+  onSelectView,
+  onAddBill,
+  onOpenAddChoice,
+}: BottomNavProps) {
   const isCompleted = activeView === "completed";
   const isRemaining = activeView === "remaining";
+
+  const handleCenterClick = () => {
+    if (onOpenAddChoice) {
+      onOpenAddChoice();
+    } else if (onAddBill) {
+      onAddBill();
+    }
+  };
 
   return (
     <nav
@@ -45,13 +59,13 @@ export function BottomNav({ activeView = "home", onSelectView, onAddBill }: Bott
           <span className="truncate">Completed</span>
         </button>
 
-        {/* CENTER: Add Bill (Prominent action pill with comfortable surrounding space) */}
+        {/* CENTER: Add Bill / Add Spend Action Button */}
         <div className="px-1 sm:px-1.5 shrink-0">
           <button
             type="button"
-            onClick={onAddBill}
+            onClick={handleCenterClick}
             className="flex items-center gap-1.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 text-white font-bold text-xs sm:text-[13px] shadow-lg shadow-blue-500/30 transition-all duration-200 active:scale-95 hover:shadow-xl hover:shadow-blue-500/40 hover:brightness-105 cursor-pointer min-h-[44px]"
-            aria-label="Add a new bill"
+            aria-label="Add Bill or Spend"
           >
             <Plus className="w-[18px] h-[18px] stroke-[2.8]" />
             <span>Add Bill</span>

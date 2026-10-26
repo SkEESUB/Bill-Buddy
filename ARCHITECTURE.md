@@ -117,3 +117,46 @@ Following the repository cleanup, all obsolete pages, unreferenced UI primitives
 - **Pruned Dependencies:** 29 unused packages removed (including `recharts`, `embla-carousel-react`, `react-resizable-panels`, `cmdk`, `vaul`, `react-day-picker`, and 20 unused Radix wrappers).
 - **CSS Bundle Optimization:** Reduced compiled CSS footprint by 35% (74.56 kB vs 113.56 kB).
 - **Verification:** 189/189 Vitest unit tests pass, TypeScript strict 0 errors, ESLint 0 errors, and production build succeeds.
+
+---
+
+## 5. Spends Feature Architecture & Component Hierarchy
+
+To support daily variable spending without contaminating recurring bill schedules, the application introduces a parallel, cleanly scoped Spends domain:
+
+```mermaid
+flowchart TD
+    Shell["Layout Shell (src/components/Layout.tsx)"]
+    Home["HomePage (src/pages/HomePage.tsx)"]
+    Header["App Header (Mascot, Dynamic Greeting, UserMenu)"]
+    Nav["Section Switcher (Bills vs Spends Rounded Segmented Pill)"]
+
+    subgraph BillsDomain ["Bills Domain (Preserved & Unmodified)"]
+        Summary["Compact Money Summary Box (Remaining / Completed)"]
+        BillList["Bill Occurrences List & Filters (Upcoming, Remaining, Completed)"]
+        BillModal["BillFormModal (Add / Edit Bill)"]
+        DetailsModal["BillDetailsModal (Details, Complete, Delete)"]
+    end
+
+    subgraph SpendsDomain ["Spends Domain (New)"]
+        SpendsDash["SpendsDashboard (src/components/spends/SpendsDashboard.tsx)"]
+        DateSelector["Date Selector (Prev, Selected Date with Native Picker, Next, Future-Blocked)"]
+        DailySummary["Daily Spending Summary Card (Total Spent ₹, Count, Glass Glow)"]
+        SpendsList["Daily Expense List (Today's Spends / Date Heading, Expense Cards)"]
+        DailyTotal["Daily Total Footer Summary"]
+        AddSpendModal["SpendFormModal (Add / Edit Spend with ₹ Amount, Date, Note, Strictly NO Time)"]
+    end
+
+    Bottom["BottomNav with Center Action"]
+    ChoiceSheet["AddChoiceSheet ('What would you like to add?' -> Add Bill / Add Spend)"]
+
+    Shell --> Home
+    Home --> Header
+    Home --> Nav
+    Nav -->|Bills Active| BillsDomain
+    Nav -->|Spends Active| SpendsDomain
+    Home --> Bottom
+    Bottom --> ChoiceSheet
+    ChoiceSheet -->|Add Bill| BillModal
+    ChoiceSheet -->|Add Spend| AddSpendModal
+```

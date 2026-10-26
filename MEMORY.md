@@ -58,6 +58,17 @@ BillBuddy was initiated to solve recurring personal expense management, subscrip
 - **Decision:** Refactored all 12 server function modules in `src/lib/*.functions.ts` to use `.validator()`.
 - **Impact:** Clean, warning-free production builds and strict input parsing before server handler execution.
 
+### ADR-007: Spends Feature Introduction & Domain Separation
+
+- **Context:** The user requested adding daily expense tracking without altering or complicating the existing, carefully polished Bills dashboard.
+- **Decision:**
+  1. Strict preservation of the existing Bills screen, components, and bottom navigation.
+  2. Sub-header segmented navigation toggling between Bills (document icon) and Spends (cartoon wallet mascot).
+  3. Spends dashboard with date selection (previous, active date, next, date picker, blocking future dates), daily spending summary ("TOTAL SPENT ₹X.XX"), daily expense list, and daily total.
+  4. Central plus action opens a compact selection sheet ("What would you like to add?") branching into "Add Bill" or "Add Spend".
+  5. Add Spend modal requires Spend Name, Amount in ₹, Date (defaults to active date, strictly NO time picker), and optional Note.
+  6. Multi-phase execution: Phase 1 (UI & Navigation), Phase 2 (Add Spend Form & DB Persistence), Phase 3 (Edit/Delete & Date Navigation), Phase 4 (Integration & Regression Testing). Stopping after Phase 1 for user approval.
+
 ---
 
 ## 3. Critical Bug Fixes & Post-Mortems

@@ -6,6 +6,7 @@ export type {
   TransactionType,
   Budget,
   BudgetPeriod,
+  Spend,
   Profile,
   UserSettings,
 } from "./database";
