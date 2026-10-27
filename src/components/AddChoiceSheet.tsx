@@ -1,4 +1,5 @@
-import { ReceiptText, X } from "lucide-react";
+import { X } from "lucide-react";
+import { BillBuddyLogo } from "@/components/BillBuddyLogo";
 
 interface AddChoiceSheetProps {
   open: boolean;
@@ -64,8 +65,12 @@ export function AddChoiceSheet({
             }}
             className="flex items-center gap-3.5 p-3.5 rounded-2xl border border-slate-200/80 bg-white hover:bg-blue-50/50 hover:border-blue-200 transition-all text-left group cursor-pointer shadow-xs active:scale-[0.99]"
           >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-              <ReceiptText className="h-6 w-6 stroke-[2]" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 p-1.5 group-hover:bg-blue-600/10 transition-colors overflow-hidden">
+              <BillBuddyLogo
+                size={36}
+                alt="Add Bill"
+                className="h-full w-full object-contain group-hover:scale-110 transition-transform"
+              />
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors">

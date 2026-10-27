@@ -3,7 +3,7 @@
 **Document Version:** 2.1.0  
 **Status:** Living Document / Authoritative Rebuild Tracker  
 **Target Architecture:** Minimal, Premium, Single-Screen Bill Reminder App  
-**Current Verification:** 256/256 Unit Tests Passing | TypeScript: 0 Errors | ESLint: 0 Errors | Production Build: Succeeded  
+**Current Verification:** 262/262 Unit Tests Passing | TypeScript: 0 Errors | ESLint: 0 Errors | Production Build: Succeeded  
 **Last Updated:** 2026-10-26
 
 ---
@@ -24,6 +24,11 @@
 | **Phase 10** | Spends: Testing & QA (Phase 4)                            | ✅ Completed | 17/17 Vitest test suites passing (253/253 tests), 0 TS errors, 0 ESLint errors, production build verified                                                                                           |
 | **Phase 11** | Upgrade Phase 1: 3-Action Bottom Nav & Section Separation | ✅ Completed | Redesigned bottom nav [Bills][+][Spends], removed top segmented control, added in-page Remaining/Completed controls, verified AddChoiceSheet; 253/253 tests passing, 0 TS errors, prod build passed |
 | **Phase 12** | Upgrade Phase 2: Date Selector & Spends Dashboard         | ✅ Completed | Timezone-safe date navigation (`shiftDateString`), Prev/Next controls, calendar picker <= today, Total Spent card with mascot, daily expense cards, daily total footer; 255/255 tests passing       |
+| **Phase 13** | Bills Mascot in Navigation & Add Choice Sheet (Phase A)   | ✅ Completed | Replaced receipt icon with official BillBuddy mascot (`/billbuddy-icon.png`) in BottomNav and AddChoiceSheet; 256/256 tests passing, 0 TS errors, 0 ESLint errors, prod build succeeded |
+| **Phase 14** | Floating 3D Spends Cards (Phase B)                        | ✅ Completed | Applied `.spend-card-premium` & `.spend-card-floating` with layered shadows, ambient edge highlights, staggered physics, and `e.stopPropagation()`; 260/260 tests passing |
+| **Phase 15** | Mobile Authentication Viewport Fit (Phase C)              | ✅ Completed | Scaled illustrations & spacing for Onboarding, Email, and OTP screens to fit mobile viewports cleanly with safe area and keyboard resilience; 260/260 tests passing |
+| **Phase 16** | Email Reminder System Audit & Repair (Phase D)            | ✅ Completed | Repaired destructive over-deletion in `deleteBill`, enhanced `processDueEmailReminders` with diagnostics and idempotency, identified missing Resend key & cron configuration; 262/262 tests passing |
+| **Phase 17** | Remaining / Completed Toggle Navbar Match                  | ✅ Completed | Redesigned segmented toggle on Bills screen with `glass-nav` rounded pill container, glossy blue-to-purple gradient active pill with 3D sheen highlight, muted inactive pill, and count badges; 262/262 tests passing, 0 TS errors, 0 ESLint errors, prod build succeeded |
 
 ---
 
@@ -217,6 +222,33 @@
 - [x] **SPEND-20:** Implemented compact daily total summary footer (`Total spent on this date: ₹...`) agreeing with upper total card.
 - [x] **SPEND-21:** Automatic view shift in `HomePage.tsx` when saving an expense for a different date so records are immediately visible.
 - [x] **SPEND-22:** Verified 17/17 test suites (255/255 tests passing), 0 TypeScript errors, and production build succeeded.
+
+## 9. Mascot Alignment Register — Phase A: Bills Mascot in Navigation & Add Choice Sheet
+
+- [x] **MASCOT-01:** Replaced generic `ReceiptText` icon in `src/components/BottomNav.tsx` with the official BillBuddy mascot component (`BillBuddyLogo` using `/billbuddy-icon.png`) matching bill cards.
+- [x] **MASCOT-02:** Maintained 19x19 icon container, active `scale-110`, inactive `opacity-80`, aligned with Bills text, preserving Spends cartoon wallet logo unchanged.
+- [x] **MASCOT-03:** Replaced generic `ReceiptText` in `src/components/AddChoiceSheet.tsx` with `BillBuddyLogo` (36px, `p-1.5`, hover zoom `scale-110`), matching the Add Spend wallet presentation.
+- [x] **MASCOT-04:** Preserved all form behavior, Add Bill dialogs, Add Spend option, and un-impacted document icons.
+- [x] **MASCOT-05:** Updated `src/lib/bottom-nav-premium.test.ts` to assert `BillBuddyLogo` in BottomNav and AddChoiceSheet; 256/256 unit tests passing, 0 TypeScript errors, 0 ESLint errors, and production build succeeded.
+
+## 10. Spends & Auth Rebuild Register — Phase B & Phase C
+
+- [x] **SPEND-3D-01:** Configured `.spend-card-premium` in `src/styles.css` with layered ambient shadow, subtle elevation, delicate outer borders, and blue/lavender ambient glow (`::before`).
+- [x] **SPEND-3D-02:** Implemented `@keyframes spend-card-float` with staggered animation delays (`floatDelay`) in `src/components/spends/SpendsDashboard.tsx`.
+- [x] **SPEND-3D-03:** Added tactile active press feedback (`scale(0.985)`) and isolated button triggers using `e.stopPropagation()` on edit and delete buttons.
+- [x] **SPEND-3D-04:** Added full accessibility respect for `prefers-reduced-motion` and `.reduce-motion` styles.
+- [x] **AUTH-FIT-01:** Responsive viewport optimization across all 3 auth screens (`welcome`, `email`, `otp`) in `src/pages/LoginPage.tsx`.
+- [x] **AUTH-FIT-02:** Optimized SVG dimensions and container margins (`max-h-[125px]`, `py-0.5 sm:py-2`) for `WalletIllustration`, `EmailIllustration`, and `OTPIllustration`.
+- [x] **AUTH-FIT-03:** Tuned feature icons (`h-9 w-9 xs:h-10 xs:w-10 sm:h-11 sm:w-11`), responsive font sizes, and button heights (`min-h-[48px] sm:min-h-[54px]`).
+- [x] **AUTH-FIT-04:** Added height media queries (`@media (max-height: 720px)`, `@media (max-height: 680px)`, `@media (max-height: 560px)`) ensuring complete content visibility without forced vertical scrolling on standard mobile screens while retaining keyboard-adaptive scrolling.
+
+## 11. Email Reminder Investigation & Repair — Phase D
+
+- [x] **REMIND-01:** Identified and fixed catastrophic reminder cancellation bug in `deleteBill` (`src/lib/bills.functions.ts`), which previously deleted all pending reminders for all user bills instead of only the target bill.
+- [x] **REMIND-02:** Enhanced `processDueEmailReminders` in `src/lib/jobs.server.ts` with comprehensive diagnostic logging (eligible count, skips with reasons, provider responses, failure tracking).
+- [x] **REMIND-03:** Validated reminder idempotency and deduplication (`email_sent:${reminder.id}`) to guarantee that re-running the job never sends duplicate reminders.
+- [x] **REMIND-04:** Documented root cause of missing reminder email: missing `RESEND_API_KEY` in environment causing simulation mode failure, and missing automated cron/pg_cron invocation for `/api/public/hooks/scheduler`.
+- [x] **REMIND-05:** Added unit test suite in `src/lib/email.test.ts` covering reminder idempotency and bill deletion isolation. Verified 17/17 test suites (262/262 tests passing), 0 TypeScript compiler errors, 0 ESLint errors, and production build succeeded.
 
 - [x] All six documentation files exist and are accurate (`PRD.md`, `ARCHITECTURE.md`, `DESIGN.md`, `MEMORY.md`, `RULES.md`, `TRACKER.md`).
 - [x] Required database schema is consolidated in [`001_billbuddy_schema.sql`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/supabase/migrations/001_billbuddy_schema.sql) covering all 22 tables.

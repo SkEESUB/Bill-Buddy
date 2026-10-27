@@ -21,12 +21,12 @@ type AuthStep = "welcome" | "email" | "otp";
 /** Screen 1: Premium 3D wallet with floating finance cards & coins */
 function WalletIllustration() {
   return (
-    <div className="auth-illustration-container relative w-full flex items-center justify-center py-1 sm:py-3 my-0.5 sm:my-1">
+    <div className="auth-illustration-container relative w-full flex items-center justify-center py-0.5 sm:py-2 my-0.5">
       <svg
         viewBox="0 0 380 320"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full max-w-[260px] xs:max-w-[280px] sm:max-w-[320px] max-h-[160px] xs:max-h-[180px] sm:max-h-[210px] h-auto object-contain transition-all duration-200 drop-shadow-[0_12px_24px_rgba(79,70,229,0.18)]"
+        className="w-full max-w-[210px] xs:max-w-[240px] sm:max-w-[300px] max-h-[125px] xs:max-h-[145px] sm:max-h-[195px] h-auto object-contain transition-all duration-200 drop-shadow-[0_12px_24px_rgba(79,70,229,0.18)]"
         aria-hidden="true"
       >
         {/* Ambient glow ring */}
@@ -218,12 +218,12 @@ function WalletIllustration() {
 /** Screen 2: Premium 3D envelope with @ symbol and floating elements */
 function EmailIllustration() {
   return (
-    <div className="auth-illustration-container relative w-full flex items-center justify-center py-1 sm:py-3 my-0.5 sm:my-1">
+    <div className="auth-illustration-container relative w-full flex items-center justify-center py-0.5 sm:py-2 my-0.5">
       <svg
         viewBox="0 0 380 260"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full max-w-[240px] xs:max-w-[260px] sm:max-w-[300px] max-h-[140px] xs:max-h-[155px] sm:max-h-[180px] h-auto object-contain transition-all duration-200 drop-shadow-[0_12px_24px_rgba(79,70,229,0.16)]"
+        className="w-full max-w-[190px] xs:max-w-[220px] sm:max-w-[280px] max-h-[115px] xs:max-h-[135px] sm:max-h-[175px] h-auto object-contain transition-all duration-200 drop-shadow-[0_12px_24px_rgba(79,70,229,0.16)]"
         aria-hidden="true"
       >
         {/* Ambient glow ring */}
@@ -390,12 +390,12 @@ function EmailIllustration() {
 /** Screen 3: Premium 3D shield with lock, envelope, and OTP elements */
 function OTPIllustration() {
   return (
-    <div className="auth-illustration-container relative w-full flex items-center justify-center py-1 sm:py-3 my-0.5 sm:my-1">
+    <div className="auth-illustration-container relative w-full flex items-center justify-center py-0.5 sm:py-2 my-0.5">
       <svg
         viewBox="0 0 380 260"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full max-w-[240px] xs:max-w-[260px] sm:max-w-[300px] max-h-[140px] xs:max-h-[155px] sm:max-h-[180px] h-auto object-contain transition-all duration-200 drop-shadow-[0_12px_24px_rgba(79,70,229,0.16)]"
+        className="w-full max-w-[190px] xs:max-w-[220px] sm:max-w-[270px] max-h-[110px] xs:max-h-[130px] sm:max-h-[170px] h-auto object-contain transition-all duration-200 drop-shadow-[0_12px_24px_rgba(79,70,229,0.16)]"
         aria-hidden="true"
       >
         {/* Ambient glow */}
@@ -558,7 +558,7 @@ function FeatureIcon({
 }) {
   return (
     <div
-      className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-2xl shadow-sm transition-transform"
+      className="flex h-9 w-9 xs:h-10 xs:w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl shadow-sm transition-transform"
       style={{ backgroundColor: bgColor }}
     >
       <div style={{ color: iconColor }}>{icon}</div>
@@ -759,13 +759,13 @@ export function LoginPage() {
   };
 
   return (
-    <div className="auth-root relative flex flex-col items-center justify-start sm:justify-center">
+    <div className="auth-root relative flex flex-col items-center justify-center">
       {/* Ambient background gradients */}
       <div className="auth-bg-glow auth-bg-glow-1" />
       <div className="auth-bg-glow auth-bg-glow-2" />
       <div className="auth-bg-glow auth-bg-glow-3" />
 
-      <div className="relative z-10 flex flex-col items-center w-full max-w-[420px] mx-auto my-auto py-2 sm:py-4 px-3 xs:px-4 sm:px-6">
+      <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-[400px] mx-auto my-auto py-1 xs:py-2 sm:py-4">
         <div className="w-full">
           {/* ============================================================ */}
           {/* SCREEN 1: ONBOARDING / WELCOME                               */}
@@ -773,18 +773,18 @@ export function LoginPage() {
           {step === "welcome" && (
             <div className="animate-fade-in flex flex-col items-center w-full my-auto">
               {/* Top bar: Logo & Skip */}
-              <div className="flex w-full items-center justify-between mb-2 sm:mb-3">
+              <div className="flex w-full items-center justify-between mb-1.5 sm:mb-3">
                 <div className="flex items-center gap-2">
                   <img
                     src="/billbuddy-logo.png"
                     alt="BillBuddy — build by Eesub labs"
-                    className="h-9 sm:h-10 w-auto object-contain"
+                    className="h-8 sm:h-10 w-auto object-contain"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={() => setStep("email")}
-                  className="flex items-center gap-0.5 text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 bg-slate-100/80 hover:bg-slate-200/80 px-3 py-1.5 rounded-full transition-colors cursor-pointer"
+                  className="flex items-center gap-0.5 text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 bg-slate-100/80 hover:bg-slate-200/80 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full transition-colors cursor-pointer"
                 >
                   Skip <ChevronRight className="h-3.5 w-3.5" />
                 </button>
@@ -794,27 +794,27 @@ export function LoginPage() {
               <WalletIllustration />
 
               {/* Heading */}
-              <h1 className="mt-2 sm:mt-3 text-center text-[23px] xs:text-[26px] sm:text-[30px] font-extrabold leading-[1.18] tracking-tight text-slate-900">
+              <h1 className="mt-1.5 sm:mt-2.5 text-center text-[21px] xs:text-[24px] sm:text-[28px] font-extrabold leading-[1.16] tracking-tight text-slate-900">
                 Take Control of
                 <br />
                 <span className="auth-gradient-text">Your Money</span>
               </h1>
 
               {/* Subtext */}
-              <p className="mt-1.5 sm:mt-2 text-center text-xs xs:text-sm leading-relaxed text-slate-600 max-w-[310px]">
+              <p className="mt-1 sm:mt-1.5 text-center text-xs xs:text-sm leading-relaxed text-slate-600 max-w-[300px]">
                 Track bills, manage budgets and achieve your financial goals effortlessly.
               </p>
 
               {/* Feature row */}
-              <div className="mt-3 sm:mt-4 flex w-full items-start justify-center gap-2 xs:gap-3.5 sm:gap-6 px-1">
+              <div className="mt-2.5 sm:mt-3.5 flex w-full items-start justify-center gap-2 xs:gap-3.5 sm:gap-6 px-1">
                 <div className="flex flex-col items-center text-center flex-1 max-w-[96px]">
                   <FeatureIcon
                     bgColor="#EDE9FE"
                     iconColor="#7C3AED"
                     icon={
                       <svg
-                        width="20"
-                        height="20"
+                        width="18"
+                        height="18"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -826,7 +826,7 @@ export function LoginPage() {
                       </svg>
                     }
                   />
-                  <span className="mt-1.5 text-[11px] xs:text-xs font-bold text-slate-800">
+                  <span className="mt-1 text-[11px] xs:text-xs font-bold text-slate-800">
                     Track Bills
                   </span>
                   <span className="text-[9.5px] xs:text-[10px] text-slate-500 leading-tight mt-0.5">
@@ -839,8 +839,8 @@ export function LoginPage() {
                     iconColor="#EF4444"
                     icon={
                       <svg
-                        width="20"
-                        height="20"
+                        width="18"
+                        height="18"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -851,7 +851,7 @@ export function LoginPage() {
                       </svg>
                     }
                   />
-                  <span className="mt-1.5 text-[11px] xs:text-xs font-bold text-slate-800">
+                  <span className="mt-1 text-[11px] xs:text-xs font-bold text-slate-800">
                     Manage Budgets
                   </span>
                   <span className="text-[9.5px] xs:text-[10px] text-slate-500 leading-tight mt-0.5">
@@ -864,8 +864,8 @@ export function LoginPage() {
                     iconColor="#16A34A"
                     icon={
                       <svg
-                        width="20"
-                        height="20"
+                        width="18"
+                        height="18"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -877,7 +877,7 @@ export function LoginPage() {
                       </svg>
                     }
                   />
-                  <span className="mt-1.5 text-[11px] xs:text-xs font-bold text-slate-800">
+                  <span className="mt-1 text-[11px] xs:text-xs font-bold text-slate-800">
                     Achieve Goals
                   </span>
                   <span className="text-[9.5px] xs:text-[10px] text-slate-500 leading-tight mt-0.5">
@@ -887,18 +887,18 @@ export function LoginPage() {
               </div>
 
               {/* Page indicators */}
-              <div className="mt-3.5 sm:mt-4 flex items-center gap-1.5" aria-hidden="true">
+              <div className="mt-2.5 sm:mt-3.5 flex items-center gap-1.5" aria-hidden="true">
                 <span className="h-1.5 w-6 sm:w-7 rounded-full bg-indigo-600 shadow-sm" />
                 <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
                 <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
               </div>
 
               {/* Actions */}
-              <div className="mt-4 sm:mt-6 w-full space-y-2.5 sm:space-y-3">
+              <div className="mt-3.5 sm:mt-5 w-full space-y-2 sm:space-y-2.5">
                 <button
                   type="button"
                   onClick={() => setStep("email")}
-                  className="auth-btn-gradient w-full min-h-[52px] sm:min-h-[56px] py-3 text-sm sm:text-base cursor-pointer"
+                  className="auth-btn-gradient w-full min-h-[48px] sm:min-h-[54px] py-2.5 sm:py-3 text-sm sm:text-base cursor-pointer"
                 >
                   <span>Get Started</span>
                   <ArrowRight className="h-4.5 w-4.5" />
@@ -924,14 +924,14 @@ export function LoginPage() {
           {step === "email" && (
             <div className="animate-fade-in flex flex-col items-center w-full my-auto">
               {/* Top bar */}
-              <div className="flex w-full items-center justify-between mb-2 sm:mb-3">
+              <div className="flex w-full items-center justify-between mb-1.5 sm:mb-2.5">
                 <button
                   type="button"
                   onClick={() => setStep("welcome")}
-                  className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm text-slate-700 hover:text-slate-900 hover:border-slate-300 transition-all cursor-pointer active:scale-95"
+                  className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm text-slate-700 hover:text-slate-900 hover:border-slate-300 transition-all cursor-pointer active:scale-95"
                   aria-label="Back to welcome"
                 >
-                  <ArrowLeft className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
+                  <ArrowLeft className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
                 </button>
                 <div className="flex flex-col items-end gap-1">
                   <span className="text-[11px] sm:text-xs font-semibold text-slate-500">
@@ -947,26 +947,26 @@ export function LoginPage() {
               <EmailIllustration />
 
               {/* Heading */}
-              <h2 className="mt-2 sm:mt-3 text-center text-2xl xs:text-[26px] sm:text-3xl font-extrabold leading-[1.2] tracking-tight text-slate-900">
+              <h2 className="mt-1.5 sm:mt-2.5 text-center text-xl xs:text-2xl sm:text-3xl font-extrabold leading-[1.2] tracking-tight text-slate-900">
                 Enter Your <span className="auth-gradient-text">Email</span>
               </h2>
 
               {/* Subtext */}
-              <p className="mt-1.5 sm:mt-2 text-center text-xs xs:text-sm leading-relaxed text-slate-600 max-w-[300px]">
+              <p className="mt-1 sm:mt-1.5 text-center text-xs xs:text-sm leading-relaxed text-slate-600 max-w-[300px]">
                 We'll send a 6-digit verification code to your inbox to sign you in securely.
               </p>
 
               {/* Form */}
-              <form onSubmit={sendOTP} className="mt-4 sm:mt-5 w-full space-y-3 sm:space-y-4">
+              <form onSubmit={sendOTP} className="mt-3 sm:mt-4 w-full space-y-2.5 sm:space-y-3.5">
                 <div>
                   <label
                     htmlFor="email"
-                    className="mb-1.5 block text-xs sm:text-sm font-bold text-slate-800"
+                    className="mb-1 block text-xs sm:text-sm font-bold text-slate-800"
                   >
                     Email Address
                   </label>
                   <div className="relative">
-                    <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                    <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-slate-400" />
                     <input
                       id="email"
                       type="email"
@@ -975,14 +975,14 @@ export function LoginPage() {
                       onFocus={handleInputFocus}
                       placeholder="name@example.com"
                       disabled={loading}
-                      className="auth-input pl-11 text-sm sm:text-base min-h-[50px] sm:min-h-[54px] rounded-2xl"
+                      className="auth-input pl-10 text-sm sm:text-base min-h-[46px] sm:min-h-[52px] rounded-xl sm:rounded-2xl"
                       autoFocus
                     />
                   </div>
                 </div>
 
                 {error && (
-                  <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3 text-xs sm:text-sm text-rose-700 flex items-start gap-2">
+                  <div className="rounded-xl sm:rounded-2xl bg-rose-50 border border-rose-200 p-2.5 sm:p-3 text-xs sm:text-sm text-rose-700 flex items-start gap-2">
                     <span className="font-bold shrink-0">!</span>
                     <span>{error}</span>
                   </div>
@@ -991,24 +991,24 @@ export function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading || !isValidEmail(email)}
-                  className="auth-btn-gradient w-full min-h-[52px] sm:min-h-[56px] py-3 text-base font-bold cursor-pointer"
+                  className="auth-btn-gradient w-full min-h-[48px] sm:min-h-[54px] py-2.5 sm:py-3 text-sm sm:text-base font-bold cursor-pointer"
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <Loader2 className="h-4.5 w-4.5 animate-spin" />
                       <span>Sending Code...</span>
                     </>
                   ) : (
                     <>
                       <span>Continue</span>
-                      <ArrowRight className="h-5 w-5" />
+                      <ArrowRight className="h-4.5 w-4.5" />
                     </>
                   )}
                 </button>
               </form>
 
               {/* Passwordless note */}
-              <p className="mt-4 sm:mt-6 flex items-center justify-center gap-1.5 text-xs sm:text-sm text-slate-500 font-medium">
+              <p className="mt-3 sm:mt-4 flex items-center justify-center gap-1.5 text-xs sm:text-sm text-slate-500 font-medium">
                 <ShieldCheck className="h-4 w-4 text-emerald-500" />
                 Passwordless OTP · No password required
               </p>
@@ -1021,14 +1021,14 @@ export function LoginPage() {
           {step === "otp" && (
             <div className="animate-scale-in flex flex-col items-center w-full my-auto">
               {/* Top bar */}
-              <div className="flex w-full items-center justify-between mb-2 sm:mb-3">
+              <div className="flex w-full items-center justify-between mb-1.5 sm:mb-2.5">
                 <button
                   type="button"
                   onClick={() => setStep("email")}
-                  className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm text-slate-700 hover:text-slate-900 hover:border-slate-300 transition-all cursor-pointer active:scale-95"
+                  className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm text-slate-700 hover:text-slate-900 hover:border-slate-300 transition-all cursor-pointer active:scale-95"
                   aria-label="Back to email"
                 >
-                  <ArrowLeft className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
+                  <ArrowLeft className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
                 </button>
                 <div className="flex flex-col items-end gap-1">
                   <span className="text-[11px] sm:text-xs font-semibold text-slate-500">
@@ -1044,15 +1044,15 @@ export function LoginPage() {
               <OTPIllustration />
 
               {/* Heading */}
-              <h2 className="mt-2 sm:mt-3 text-center text-2xl xs:text-[26px] sm:text-3xl font-extrabold leading-[1.2] tracking-tight text-slate-900">
+              <h2 className="mt-1.5 sm:mt-2 text-center text-xl xs:text-2xl sm:text-3xl font-extrabold leading-[1.2] tracking-tight text-slate-900">
                 Enter <span className="auth-gradient-text">OTP</span>
               </h2>
 
               {/* Email display */}
-              <p className="mt-1 text-center text-xs sm:text-sm text-slate-600">
+              <p className="mt-0.5 sm:mt-1 text-center text-xs sm:text-sm text-slate-600">
                 We've sent a 6-digit code to
               </p>
-              <div className="mt-1 inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-xs sm:text-sm font-bold text-indigo-950">
+              <div className="mt-0.5 sm:mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-200/80 text-xs sm:text-sm font-bold text-indigo-950">
                 {email}
               </div>
 
@@ -1062,7 +1062,7 @@ export function LoginPage() {
                   e.preventDefault();
                   void verifyOTP();
                 }}
-                className="mt-4 sm:mt-5 w-full"
+                className="mt-3 sm:mt-4 w-full"
               >
                 <div
                   className="flex justify-center gap-1.5 xs:gap-2 sm:gap-2.5"
@@ -1089,44 +1089,46 @@ export function LoginPage() {
                 </div>
 
                 {/* Status messages */}
-                <div className="mt-3 sm:mt-3.5 space-y-1.5">
-                  {error && (
-                    <div className="rounded-2xl bg-rose-50 border border-rose-200 p-2.5 text-xs sm:text-sm text-rose-700 flex items-start gap-2">
-                      <span className="font-bold shrink-0">!</span>
-                      <span>{error}</span>
-                    </div>
-                  )}
-                  {success && (
-                    <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-2.5 text-xs sm:text-sm text-emerald-700 flex items-center gap-2">
-                      <CheckCircle2 className="h-4.5 w-4.5 shrink-0 text-emerald-600" />
-                      <span>{success}</span>
-                    </div>
-                  )}
-                </div>
+                {(error || success) && (
+                  <div className="mt-2.5 sm:mt-3 space-y-1">
+                    {error && (
+                      <div className="rounded-xl sm:rounded-2xl bg-rose-50 border border-rose-200 p-2 sm:p-2.5 text-xs sm:text-sm text-rose-700 flex items-start gap-2">
+                        <span className="font-bold shrink-0">!</span>
+                        <span>{error}</span>
+                      </div>
+                    )}
+                    {success && (
+                      <div className="rounded-xl sm:rounded-2xl bg-emerald-50 border border-emerald-200 p-2 sm:p-2.5 text-xs sm:text-sm text-emerald-700 flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+                        <span>{success}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Verify button */}
-                <div className="mt-4 sm:mt-5">
+                <div className="mt-3 sm:mt-4">
                   <button
                     type="submit"
                     disabled={loading || otp.join("").length !== 6}
-                    className="auth-btn-gradient w-full min-h-[52px] sm:min-h-[56px] py-3 text-base font-bold cursor-pointer"
+                    className="auth-btn-gradient w-full min-h-[48px] sm:min-h-[54px] py-2.5 sm:py-3 text-sm sm:text-base font-bold cursor-pointer"
                   >
                     {loading ? (
                       <>
-                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <Loader2 className="h-4.5 w-4.5 animate-spin" />
                         <span>Verifying...</span>
                       </>
                     ) : (
                       <>
                         <span>Verify & Continue</span>
-                        <ArrowRight className="h-5 w-5" />
+                        <ArrowRight className="h-4.5 w-4.5" />
                       </>
                     )}
                   </button>
                 </div>
 
                 {/* Resend countdown */}
-                <p className="mt-3 sm:mt-4 text-center text-xs sm:text-sm text-slate-500">
+                <p className="mt-2.5 sm:mt-3.5 text-center text-xs sm:text-sm text-slate-500">
                   {resendCooldown > 0 ? (
                     <>
                       Resend OTP in <span className="font-bold text-indigo-600">{mmss}</span>
@@ -1152,7 +1154,7 @@ export function LoginPage() {
                     setError("");
                     setSuccess("");
                   }}
-                  className="mt-3 sm:mt-4 flex w-full items-center gap-2.5 rounded-2xl bg-white border border-slate-200 px-4 py-3 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer shadow-sm active:scale-98"
+                  className="mt-2.5 sm:mt-3.5 flex w-full items-center gap-2 rounded-xl sm:rounded-2xl bg-white border border-slate-200 px-3.5 py-2.5 sm:py-3 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer shadow-xs active:scale-98"
                 >
                   <Edit3 className="h-4 w-4 text-indigo-600" />
                   <span className="flex-1 text-left font-semibold">Change email address</span>

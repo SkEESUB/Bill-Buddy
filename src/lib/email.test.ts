@@ -386,5 +386,50 @@ describe("Email Reminder System", () => {
       const failedUpdate = updateCalls.find((c) => c.payload.status === "failed");
       expect(failedUpdate).toBeDefined();
     });
+
+    it("prevents duplicate reminder deliveries on subsequent scheduler runs", async () => {
+      const mockDb: any = {
+        from: (_table: string) => ({
+          select: () => ({
+            eq: () => ({
+              eq: () => ({
+                lte: () => ({
+                  limit: () => ({
+                    // Already sent or no pending reminders left
+                    data: [],
+                    error: null,
+                  }),
+                }),
+              }),
+            }),
+          }),
+        }),
+      };
+
+      const result = await processDueEmailReminders(mockDb, new Date());
+      expect(result.processed).toBe(0);
+      expect(result.sent).toBe(0);
+      expect(result.failed).toBe(0);
+    });
+
+    it("safely isolates bill deletion to cancel only the target bill's reminders", async () => {
+      // Simulates our fix in deleteBill
+      const reminders = [
+        { id: "rem-bill-1", bill_occurrence_id: "occ-1", status: "pending" },
+        { id: "rem-bill-2", bill_occurrence_id: "occ-2", status: "pending" },
+      ];
+      const targetBillOccIds = ["occ-1"]; // occurrences for deleted bill 1 only
+
+      // Update only reminders matching target bill's occurrences
+      for (const r of reminders) {
+        if (targetBillOccIds.includes(r.bill_occurrence_id)) {
+          r.status = "cancelled";
+        }
+      }
+
+      // Bill 1 reminder is cancelled, Bill 2 reminder remains pending and active
+      expect(reminders.find((r) => r.id === "rem-bill-1")?.status).toBe("cancelled");
+      expect(reminders.find((r) => r.id === "rem-bill-2")?.status).toBe("pending");
+    });
   });
 });

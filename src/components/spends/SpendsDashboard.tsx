@@ -250,69 +250,79 @@ export function SpendsDashboard({
 
         {/* Daily Expense Cards */}
         {!loading && spendsCount > 0 && (
-          <div className="flex flex-col gap-2">
-            {spends.map((spend) => (
-              <div
-                key={spend.id}
-                className="flex items-center justify-between p-3.5 rounded-2xl glass-card border border-white/90 dark:border-slate-800 shadow-xs hover:shadow-md transition-all group"
-              >
-                {/* Left: Cartoon wallet icon and spend details */}
-                <div className="flex items-center gap-3 min-w-0 pr-2">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100/60 dark:border-indigo-900/60 p-1">
-                    <img
-                      src="/spends-icon.png"
-                      alt=""
-                      className="h-full w-full object-contain"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
-                      {spend.name}
-                    </p>
-                    {spend.notes && (
-                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                        {spend.notes}
+          <div className="flex flex-col gap-2.5">
+            {spends.map((spend, index) => {
+              const floatDelay = `${((index % 5) * 0.35).toFixed(1)}s`;
+              return (
+                <div
+                  key={spend.id}
+                  className="spend-card-premium spend-card-floating flex items-center justify-between p-3.5 sm:p-4 rounded-2xl transition-all group"
+                  style={{ animationDelay: floatDelay }}
+                >
+                  {/* Left: Cartoon wallet icon and spend details */}
+                  <div className="flex items-center gap-3 min-w-0 pr-2">
+                    <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-white/95 dark:bg-slate-800/95 border border-indigo-100/80 dark:border-indigo-900/60 shadow-xs p-1.5 transition-all duration-200 group-hover:scale-105 group-hover:shadow-sm">
+                      <img
+                        src="/spends-icon.png"
+                        alt=""
+                        className="h-full w-full object-contain animate-gentle-float"
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm sm:text-[15px] font-bold text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug">
+                        {spend.name}
                       </p>
+                      {spend.notes && (
+                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5 font-medium">
+                          {spend.notes}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right: Amount and Actions */}
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    <span className="text-sm sm:text-base font-extrabold tabular-nums text-slate-900 dark:text-white">
+                      {formatAmount(Number(spend.amount))}
+                    </span>
+
+                    {(onEditSpend || onDeleteSpend) && (
+                      <div className="flex items-center gap-1 ml-1 opacity-90 sm:opacity-75 sm:group-hover:opacity-100 transition-opacity">
+                        {onEditSpend && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEditSpend(spend);
+                            }}
+                            className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 transition-colors cursor-pointer"
+                            aria-label={`Edit ${spend.name}`}
+                            title="Edit spend"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                        {onDeleteSpend && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDeleteSpend(spend);
+                            }}
+                            className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/60 text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
+                            aria-label={`Delete ${spend.name}`}
+                            title="Delete spend"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
-
-                {/* Right: Amount and Actions */}
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-sm sm:text-base font-extrabold tabular-nums text-slate-900 dark:text-white">
-                    {formatAmount(Number(spend.amount))}
-                  </span>
-
-                  {(onEditSpend || onDeleteSpend) && (
-                    <div className="flex items-center gap-1 ml-1 opacity-90 sm:opacity-75 sm:group-hover:opacity-100 transition-opacity">
-                      {onEditSpend && (
-                        <button
-                          type="button"
-                          onClick={() => onEditSpend(spend)}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 transition-colors cursor-pointer"
-                          aria-label={`Edit ${spend.name}`}
-                          title="Edit spend"
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                        </button>
-                      )}
-                      {onDeleteSpend && (
-                        <button
-                          type="button"
-                          onClick={() => onDeleteSpend(spend)}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/60 text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
-                          aria-label={`Delete ${spend.name}`}
-                          title="Delete spend"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
 
             {/* ==================================================================== */}
             {/* 3.4 DAILY TOTAL FOOTER                                               */}

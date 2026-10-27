@@ -386,7 +386,7 @@ export async function runNotificationSweep(now: Date = new Date()): Promise<Swee
   }
 
   // Process and deliver due email reminders
-  let emailReminders = { processed: 0, sent: 0, failed: 0 };
+  let emailReminders = { processed: 0, sent: 0, failed: 0, skipped: 0 };
   try {
     emailReminders = await processDueEmailReminders(db, now);
   } catch (emailErr) {
@@ -442,8 +442,9 @@ async function syncUserSchedules(db: Db, userId: string, today: string): Promise
 export async function processDueEmailReminders(
   db: Db,
   now: Date = new Date(),
-): Promise<{ processed: number; sent: number; failed: number }> {
+): Promise<{ processed: number; sent: number; failed: number; skipped: number }> {
   const nowIso = now.toISOString();
+  console.log(`[jobs:email_reminders] Starting reminder processing at ${nowIso}`);
 
   const { data: dueReminders, error } = await db
     .from("bill_reminders")
@@ -471,29 +472,42 @@ export async function processDueEmailReminders(
 
   if (error || !dueReminders) {
     if (error) console.error("[jobs:email_reminders] Query error:", error.message);
-    return { processed: 0, sent: 0, failed: 0 };
+    return { processed: 0, sent: 0, failed: 0, skipped: 0 };
   }
+
+  console.log(
+    `[jobs:email_reminders] Found ${dueReminders.length} pending reminder(s) eligible at ${nowIso}`,
+  );
 
   let sent = 0;
   let failed = 0;
+  let skipped = 0;
 
   for (const reminder of dueReminders) {
     try {
       const occ = reminder.occurrence as any;
       if (!occ || occ.status === "paid" || occ.status === "cancelled" || occ.status === "skipped") {
+        console.log(
+          `[jobs:email_reminders] Skipping reminder ${reminder.id}: occurrence status is ${occ?.status ?? "missing"} (cancelled reminder)`,
+        );
         await db
           .from("bill_reminders")
           .update({ status: "cancelled" } as never)
           .eq("id", reminder.id);
+        skipped += 1;
         continue;
       }
 
       const bill = occ.bill;
       if (bill && bill.is_active === false) {
+        console.log(
+          `[jobs:email_reminders] Skipping reminder ${reminder.id}: bill "${bill?.title}" is inactive (cancelled reminder)`,
+        );
         await db
           .from("bill_reminders")
           .update({ status: "cancelled" } as never)
           .eq("id", reminder.id);
+        skipped += 1;
         continue;
       }
 
@@ -508,7 +522,9 @@ export async function processDueEmailReminders(
       }
 
       if (!recipientEmail) {
-        console.warn(`[jobs:email_reminders] No destination email for reminder ${reminder.id}`);
+        console.warn(
+          `[jobs:email_reminders] No destination email for reminder ${reminder.id} ("${bill?.title}")`,
+        );
         await db
           .from("bill_reminders")
           .update({ status: "failed" } as never)
@@ -530,6 +546,9 @@ export async function processDueEmailReminders(
 
       if (result.delivered) {
         sent += 1;
+        console.log(
+          `[jobs:email_reminders] Provider accepted reminder for "${bill?.title}" to ${recipientEmail} (messageId: ${result.messageId ?? "none"})`,
+        );
         await db
           .from("bill_reminders")
           .update({
@@ -547,6 +566,9 @@ export async function processDueEmailReminders(
         });
       } else {
         failed += 1;
+        console.warn(
+          `[jobs:email_reminders] Provider delivery failed for "${bill?.title}" to ${recipientEmail}: ${result.error}`,
+        );
         await db
           .from("bill_reminders")
           .update({
@@ -571,7 +593,10 @@ export async function processDueEmailReminders(
     }
   }
 
-  return { processed: dueReminders.length, sent, failed };
+  console.log(
+    `[jobs:email_reminders] Finished: ${dueReminders.length} processed, ${sent} sent, ${skipped} skipped, ${failed} failed.`,
+  );
+  return { processed: dueReminders.length, sent, failed, skipped };
 }
 
 /* ------------------------------- retention ------------------------------- */

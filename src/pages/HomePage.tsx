@@ -364,52 +364,78 @@ export function HomePage() {
           {/* SECTION B.2 — IN-PAGE REMAINING & COMPLETED CONTROLS                  */}
           {/* ==================================================================== */}
           <div
-            className="grid grid-cols-2 p-1.5 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-[0_2px_10px_-2px_rgba(15,35,75,0.05)]"
+            className="relative flex items-center p-2 rounded-full glass-nav bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-white/80 dark:border-slate-800/80 shadow-[0_16px_40px_-6px_rgba(15,35,75,0.18)] gap-2 select-none"
             role="tablist"
             aria-label="Bill status filter"
           >
+            {/* Active sliding glossy gradient pill (identical to navbar 3D gradient treatment) */}
+            <div
+              className={`absolute top-2 bottom-2 w-[calc(50%-0.75rem)] rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 shadow-[0_10px_25px_-4px_rgba(79,70,229,0.5),0_4px_10px_-2px_rgba(37,99,235,0.35)] border border-white/30 transition-transform duration-250 ease-out pointer-events-none motion-reduce:transition-none ${
+                billsFilter === "remaining"
+                  ? "left-2 translate-x-0"
+                  : "left-2 translate-x-[calc(100%+0.5rem)]"
+              }`}
+              aria-hidden="true"
+            >
+              {/* Glossy top reflection highlight */}
+              <span
+                className="absolute inset-x-3 top-0.5 h-3 rounded-full bg-gradient-to-b from-white/35 to-transparent pointer-events-none"
+                aria-hidden="true"
+              />
+            </div>
+
+            {/* REMAINING TAB */}
             <button
               type="button"
               role="tab"
               aria-selected={billsFilter === "remaining"}
               onClick={() => setBillsFilter("remaining")}
-              className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer min-h-[40px] ${
+              className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-full min-h-[44px] text-xs sm:text-[13px] font-semibold tracking-tight transition-colors duration-200 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/70 focus-visible:ring-offset-2 active:scale-[0.98] ${
                 billsFilter === "remaining"
-                  ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 text-white shadow-md shadow-blue-500/25"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/60"
+                  ? "text-white font-bold"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100/50 dark:hover:bg-slate-800/40"
               }`}
             >
-              <Clock className="w-4 h-4 stroke-[2.2]" />
-              <span>Remaining</span>
+              <Clock
+                className={`w-[18px] h-[18px] stroke-[2.3] shrink-0 transition-transform duration-200 ${
+                  billsFilter === "remaining" ? "scale-105 text-white" : "opacity-80"
+                }`}
+              />
+              <span className="truncate">Remaining</span>
               <span
-                className={`text-[11px] px-1.5 py-0.5 rounded-full font-semibold transition-colors ${
+                className={`text-[11px] px-2 py-0.5 rounded-full font-bold transition-all shrink-0 ${
                   billsFilter === "remaining"
-                    ? "bg-white/25 text-white"
-                    : "bg-slate-200/80 text-slate-700"
+                    ? "bg-white/25 text-white border border-white/30 backdrop-blur-xs shadow-xs"
+                    : "bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300/40 dark:border-slate-700/50"
                 }`}
               >
                 {remainingCount}
               </span>
             </button>
 
+            {/* COMPLETED TAB */}
             <button
               type="button"
               role="tab"
               aria-selected={billsFilter === "completed"}
               onClick={() => setBillsFilter("completed")}
-              className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer min-h-[40px] ${
+              className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-full min-h-[44px] text-xs sm:text-[13px] font-semibold tracking-tight transition-colors duration-200 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/70 focus-visible:ring-offset-2 active:scale-[0.98] ${
                 billsFilter === "completed"
-                  ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 text-white shadow-md shadow-blue-500/25"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/60"
+                  ? "text-white font-bold"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100/50 dark:hover:bg-slate-800/40"
               }`}
             >
-              <CheckCircle2 className="w-4 h-4 stroke-[2.2]" />
-              <span>Completed</span>
+              <CheckCircle2
+                className={`w-[18px] h-[18px] stroke-[2.3] shrink-0 transition-transform duration-200 ${
+                  billsFilter === "completed" ? "scale-105 text-white" : "opacity-80"
+                }`}
+              />
+              <span className="truncate">Completed</span>
               <span
-                className={`text-[11px] px-1.5 py-0.5 rounded-full font-semibold transition-colors ${
+                className={`text-[11px] px-2 py-0.5 rounded-full font-bold transition-all shrink-0 ${
                   billsFilter === "completed"
-                    ? "bg-white/25 text-white"
-                    : "bg-slate-200/80 text-slate-700"
+                    ? "bg-white/25 text-white border border-white/30 backdrop-blur-xs shadow-xs"
+                    : "bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300/40 dark:border-slate-700/50"
                 }`}
               >
                 {completedCount}

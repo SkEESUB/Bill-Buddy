@@ -18,8 +18,8 @@ describe("Phase 1: Three-Action Premium Bottom Navigation (Bills, +, Spends)", (
     expect(navSrc).not.toContain("<span>Add Bill</span>");
   });
 
-  it("renders a receipt/document icon for Bills and cartoon wallet logo for Spends", () => {
-    expect(navSrc).toContain("ReceiptText");
+  it("renders the BillBuddy mascot logo for Bills and cartoon wallet logo for Spends", () => {
+    expect(navSrc).toContain("BillBuddyLogo");
     expect(navSrc).toContain("/spends-icon.png");
   });
 
@@ -38,19 +38,30 @@ describe("Phase 1: Three-Action Premium Bottom Navigation (Bills, +, Spends)", (
     expect(stylesSrc).toContain(".nav-pill-btn.active");
   });
 
-  it("relocates Remaining and Completed controls inside the Bills page content", () => {
+  it("relocates Remaining and Completed controls inside the Bills page content with navbar matching glossy pill design", () => {
     // Remaining and Completed controls are within HomePage Bills panel
     expect(homeSrc).toContain('role="tab"');
     expect(homeSrc).toContain('billsFilter === "remaining"');
     expect(homeSrc).toContain('billsFilter === "completed"');
+    // Outer container matches bottom nav styling
+    expect(homeSrc).toContain("rounded-full glass-nav bg-white/90");
+    // Active option uses smooth blue-to-purple gradient with glossy 3D sheen matching navbar
+    expect(homeSrc).toContain("bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600");
+    expect(homeSrc).toContain("bg-gradient-to-b from-white/35 to-transparent");
     // Top-level segmented control between bills/spends removed
     expect(homeSrc).not.toContain('id="bills-tab"');
     expect(homeSrc).not.toContain('id="spends-tab"');
   });
 
-  it("opens AddChoiceSheet when central plus button is clicked with independent options", () => {
+  it("opens AddChoiceSheet when central plus button is clicked with independent options and mascot logos", () => {
+    const choiceSheetSrc = readFileSync(
+      join(process.cwd(), "src/components/AddChoiceSheet.tsx"),
+      "utf8",
+    );
     expect(homeSrc).toContain("onOpenAddChoice={() => setChoiceSheetOpen(true)}");
     expect(homeSrc).toContain("onSelectAddBill");
     expect(homeSrc).toContain("onSelectAddSpend");
+    expect(choiceSheetSrc).toContain("BillBuddyLogo");
+    expect(choiceSheetSrc).toContain("/spends-icon.png");
   });
 });

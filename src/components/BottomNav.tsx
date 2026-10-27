@@ -1,4 +1,5 @@
-import { Plus, ReceiptText } from "lucide-react";
+import { Plus } from "lucide-react";
+import { BillBuddyLogo } from "@/components/BillBuddyLogo";
 
 export type BottomNavSection = "bills" | "spends";
 
@@ -47,13 +48,15 @@ export function BottomNav({
           aria-label="Bills Section"
           aria-pressed={isBills}
         >
-          <ReceiptText
-            className={`w-[18px] h-[18px] transition-transform duration-200 stroke-[2.3] ${
-              isBills
-                ? "scale-110 text-indigo-600 dark:text-indigo-400"
-                : "text-slate-500 dark:text-slate-400"
-            }`}
-          />
+          <div className="w-[19px] h-[19px] shrink-0 flex items-center justify-center">
+            <BillBuddyLogo
+              size={19}
+              alt=""
+              className={`w-full h-full object-contain transition-transform duration-200 ${
+                isBills ? "scale-110" : "opacity-80"
+              }`}
+            />
+          </div>
           <span className="truncate">Bills</span>
         </button>
 

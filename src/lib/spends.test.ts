@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { spendInputSchema, spendUpdateSchema } from "./spends.functions";
 import { addDays, toDay } from "./format";
 import type { Spend } from "@/types/database";
@@ -229,5 +231,37 @@ describe("Spends Feature — Business Logic & Validation", () => {
     const returnToday = mockStore.filter((s) => s.spend_date === selectedDate1);
     expect(returnToday.length).toBe(2);
     expect(returnToday.reduce((sum, s) => sum + s.amount, 0)).toBe(130);
+  });
+
+  describe("Phase B: Premium Floating 3D Spends Cards", () => {
+    const dashboardSrc = readFileSync(
+      join(process.cwd(), "src/components/spends/SpendsDashboard.tsx"),
+      "utf8",
+    );
+    const stylesSrc = readFileSync(join(process.cwd(), "src/styles.css"), "utf8");
+
+    it("attaches spend-card-premium and spend-card-floating to spend cards", () => {
+      expect(dashboardSrc).toContain("spend-card-premium");
+      expect(dashboardSrc).toContain("spend-card-floating");
+      expect(dashboardSrc).toContain("style={{ animationDelay: floatDelay }}");
+    });
+
+    it("defines floating 3D keyframes, ambient glow, and elevated shadow in CSS", () => {
+      expect(stylesSrc).toContain("@keyframes spend-card-float");
+      expect(stylesSrc).toContain(".spend-card-premium");
+      expect(stylesSrc).toContain(".spend-card-premium.spend-card-floating");
+      expect(stylesSrc).toContain(".spend-card-premium::before");
+      expect(stylesSrc).toContain(".spend-card-premium:active");
+    });
+
+    it("stops propagation on edit and delete buttons to prevent accidental triggers", () => {
+      expect(dashboardSrc).toContain("e.stopPropagation()");
+    });
+
+    it("strictly honors prefers-reduced-motion for spend cards", () => {
+      expect(stylesSrc).toContain(".spend-card-premium");
+      expect(stylesSrc).toContain(".spend-card-premium.spend-card-floating");
+      expect(stylesSrc).toContain(".reduce-motion .spend-card-premium");
+    });
   });
 });

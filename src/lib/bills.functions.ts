@@ -213,8 +213,21 @@ export const deleteBill = createServerFn({ method: "POST" })
     const { audit, privilegedDb } = await import("./bills.server");
     const db = await privilegedDb(supabase as any);
 
-    // Cancel pending reminders for this bill
-    await db.from("bill_reminders").delete().eq("user_id", userId).eq("status", "pending");
+    // Cancel pending reminders for occurrences belonging ONLY to this bill
+    const { data: billOccurrences } = await db
+      .from("bill_occurrences")
+      .select("id")
+      .eq("bill_id", data.id)
+      .eq("user_id", userId);
+    const occIds = (billOccurrences ?? []).map((o: { id: string }) => o.id);
+    if (occIds.length > 0) {
+      await db
+        .from("bill_reminders")
+        .update({ status: "cancelled" } as never)
+        .eq("user_id", userId)
+        .in("bill_occurrence_id", occIds)
+        .eq("status", "pending");
+    }
 
     // Remove pending / future occurrences so they no longer appear in remaining totals
     await db
