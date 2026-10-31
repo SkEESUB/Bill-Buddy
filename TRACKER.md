@@ -391,6 +391,30 @@
   - Safely deleted all disposable test records (100% clean).
   - Production Supabase reference (`xsytaixmyeypoiscfbim`) confirmed 100% untouched.
 
+## 22. Automatic Spend Tracking — Phase 3.4.1: Save-Failure Fix Deployment to billbuddy-staging
+
+- [x] **DEPLOY-REVIEW-01 (Pre-Deployment Code Review):** Confirmed all local changes match the investigation findings:
+  - `src/start.ts`: Server function RPCs (`/_serverFn/`, `x-tss-server-fn`) bypass HTML error page rendering, allowing structured JSON error serialization to the client.
+  - `src/lib/errors.ts`: Database check constraint errors (`violates check constraint`) and server errors classified with actionable messages; token/secret/PII redaction via `safeSanitizeMessage()`; structured logging via `safeLogError()`.
+  - `src/lib/bills.functions.ts` & `src/lib/spends.functions.ts`: Safe error logging and unmasked errors.
+  - `src/integrations/supabase/client.ts`: Dynamic environment resolution and strict staging isolation guards.
+- [x] **DEPLOY-BRIDGE-02 (Build-Time Staging URL Bridge):** Enhanced `vite.config.ts` to automatically detect staging environments (`APP_ENV=staging`, `mode=staging`, or branch `staging`) and define `import.meta.env.VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, and `VITE_SUPABASE_PROJECT_ID` pointing to staging Supabase `eiwybyhvnhagugjjbkkl`, preventing production fallbacks in client bundles.
+- [x] **DEPLOY-SUITE-03 (Automated Verification):**
+  - Vitest: 29/29 test suites passed, 355/355 unit tests passed.
+  - TypeScript: `npx tsc --noEmit` passed with 0 errors.
+  - ESLint: `npx eslint ... --quiet` passed with 0 errors.
+  - Production staging build (`npm run build:staging`) verified inlining `eiwybyhvnhagugjjbkkl`.
+- [x] **DEPLOY-GIT-04 (Isolated Staging Branch Push):**
+  - Created dedicated isolated branch `staging` locally.
+  - Committed all Phase 3 features and save-failure fixes (Commit `6dac2dd`).
+  - Pushed to `origin/staging` (`https://github.com/SkEESUB/Bill-Buddy.git`).
+  - Branch `main` remained 100% untouched.
+  - Production Supabase `xsytaixmyeypoiscfbim` and production Vercel project remained 100% untouched.
+- [x] **DEPLOY-STATUS-05 (Vercel billbuddy-staging Status):**
+  - GitHub integration triggered Vercel deployment for branch `staging`: `https://billbuddy-staging-git-staging-sk-eesubs-projects.vercel.app` (Deployment `dpl_2raC7cWU97EER6RTHJCPy13PWtqc`).
+  - The project `billbuddy-staging` currently tracks `main` as its Production Branch in Vercel settings, meaning branch `staging` deployed as a preview deployment.
+  - Next step for user: In Vercel Project Settings for `billbuddy-staging` -> Git, change the Production Branch from `main` to `staging` (or click Promote to Production on deployment `AbhELUw6548SwKEo68Bd5mTAyLVi`) to map `https://billbuddy-staging.vercel.app` to the new build.
+
 - [x] All six documentation files exist and are accurate (`PRD.md`, `ARCHITECTURE.md`, `DESIGN.md`, `MEMORY.md`, `RULES.md`, `TRACKER.md`).
 - [x] Required database schema is consolidated in [`001_billbuddy_schema.sql`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/supabase/migrations/001_billbuddy_schema.sql) covering all 22 tables.
 - [x] Migration state and ordering are documented.
@@ -399,4 +423,5 @@
 - [x] Production build succeeds (`vite build` / Nitro output generated cleanly with zero deprecation warnings).
 - [ ] Live database schema executed in Supabase project `xsytaixmyeypoiscfbim`.
 - [ ] End-to-end live browser authentication and data persistence verified.
+
 
