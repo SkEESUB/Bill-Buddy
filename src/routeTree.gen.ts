@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ApiPublicDevicesPairRouteImport } from './routes/api/public/devices/pair'
 import { Route as ApiPublicHooksSchedulerRouteImport } from './routes/api/public/hooks/scheduler'
+import { Route as ApiPublicNotificationsIngestRouteImport } from './routes/api/public/notifications/ingest'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -24,11 +26,22 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicDevicesPairRoute = ApiPublicDevicesPairRouteImport.update({
+  id: '/api/public/devices/pair',
+  path: '/api/public/devices/pair',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksSchedulerRoute = ApiPublicHooksSchedulerRouteImport.update({
   id: '/api/public/hooks/scheduler',
   path: '/api/public/hooks/scheduler',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicNotificationsIngestRoute =
+  ApiPublicNotificationsIngestRouteImport.update({
+    id: '/api/public/notifications/ingest',
+    path: '/api/public/notifications/ingest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -39,20 +52,26 @@ const ApiPublicPaymentsWebhookRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/api/public/devices/pair': typeof ApiPublicDevicesPairRoute
   '/api/public/hooks/scheduler': typeof ApiPublicHooksSchedulerRoute
+  '/api/public/notifications/ingest': typeof ApiPublicNotificationsIngestRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/api/public/devices/pair': typeof ApiPublicDevicesPairRoute
   '/api/public/hooks/scheduler': typeof ApiPublicHooksSchedulerRoute
+  '/api/public/notifications/ingest': typeof ApiPublicNotificationsIngestRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/api/public/devices/pair': typeof ApiPublicDevicesPairRoute
   '/api/public/hooks/scheduler': typeof ApiPublicHooksSchedulerRoute
+  '/api/public/notifications/ingest': typeof ApiPublicNotificationsIngestRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -60,26 +79,34 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/api/public/devices/pair'
     | '/api/public/hooks/scheduler'
+    | '/api/public/notifications/ingest'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
+    | '/api/public/devices/pair'
     | '/api/public/hooks/scheduler'
+    | '/api/public/notifications/ingest'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
     | '/'
     | '/login'
+    | '/api/public/devices/pair'
     | '/api/public/hooks/scheduler'
+    | '/api/public/notifications/ingest'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
+  ApiPublicDevicesPairRoute: typeof ApiPublicDevicesPairRoute
   ApiPublicHooksSchedulerRoute: typeof ApiPublicHooksSchedulerRoute
+  ApiPublicNotificationsIngestRoute: typeof ApiPublicNotificationsIngestRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -99,11 +126,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/devices/pair': {
+      id: '/api/public/devices/pair'
+      path: '/api/public/devices/pair'
+      fullPath: '/api/public/devices/pair'
+      preLoaderRoute: typeof ApiPublicDevicesPairRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/scheduler': {
       id: '/api/public/hooks/scheduler'
       path: '/api/public/hooks/scheduler'
       fullPath: '/api/public/hooks/scheduler'
       preLoaderRoute: typeof ApiPublicHooksSchedulerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/notifications/ingest': {
+      id: '/api/public/notifications/ingest'
+      path: '/api/public/notifications/ingest'
+      fullPath: '/api/public/notifications/ingest'
+      preLoaderRoute: typeof ApiPublicNotificationsIngestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/payments/webhook': {
@@ -119,7 +160,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  ApiPublicDevicesPairRoute: ApiPublicDevicesPairRoute,
   ApiPublicHooksSchedulerRoute: ApiPublicHooksSchedulerRoute,
+  ApiPublicNotificationsIngestRoute: ApiPublicNotificationsIngestRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport

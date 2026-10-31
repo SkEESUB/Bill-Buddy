@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS public.spends (
 ALTER TABLE public.spends ENABLE ROW LEVEL SECURITY;
 
 -- Owner-only RLS Policy
+DROP POLICY IF EXISTS "Users can only manage their own spends" ON public.spends;
 CREATE POLICY "Users can only manage their own spends"
   ON public.spends
   FOR ALL

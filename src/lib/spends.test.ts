@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { spendInputSchema, spendUpdateSchema } from "./spends.functions";
+import {
+  computeSpendDedupeHash,
+  SPEND_SOURCES,
+  spendInputSchema,
+  spendSourceSchema,
+  spendUpdateSchema,
+} from "./spends.functions";
 import { addDays, toDay } from "./format";
 import type { Spend } from "@/types/database";
 
@@ -262,6 +268,226 @@ describe("Spends Feature — Business Logic & Validation", () => {
       expect(stylesSrc).toContain(".spend-card-premium");
       expect(stylesSrc).toContain(".spend-card-premium.spend-card-floating");
       expect(stylesSrc).toContain(".reduce-motion .spend-card-premium");
+    });
+  });
+
+  describe("Phase 1: Spend Source Tracking & Deduplication", () => {
+    const modalSrc = readFileSync(
+      join(process.cwd(), "src/components/spends/SpendFormModal.tsx"),
+      "utf8",
+    );
+    const dashboardSrc = readFileSync(
+      join(process.cwd(), "src/components/spends/SpendsDashboard.tsx"),
+      "utf8",
+    );
+    const migrationSrc = readFileSync(
+      join(process.cwd(), "supabase/migrations/20261030000000_add_spend_source_and_dedupe.sql"),
+      "utf8",
+    );
+
+    it("supports all defined spend sources in schema and runtime", () => {
+      expect(SPEND_SOURCES).toEqual([
+        "cash",
+        "bank",
+        "statement",
+        "email",
+        "notification",
+        "card",
+        "upi",
+        "other",
+      ]);
+
+      for (const src of SPEND_SOURCES) {
+        const parsed = spendSourceSchema.safeParse(src);
+        expect(parsed.success).toBe(true);
+      }
+
+      // Rejects unsupported sources
+      const invalid = spendSourceSchema.safeParse("crypto_transfer");
+      expect(invalid.success).toBe(false);
+    });
+
+    it("defaults new spends to 'cash' source when not specified", () => {
+      const parsed = spendInputSchema.safeParse({
+        name: "Chai and Biscuit",
+        amount: 30,
+        spend_date: today,
+      });
+      expect(parsed.success).toBe(true);
+      if (parsed.success) {
+        expect(parsed.data.source).toBe("cash");
+      }
+    });
+
+    it("persists explicit cash and electronic sources accurately", () => {
+      const cashSpend = spendInputSchema.safeParse({
+        name: "Auto rickshaw",
+        amount: 60,
+        spend_date: today,
+        source: "cash",
+      });
+      expect(cashSpend.success).toBe(true);
+      if (cashSpend.success) expect(cashSpend.data.source).toBe("cash");
+
+      const bankSpend = spendInputSchema.safeParse({
+        name: "Swiggy dinner",
+        amount: 340,
+        spend_date: today,
+        source: "bank",
+      });
+      expect(bankSpend.success).toBe(true);
+      if (bankSpend.success) expect(bankSpend.data.source).toBe("bank");
+
+      const statementSpend = spendInputSchema.safeParse({
+        name: "Electricity Bill (Auto)",
+        amount: 1450,
+        spend_date: yesterday,
+        source: "statement",
+      });
+      expect(statementSpend.success).toBe(true);
+      if (statementSpend.success) expect(statementSpend.data.source).toBe("statement");
+
+      const emailSpend = spendInputSchema.safeParse({
+        name: "Uber Ride",
+        amount: 220,
+        spend_date: today,
+        source: "email",
+      });
+      expect(emailSpend.success).toBe(true);
+      if (emailSpend.success) expect(emailSpend.data.source).toBe("email");
+
+      const notificationSpend = spendInputSchema.safeParse({
+        name: "Google Pay Merchant",
+        amount: 150,
+        spend_date: today,
+        source: "notification",
+      });
+      expect(notificationSpend.success).toBe(true);
+      if (notificationSpend.success) expect(notificationSpend.data.source).toBe("notification");
+    });
+
+    it("preserves source on updates when source is omitted", () => {
+      const updateWithoutSource = spendUpdateSchema.safeParse({
+        id: "spend-001",
+        name: "Revised Dinner",
+        amount: 400,
+        spend_date: today,
+      });
+      expect(updateWithoutSource.success).toBe(true);
+      if (updateWithoutSource.success) {
+        expect(updateWithoutSource.data.source).toBeUndefined();
+      }
+
+      const updateWithNewSource = spendUpdateSchema.safeParse({
+        id: "spend-001",
+        name: "Revised Dinner",
+        amount: 400,
+        spend_date: today,
+        source: "card",
+      });
+      expect(updateWithNewSource.success).toBe(true);
+      if (updateWithNewSource.success) {
+        expect(updateWithNewSource.data.source).toBe("card");
+      }
+    });
+
+    it("computes deterministic deduplication hash", () => {
+      const hash1 = computeSpendDedupeHash("user-1", "2026-10-30", 250, "Petrol");
+      const hash2 = computeSpendDedupeHash("user-1", "2026-10-30", 250.0, "  petrol  ");
+      const diffUser = computeSpendDedupeHash("user-2", "2026-10-30", 250, "Petrol");
+      const diffAmount = computeSpendDedupeHash("user-1", "2026-10-30", 251, "Petrol");
+      const diffDate = computeSpendDedupeHash("user-1", "2026-10-29", 250, "Petrol");
+
+      expect(hash1).toBe(hash2);
+      expect(hash1.startsWith("dh_")).toBe(true);
+      expect(hash1).not.toBe(diffUser);
+      expect(hash1).not.toBe(diffAmount);
+      expect(hash1).not.toBe(diffDate);
+    });
+
+    it("verifies daily totals correctly aggregate spends regardless of source", () => {
+      const multiSourceSpends: Spend[] = [
+        {
+          id: "m1",
+          user_id: "u1",
+          name: "Tea (Cash)",
+          amount: 20,
+          spend_date: today,
+          source: "cash",
+          created_at: new Date().toISOString(),
+        },
+        {
+          id: "m2",
+          user_id: "u1",
+          name: "Groceries (Bank)",
+          amount: 500,
+          spend_date: today,
+          source: "bank",
+          created_at: new Date().toISOString(),
+        },
+        {
+          id: "m3",
+          user_id: "u1",
+          name: "Fuel (Card)",
+          amount: 300,
+          spend_date: today,
+          source: "card",
+          created_at: new Date().toISOString(),
+        },
+        {
+          id: "m4",
+          user_id: "u1",
+          name: "Ride (Notification)",
+          amount: 180,
+          spend_date: today,
+          source: "notification",
+          created_at: new Date().toISOString(),
+        },
+        {
+          id: "m5",
+          user_id: "u1",
+          name: "Legacy Spend (No source)",
+          amount: 100,
+          spend_date: today,
+          created_at: new Date().toISOString(),
+        },
+      ];
+
+      const dailyTotal = multiSourceSpends.reduce((sum, s) => sum + s.amount, 0);
+      expect(dailyTotal).toBe(1100);
+      expect(multiSourceSpends.length).toBe(5);
+    });
+
+    it("verifies SpendFormModal contains source options and no time picker", () => {
+      expect(modalSrc).toContain("Payment Source");
+      expect(modalSrc).toContain('"cash"');
+      expect(modalSrc).toContain('"bank"');
+      expect(modalSrc).toContain('"card"');
+      expect(modalSrc).toContain('"other"');
+      // Confirms strictly no time input or time picker
+      expect(modalSrc).not.toContain('type="time"');
+      expect(modalSrc).not.toContain('type="datetime-local"');
+    });
+
+    it("verifies SpendsDashboard renders source indicator badges", () => {
+      expect(dashboardSrc).toContain("SpendSourceBadge");
+      expect(dashboardSrc).toContain("Cash");
+      expect(dashboardSrc).toContain("Bank");
+      expect(dashboardSrc).toContain("Card");
+      expect(dashboardSrc).toContain("Statement");
+      expect(dashboardSrc).toContain("Email");
+      expect(dashboardSrc).toContain("Notification");
+    });
+
+    it("verifies migration SQL is non-destructive, idempotent, and indexed", () => {
+      expect(migrationSrc).toContain("ADD COLUMN source text NOT NULL DEFAULT 'other'");
+      expect(migrationSrc).toContain("spends_source_check");
+      expect(migrationSrc).toContain("ADD COLUMN dedupe_hash text");
+      expect(migrationSrc).toContain("idx_spends_user_source");
+      expect(migrationSrc).toContain("idx_spends_user_dedupe");
+      expect(migrationSrc).not.toContain("DROP TABLE");
+      expect(migrationSrc).not.toContain("DELETE FROM");
+      expect(migrationSrc).not.toContain("TRUNCATE");
     });
   });
 });

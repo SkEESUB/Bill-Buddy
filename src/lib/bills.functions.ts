@@ -7,6 +7,7 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireActiveAccount } from "@/lib/auth/active-account";
+import { safeLogError } from "@/lib/errors";
 import { z } from "zod";
 
 const dayString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected a YYYY-MM-DD date");
@@ -92,7 +93,7 @@ export const createBill = createServerFn({ method: "POST" })
     }
 
     if (error || !bill) {
-      console.error("[createBill] Supabase INSERT error:", error);
+      safeLogError("createBill", error);
       throw new Error(
         `Failed to create bill: ${error?.message || "Unknown error"} (${error?.code || "UNKNOWN"})`,
       );

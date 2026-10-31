@@ -17,6 +17,7 @@ export type ErrorKind =
   | "not_found"
   | "rate_limit"
   | "server_error"
+  | "db_constraint"
   | "already_settled"
   | "not_settleable"
   | "unauthorized"
@@ -214,6 +215,41 @@ export function classifyError(error: unknown): ClassifiedError {
     };
   }
 
+  // ── Database constraint violation ─────────────────────────
+  if (
+    lower.includes("violates check constraint") ||
+    lower.includes("check constraint") ||
+    lower.includes("23514")
+  ) {
+    const safeMsg = safeSanitizeMessage(raw);
+    return {
+      kind: "db_constraint",
+      message: safeMsg.length < 160 ? safeMsg : "Invalid data violates a database rule.",
+      action: "Please verify the details and try again.",
+      technical: safeMsg,
+      retryable: false,
+    };
+  }
+
+  // ── Database & save operational errors ───────────────────────
+  if (
+    lower.includes("failed to create") ||
+    lower.includes("failed to update") ||
+    lower.includes("failed to delete") ||
+    lower.includes("staging guard") ||
+    lower.includes("config_error") ||
+    lower.includes("schedule failed")
+  ) {
+    const safeMsg = safeSanitizeMessage(raw);
+    return {
+      kind: "server_error",
+      message: safeMsg.length < 160 ? safeMsg : "Unable to save record.",
+      action: "Please try again.",
+      technical: safeMsg,
+      retryable: true,
+    };
+  }
+
   // ── Validation ─────────────────────────────────────────────
   if (
     lower.includes("validation") ||
@@ -230,13 +266,47 @@ export function classifyError(error: unknown): ClassifiedError {
   }
 
   // ── Fallback ───────────────────────────────────────────────
+  const safeFallback = safeSanitizeMessage(raw);
+  const isHelpful =
+    safeFallback.length > 0 && safeFallback.length < 120 && !safeFallback.includes("{");
   return {
     kind: "unknown",
-    message: "Something went wrong.",
+    message: isHelpful ? safeFallback : "Something went wrong.",
     action: "Please try again.",
-    technical: raw,
+    technical: safeFallback,
     retryable: true,
   };
+}
+
+/** Sanitize an error string to eliminate JWTs, secrets, API keys and email addresses */
+export function safeSanitizeMessage(raw: string): string {
+  if (!raw) return "";
+  let sanitized = String(raw);
+  // Redact JWT tokens (header.payload.signature)
+  sanitized = sanitized.replace(
+    /ey[A-Za-z0-9_-]{10,}\.ey[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g,
+    "[REDACTED_JWT]",
+  );
+  // Redact Bearer tokens
+  sanitized = sanitized.replace(/Bearer\s+[A-Za-z0-9._-]+/gi, "Bearer [REDACTED]");
+  // Redact Supabase keys
+  sanitized = sanitized.replace(/sb_(publishable|secret)_[A-Za-z0-9_-]+/g, "[REDACTED_KEY]");
+  // Redact email addresses
+  sanitized = sanitized.replace(
+    /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
+    "[REDACTED_EMAIL]",
+  );
+  return sanitized;
+}
+
+/** Safe structured error logging that prevents secret and PII leakage */
+export function safeLogError(contextName: string, error: unknown): void {
+  const classified = classifyError(error);
+  console.error(`[BillBuddy Error][${contextName}]`, {
+    kind: classified.kind,
+    message: safeSanitizeMessage(classified.message),
+    technical: safeSanitizeMessage(classified.technical ?? ""),
+  });
 }
 
 export function toUserMessage(error: unknown): string {

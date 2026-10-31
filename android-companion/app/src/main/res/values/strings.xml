@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">BillBuddy Companion</string>
+    <string name="service_name">BillBuddy Notification Sync Service</string>
+    <string name="status_connected">Connected to BillBuddy</string>
+    <string name="status_not_paired">Device Not Paired</string>
+    <string name="btn_scan_qr">Scan Web QR Code</string>
+    <string name="btn_disconnect">Disconnect Device</string>
+    <string name="switch_monitoring">Automatic Expense Sync</string>
+    <string name="notification_permission_required">Notification Access Required</string>
+    <string name="grant_permission">Grant Access in Settings</string>
+</resources>

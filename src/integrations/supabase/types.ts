@@ -16,6 +16,8 @@ export type Database = {
           amount: number;
           spend_date: string;
           notes: string | null;
+          source: string;
+          dedupe_hash: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -26,6 +28,8 @@ export type Database = {
           amount: number;
           spend_date?: string;
           notes?: string | null;
+          source?: string;
+          dedupe_hash?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -36,8 +40,130 @@ export type Database = {
           amount?: number;
           spend_date?: string;
           notes?: string | null;
+          source?: string;
+          dedupe_hash?: string | null;
           created_at?: string;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      linked_devices: {
+        Row: {
+          id: string;
+          user_id: string;
+          device_name: string;
+          device_fingerprint: string;
+          hmac_key: string;
+          status: "active" | "paused" | "revoked";
+          last_sync_at: string | null;
+          last_ip: string | null;
+          created_at: string;
+          revoked_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          device_name: string;
+          device_fingerprint: string;
+          hmac_key: string;
+          status?: "active" | "paused" | "revoked";
+          last_sync_at?: string | null;
+          last_ip?: string | null;
+          created_at?: string;
+          revoked_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          device_name?: string;
+          device_fingerprint?: string;
+          hmac_key?: string;
+          status?: "active" | "paused" | "revoked";
+          last_sync_at?: string | null;
+          last_ip?: string | null;
+          created_at?: string;
+          revoked_at?: string | null;
+        };
+        Relationships: [];
+      };
+      device_pairing_tokens: {
+        Row: {
+          token: string;
+          user_id: string;
+          expires_at: string;
+          used_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          token: string;
+          user_id: string;
+          expires_at: string;
+          used_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          token?: string;
+          user_id?: string;
+          expires_at?: string;
+          used_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      notification_ingest_logs: {
+        Row: {
+          id: string;
+          user_id: string;
+          device_id: string;
+          nonce: string;
+          request_timestamp: number;
+          package_name: string;
+          status:
+            | "imported"
+            | "duplicate"
+            | "ignored_credit"
+            | "needs_review"
+            | "rejected"
+            | "processing";
+          spend_id: string | null;
+          error_reason: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          device_id: string;
+          nonce: string;
+          request_timestamp: number;
+          package_name: string;
+          status:
+            | "imported"
+            | "duplicate"
+            | "ignored_credit"
+            | "needs_review"
+            | "rejected"
+            | "processing";
+          spend_id?: string | null;
+          error_reason?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          device_id?: string;
+          nonce?: string;
+          request_timestamp?: number;
+          package_name?: string;
+          status?:
+            | "imported"
+            | "duplicate"
+            | "ignored_credit"
+            | "needs_review"
+            | "rejected"
+            | "processing";
+          spend_id?: string | null;
+          error_reason?: string | null;
+          created_at?: string;
         };
         Relationships: [];
       };

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Calendar, Loader2, X } from "lucide-react";
-import type { Spend } from "@/types/database";
+import { Banknote, Calendar, CircleDot, CreditCard, Landmark, Loader2, X } from "lucide-react";
+import type { Spend, SpendSource } from "@/types/database";
 import type { SpendInput } from "@/lib/spends.functions";
 
 interface SpendFormModalProps {
@@ -32,6 +32,7 @@ export function SpendFormModal({
   const [amount, setAmount] = useState("");
   const [spendDate, setSpendDate] = useState(defaultDate);
   const [notes, setNotes] = useState("");
+  const [source, setSource] = useState<SpendSource>("cash");
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
 
@@ -43,11 +44,13 @@ export function SpendFormModal({
         setAmount(String(spend.amount));
         setSpendDate(spend.spend_date);
         setNotes(spend.notes || "");
+        setSource((spend.source as SpendSource) || "cash");
       } else {
         setName("");
         setAmount("");
         setSpendDate(defaultDate || today);
         setNotes("");
+        setSource("cash");
       }
       setErrors({});
       setSubmitting(false);
@@ -96,6 +99,7 @@ export function SpendFormModal({
         amount: Number(amount),
         spend_date: spendDate,
         notes: notes.trim() || null,
+        source,
       });
       onClose();
     } catch {
@@ -231,6 +235,39 @@ export function SpendFormModal({
               {errors.spendDate && (
                 <p className="text-[11px] text-rose-600 font-medium mt-0.5">{errors.spendDate}</p>
               )}
+            </div>
+          </div>
+
+          {/* Payment Source Selector */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              Payment Source
+            </label>
+            <div className="grid grid-cols-4 gap-1.5 p-1 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
+              {[
+                { id: "cash", label: "Cash", icon: Banknote },
+                { id: "bank", label: "UPI/Bank", icon: Landmark },
+                { id: "card", label: "Card", icon: CreditCard },
+                { id: "other", label: "Other", icon: CircleDot },
+              ].map((opt) => {
+                const Icon = opt.icon;
+                const isSelected = source === opt.id || (opt.id === "bank" && source === "upi");
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setSource(opt.id as SpendSource)}
+                    className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      isSelected
+                        ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5 shrink-0 stroke-[2.2]" />
+                    <span>{opt.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

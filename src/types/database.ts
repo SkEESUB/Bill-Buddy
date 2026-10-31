@@ -66,6 +66,9 @@ export type Budget = {
   created_at: string;
 };
 
+export type SpendSource =
+  "cash" | "bank" | "statement" | "email" | "notification" | "card" | "upi" | "other";
+
 export type Spend = {
   id: string;
   user_id: string;
@@ -73,8 +76,49 @@ export type Spend = {
   amount: number;
   spend_date: string;
   notes?: string | null;
+  source?: SpendSource | string;
+  dedupe_hash?: string | null;
   created_at: string;
   updated_at?: string;
+};
+
+export type DeviceStatus = "active" | "paused" | "revoked";
+
+export type LinkedDevice = {
+  id: string;
+  user_id: string;
+  device_name: string;
+  device_fingerprint: string;
+  hmac_key: string;
+  status: DeviceStatus;
+  last_sync_at?: string | null;
+  last_ip?: string | null;
+  created_at: string;
+  revoked_at?: string | null;
+};
+
+export type DevicePairingToken = {
+  token: string;
+  user_id: string;
+  expires_at: string;
+  used_at?: string | null;
+  created_at: string;
+};
+
+export type NotificationIngestStatus =
+  "imported" | "duplicate" | "ignored_credit" | "needs_review" | "rejected" | "processing";
+
+export type NotificationIngestLog = {
+  id: string;
+  user_id: string;
+  device_id: string;
+  nonce: string;
+  request_timestamp: number;
+  package_name: string;
+  status: NotificationIngestStatus;
+  spend_id?: string | null;
+  error_reason?: string | null;
+  created_at: string;
 };
 
 /*

@@ -28,6 +28,8 @@ import { UserMenu } from "@/components/UserMenu";
 import { AddChoiceSheet } from "@/components/AddChoiceSheet";
 import { SpendsDashboard } from "@/components/spends/SpendsDashboard";
 import { SpendFormModal } from "@/components/spends/SpendFormModal";
+import { StatementImportModal } from "@/components/spends/StatementImportModal";
+import { AutomaticTrackingModal } from "@/components/spends/AutomaticTrackingModal";
 import type { Bill, Spend } from "@/types/database";
 import type { SpendInput } from "@/lib/spends.functions";
 
@@ -45,6 +47,8 @@ export function HomePage() {
   // Spends State
   const [selectedSpendDate, setSelectedSpendDate] = useState<string>(today);
   const [spendModalOpen, setSpendModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [autoTrackingModalOpen, setAutoTrackingModalOpen] = useState(false);
   const [editingSpend, setEditingSpend] = useState<Spend | null>(null);
   const [deleteSpendTarget, setDeleteSpendTarget] = useState<Spend | null>(null);
 
@@ -74,6 +78,7 @@ export function HomePage() {
               amount: Number(t.amount) || 0,
               spend_date: t.date,
               notes: t.notes ?? null,
+              source: t.payment_method === "cash" ? "cash" : "bank",
               created_at: t.created_at,
             }));
 
@@ -544,6 +549,8 @@ export function HomePage() {
               setSpendModalOpen(true);
             }}
             onDeleteSpend={(spend) => setDeleteSpendTarget(spend)}
+            onImportStatement={() => setImportModalOpen(true)}
+            onOpenAutoTracking={() => setAutoTrackingModalOpen(true)}
           />
         </div>
       )}
@@ -615,6 +622,14 @@ export function HomePage() {
           setEditingSpend(null);
           setSpendModalOpen(true);
         }}
+        onSelectImportStatement={() => {
+          setActiveTab("spends");
+          setImportModalOpen(true);
+        }}
+        onSelectAutoTracking={() => {
+          setActiveTab("spends");
+          setAutoTrackingModalOpen(true);
+        }}
       />
 
       {/* Add / Edit Spend Form Modal */}
@@ -628,6 +643,24 @@ export function HomePage() {
           setEditingSpend(null);
         }}
         onSubmit={handleSubmitSpend}
+      />
+
+      {/* Import Bank Statement (CSV) Modal */}
+      <StatementImportModal
+        open={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onImportSuccess={async () => {
+          await reload();
+        }}
+      />
+
+      {/* Automatic Notification Tracking Settings Modal */}
+      <AutomaticTrackingModal
+        open={autoTrackingModalOpen}
+        onClose={() => {
+          setAutoTrackingModalOpen(false);
+          void reload();
+        }}
       />
 
       {/* Permanent Delete Confirmation Dialog for Spends */}

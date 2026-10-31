@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { FileSpreadsheet, Smartphone, X } from "lucide-react";
 import { BillBuddyLogo } from "@/components/BillBuddyLogo";
 
 interface AddChoiceSheetProps {
@@ -6,17 +6,21 @@ interface AddChoiceSheetProps {
   onClose: () => void;
   onSelectAddBill: () => void;
   onSelectAddSpend: () => void;
+  onSelectImportStatement?: () => void;
+  onSelectAutoTracking?: () => void;
 }
 
 /**
  * Compact selection sheet presented when user taps the central Add button.
- * Allows choosing between adding a Bill or a daily Spend independently.
+ * Allows choosing between adding a Bill, a daily Spend, importing a CSV, or automatic tracking.
  */
 export function AddChoiceSheet({
   open,
   onClose,
   onSelectAddBill,
   onSelectAddSpend,
+  onSelectImportStatement,
+  onSelectAutoTracking,
 }: AddChoiceSheetProps) {
   if (!open) return null;
 
@@ -107,6 +111,54 @@ export function AddChoiceSheet({
               </p>
             </div>
           </button>
+
+          {/* Import Bank Statement Option */}
+          {onSelectImportStatement && (
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onSelectImportStatement();
+              }}
+              className="flex items-center gap-3.5 p-3.5 rounded-2xl border border-slate-200/80 bg-white hover:bg-amber-50/50 hover:border-amber-200 transition-all text-left group cursor-pointer shadow-xs active:scale-[0.99]"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-50 p-2 group-hover:bg-amber-600/10 transition-colors overflow-hidden">
+                <FileSpreadsheet className="h-full w-full text-amber-600 group-hover:scale-110 transition-transform" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-bold text-slate-900 group-hover:text-amber-600 transition-colors">
+                  Import Bank Statement (CSV)
+                </div>
+                <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">
+                  Bank of Baroda, SBI, HDFC, ICICI debit extracts
+                </p>
+              </div>
+            </button>
+          )}
+
+          {/* Automatic Tracking Option */}
+          {onSelectAutoTracking && (
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onSelectAutoTracking();
+              }}
+              className="flex items-center gap-3.5 p-3.5 rounded-2xl border border-slate-200/80 bg-white hover:bg-cyan-50/50 hover:border-cyan-200 transition-all text-left group cursor-pointer shadow-xs active:scale-[0.99]"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-cyan-50 p-2 group-hover:bg-cyan-600/10 transition-colors overflow-hidden">
+                <Smartphone className="h-full w-full text-cyan-600 group-hover:scale-110 transition-transform" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-bold text-slate-900 group-hover:text-cyan-600 transition-colors">
+                  Automatic Notification Tracking
+                </div>
+                <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">
+                  Pair Android phone for PhonePe, GPay, Paytm & BOB
+                </p>
+              </div>
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -101,7 +101,10 @@ export const getFinanceSnapshot = createServerFn({ method: "GET" })
     // Derive spends from dedicated public.spends table, falling back to transactions if table is unmigrated
     let spends: Spend[] = [];
     if (!spendsResult.error && spendsResult.data) {
-      spends = spendsResult.data as unknown as Spend[];
+      spends = (spendsResult.data as any[]).map((s) => ({
+        ...s,
+        source: s.source || "other",
+      })) as unknown as Spend[];
     } else if (transactions && transactions.length > 0) {
       spends = transactions
         .filter((t: any) => t.type === "expense")
@@ -112,6 +115,7 @@ export const getFinanceSnapshot = createServerFn({ method: "GET" })
           amount: Number(t.amount) || 0,
           spend_date: t.date,
           notes: t.notes ?? null,
+          source: t.payment_method === "cash" ? "cash" : "bank",
           created_at: t.created_at,
         }));
     }
