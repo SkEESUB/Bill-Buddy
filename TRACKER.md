@@ -3,8 +3,8 @@
 **Document Version:** 2.5.0  
 **Status:** Living Document / Authoritative Rebuild Tracker  
 **Target Architecture:** Minimal, Premium, Single-Screen Bill Reminder App  
-**Current Verification:** 340/340 Unit Tests Passing | TypeScript: 0 Errors | ESLint: 0 Errors | Production Build: Succeeded | Staging Security Verification: 100% PASSED  
-**Last Updated:** 2026-10-31
+**Current Verification:** 369/369 Unit Tests Passing (30 Test Suites) | TypeScript: 0 Errors | Production Build: Succeeded | Staging Security Verification: 100% PASSED  
+**Last Updated:** 2026-11-03
 
 ---
 
@@ -473,14 +473,55 @@
   - Because `billbuddy-staging` has `main` configured as its Production Branch, the deployment is marked as a Preview Deployment with Vercel SSO Protection enabled.
   - To route the newly built staging deployment to the public domain `https://billbuddy-staging.vercel.app`: In Vercel Project Settings for `billbuddy-staging` -> Git, change the Production Branch from `main` to `staging` (or click "Promote to Production" on deployment `d058e8c`).
 
+## 25. Staging Authentication Remediation & Rate-Limit Resilience (Phase 3.4.4)
+
+- [x] **AUTH-REMED-01 (Root Cause Confirmation):**
+  1. **6-Digit UI vs 8-Digit GoTrue OTP:** Staging Supabase project (`eiwybyhvnhagugjjbkkl`) was configured with `Mailer OTP length: 8`, causing `signInWithOtp` to send 8-digit codes that could not be submitted through the 6-slot OTP interface in `LoginPage.tsx`.
+  2. **Magic Link vs Numeric OTP Email Template:** The staging Supabase email template used `{{ .ConfirmationURL }}` rather than `{{ .Token }}`, delivering login links instead of 6-digit verification codes.
+  3. **Tripzy Redirect Leakage:** Supabase URL Configuration lacked BillBuddy staging entries and had external/Tripzy redirect entries. When `signInWithOtp` ran without explicit `emailRedirectTo`, GoTrue defaulted to the misconfigured redirect target.
+  4. **Cooldown Reset Vulnerability:** In `LoginPage.tsx`, navigating back from the OTP step to the email input step cleared `resendCooldown`, allowing immediate re-submissions that triggered Supabase's 60-second rate limiter (`429 Too many requests`).
+- [x] **AUTH-REMED-02 (Application Code Fixes in `LoginPage.tsx`):**
+  1. **Explicit Staging Redirect:** Passed `options: { emailRedirectTo: redirectUrl, shouldCreateUser: true }` in `signInWithOtp`, dynamically resolving to `${window.location.origin}/login` with safe fallback to `https://billbuddy-staging.vercel.app/login`.
+  2. **Supabase 429 Dynamic Cooldown Parsing:** Added regex extraction (`/after (\d+) seconds/i`) in the `sendOTP` catch block to synchronize the frontend cooldown timer with Supabase's actual remaining lockout duration.
+  3. **Cross-Step Cooldown Persistence:** Tracked `lastRequestedEmail` alongside `resendCooldown`. When navigating back to the email step, if the entered email matches `lastRequestedEmail` and cooldown is active, the submit button is disabled ("Wait {s}s before resending") and a helpful alert banner is displayed.
+  4. **Auth State Synchronization:** Added `supabase.auth.onAuthStateChange` listener to instantly transition the user to `/` upon session confirmation from any verification channel.
+- [x] **AUTH-REMED-03 (Automated Regression Test Suite):**
+  - Created `src/lib/auth/staging-auth-resilience.test.ts` (14 tests) covering:
+    - 6-slot OTP state and strict 6-digit numeric validation (`/^\d{6}$/`).
+    - Explicit `emailRedirectTo` and `shouldCreateUser: true`.
+    - Zero Tripzy domain references in auth code.
+    - Rate limit regex parsing for remaining seconds.
+    - Persistent cooldown state enforcement on the email input step.
+    - `onAuthStateChange` dashboard transition.
+- [x] **AUTH-REMED-04 (Staging Supabase Auth Dashboard Settings Reference):**
+  - **Target Project:** `eiwybyhvnhagugjjbkkl` ONLY (Production `xsytaixmyeypoiscfbim` untouched).
+  - **Authentication -> Providers -> Email:** Set `Mailer OTP length` to `6`.
+  - **Authentication -> Email Templates -> Magic Link:**
+    - Subject: `Your BillBuddy Verification Code`
+    - Body: Include `{{ .Token }}` prominently without external links.
+  - **Authentication -> URL Configuration -> Site URL:** `https://billbuddy-staging.vercel.app`
+  - **Authentication -> URL Configuration -> Redirect URLs (Allow list):**
+    - `https://billbuddy-staging.vercel.app/**`
+    - `https://billbuddy-staging.vercel.app/login`
+    - `https://billbuddy-staging-git-staging-sk-eesubs-projects.vercel.app/**`
+    - `https://billbuddy-staging-git-staging-sk-eesubs-projects.vercel.app/login`
+    - `http://localhost:3000/**`
+    - `http://localhost:5173/**`
+- [x] **AUTH-REMED-05 (Verification & Integrity):**
+  - Vitest: 369/369 unit tests passing across all 30 test suites.
+  - TypeScript: `npx tsc --noEmit` passed with 0 errors.
+  - Staging Production Build: `npm run build:staging` succeeded cleanly.
+  - Git: Committed to branch `staging`; `main` and production Supabase remained 100% untouched.
+
 - [x] All six documentation files exist and are accurate (`PRD.md`, `ARCHITECTURE.md`, `DESIGN.md`, `MEMORY.md`, `RULES.md`, `TRACKER.md`).
 - [x] Required database schema is consolidated in [`001_billbuddy_schema.sql`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/supabase/migrations/001_billbuddy_schema.sql) covering all 22 tables.
 - [x] Migration state and ordering are documented.
-- [x] Automated tests pass (355/355 passing).
+- [x] Automated tests pass (369/369 passing).
 - [x] Type checking passes (0 errors).
 - [x] Production build succeeds (`vite build` / Nitro output generated cleanly with zero deprecation warnings).
 - [ ] Live database schema executed in Supabase project `xsytaixmyeypoiscfbim`.
 - [ ] End-to-end live browser authentication and data persistence verified.
+
 
 
 

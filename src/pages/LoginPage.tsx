@@ -575,6 +575,7 @@ export function LoginPage() {
 
   const [step, setStep] = useState<AuthStep>("welcome");
   const [email, setEmail] = useState("");
+  const [lastRequestedEmail, setLastRequestedEmail] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -584,13 +585,25 @@ export function LoginPage() {
 
   const otpRefs = useRef<Array<HTMLInputElement | null>>([]);
 
-  // Already signed in? Redirect to home.
+  // Already signed in or sign-in state changed? Redirect to home.
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session?.user) {
         navigate({ to: "/", replace: true });
       }
     });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        navigate({ to: "/", replace: true });
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   useEffect(() => {
@@ -618,12 +631,23 @@ export function LoginPage() {
     setLoading(true);
     const target = email.trim().toLowerCase();
 
+    // Determine secure staging-safe redirect URL
+    const redirectUrl =
+      typeof window !== "undefined" && window.location.origin
+        ? `${window.location.origin}/login`
+        : "https://billbuddy-staging.vercel.app/login";
+
     try {
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email: target,
+        options: {
+          emailRedirectTo: redirectUrl,
+          shouldCreateUser: true,
+        },
       });
       if (otpError) throw otpError;
 
+      setLastRequestedEmail(target);
       setStep("otp");
       setSuccess("Verification code sent! Check your inbox.");
       setResendCooldown(60);
@@ -632,11 +656,19 @@ export function LoginPage() {
     } catch (err) {
       console.error("[LoginPage] Send OTP failed:", err);
       const message = err instanceof Error ? err.message : "";
-      setError(
-        message.toLowerCase().includes("rate")
-          ? "Too many requests. Please wait a minute and try again."
-          : message || "Failed to send verification code. Please try again.",
-      );
+      const lowerMsg = message.toLowerCase();
+
+      // Parse dynamic lockout duration from Supabase error (e.g. "after 48 seconds")
+      const secondsMatch = message.match(/after (\d+) seconds/i);
+      const parsedSeconds = secondsMatch && secondsMatch[1] ? parseInt(secondsMatch[1], 10) : 60;
+
+      if (lowerMsg.includes("rate") || lowerMsg.includes("after") || lowerMsg.includes("too many")) {
+        setLastRequestedEmail(target);
+        setResendCooldown(parsedSeconds);
+        setError(`Too many requests. Please wait ${parsedSeconds}s and try again.`);
+      } else {
+        setError(message || "Failed to send verification code. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -750,6 +782,9 @@ export function LoginPage() {
   const mmss = `${String(Math.floor(resendCooldown / 60)).padStart(2, "0")}:${String(
     resendCooldown % 60,
   ).padStart(2, "0")}`;
+
+  const isEmailCoolingDown =
+    email.trim().toLowerCase() === lastRequestedEmail && resendCooldown > 0;
 
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     // Delay slightly to let virtual keyboard complete transition on mobile devices
@@ -988,15 +1023,26 @@ export function LoginPage() {
                   </div>
                 )}
 
+                {isEmailCoolingDown && (
+                  <div className="rounded-xl sm:rounded-2xl bg-amber-50 border border-amber-200 p-2.5 sm:p-3 text-xs sm:text-sm text-amber-800 flex items-center justify-between">
+                    <span>A code was recently sent to this address.</span>
+                    <span className="font-bold text-amber-900">{resendCooldown}s</span>
+                  </div>
+                )}
+
                 <button
                   type="submit"
-                  disabled={loading || !isValidEmail(email)}
-                  className="auth-btn-gradient w-full min-h-[48px] sm:min-h-[54px] py-2.5 sm:py-3 text-sm sm:text-base font-bold cursor-pointer"
+                  disabled={loading || !isValidEmail(email) || isEmailCoolingDown}
+                  className="auth-btn-gradient w-full min-h-[48px] sm:min-h-[54px] py-2.5 sm:py-3 text-sm sm:text-base font-bold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <>
                       <Loader2 className="h-4.5 w-4.5 animate-spin" />
                       <span>Sending Code...</span>
+                    </>
+                  ) : isEmailCoolingDown ? (
+                    <>
+                      <span>Wait {resendCooldown}s before resending</span>
                     </>
                   ) : (
                     <>
