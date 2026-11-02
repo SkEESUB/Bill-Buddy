@@ -449,6 +449,30 @@
 - [x] **ROOT-CAUSE-04 (Halted Before Code Modification / Deployment):**
   - Strictly adhering to instructions: reported findings, updated `TRACKER.md`, zero changes made to production Supabase (`xsytaixmyeypoiscfbim`), and halted before deploying further fixes.
 
+## 24. Staging Save Remediation & Deployment Bridge Verification (Phase 3.4.3)
+
+- [x] **REMEDIATE-01 (Deployment Timing & Environment Variable Inspection):**
+  - Confirmed the active deployment on `https://billbuddy-staging.vercel.app` was built prior to the environment variables being configured in Vercel project settings. It was running with hardcoded production fallbacks and returning `AUTH_INVALID: unrecognized JWT kid 6b7efb25-dd0f-4d56-9e0b-339be8fb364d`.
+- [x] **REMEDIATE-02 (Server-Side Staging Inlining Bridge):**
+  - Updated `vite.config.ts` to define `process.env.SUPABASE_URL`, `process.env.SUPABASE_PUBLISHABLE_KEY`, `process.env.SUPABASE_PROJECT_ID`, and `process.env.APP_ENV` for staging builds.
+  - Verified in `.output/server/_ssr/client-CQ6HNNoF.mjs` that the server runtime now inlines `https://eiwybyhvnhagugjjbkkl.supabase.co` directly into server functions, completely eliminating silent fallbacks to production.
+- [x] **REMEDIATE-03 (Client & Server Key Matching):**
+  - Confirmed both browser client (`VITE_SUPABASE_PUBLISHABLE_KEY`) and server function runtime (`SUPABASE_PUBLISHABLE_KEY`) resolve to the Staging key (`sb_publishable_z3Ik...VVgTIEoT`) on project `eiwybyhvnhagugjjbkkl`.
+- [x] **REMEDIATE-04 (Actionable Auth Error Classification):**
+  - Enhanced `src/lib/errors.ts` to classify `unrecognized jwt kid`, `auth_invalid`, and `token is unverifiable` as `session_expired` with clear diagnostic advice ("Your session is invalid or from a different environment. Sign in again"), preventing generic masking behind "Something went wrong".
+- [x] **REMEDIATE-05 (Automated Test & Compiler Verification):**
+  - Vitest: 355/355 unit tests passed across all 29 test suites.
+  - TypeScript: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build:staging` succeeded with clean output.
+- [x] **REMEDIATE-06 (Isolated Staging Branch Push):**
+  - Committed changes in commit `d058e8c` (`fix(staging): enforce server-side staging Supabase inlining and unmask auth errors`).
+  - Pushed to `origin/staging` (`https://github.com/SkEESUB/Bill-Buddy.git`).
+  - Branch `main` and production Supabase (`xsytaixmyeypoiscfbim`) remain 100% untouched.
+- [x] **REMEDIATE-07 (Vercel billbuddy-staging Deployment Routing):**
+  - Pushing to `origin/staging` triggers the Vercel build for `billbuddy-staging-git-staging-sk-eesubs-projects.vercel.app`.
+  - Because `billbuddy-staging` has `main` configured as its Production Branch, the deployment is marked as a Preview Deployment with Vercel SSO Protection enabled.
+  - To route the newly built staging deployment to the public domain `https://billbuddy-staging.vercel.app`: In Vercel Project Settings for `billbuddy-staging` -> Git, change the Production Branch from `main` to `staging` (or click "Promote to Production" on deployment `d058e8c`).
+
 - [x] All six documentation files exist and are accurate (`PRD.md`, `ARCHITECTURE.md`, `DESIGN.md`, `MEMORY.md`, `RULES.md`, `TRACKER.md`).
 - [x] Required database schema is consolidated in [`001_billbuddy_schema.sql`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/supabase/migrations/001_billbuddy_schema.sql) covering all 22 tables.
 - [x] Migration state and ordering are documented.
@@ -457,6 +481,7 @@
 - [x] Production build succeeds (`vite build` / Nitro output generated cleanly with zero deprecation warnings).
 - [ ] Live database schema executed in Supabase project `xsytaixmyeypoiscfbim`.
 - [ ] End-to-end live browser authentication and data persistence verified.
+
 
 
 
