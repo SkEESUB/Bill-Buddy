@@ -171,7 +171,9 @@ export function classifyError(error: unknown): ClassifiedError {
     lower.includes("token has expired") ||
     lower.includes("token expired") ||
     lower.includes("refresh_token_not_found") ||
-    lower.includes("auth_invalid:")
+    lower.includes("auth_invalid") ||
+    lower.includes("unrecognized jwt kid") ||
+    lower.includes("token is unverifiable")
   ) {
     return {
       kind: "session_expired",

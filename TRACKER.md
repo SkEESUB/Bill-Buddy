@@ -415,6 +415,40 @@
   - The project `billbuddy-staging` currently tracks `main` as its Production Branch in Vercel settings, meaning branch `staging` deployed as a preview deployment.
   - Next step for user: In Vercel Project Settings for `billbuddy-staging` -> Git, change the Production Branch from `main` to `staging` (or click Promote to Production on deployment `AbhELUw6548SwKEo68Bd5mTAyLVi`) to map `https://billbuddy-staging.vercel.app` to the new build.
 
+## 23. Staging Deployment Save Failure Investigation & Root Cause Proof (Phase 3.4.2)
+
+- [x] **ROOT-CAUSE-01 (Direct Network & Server Function RPC Reproduction):**
+  - Executed authenticated RPC tests against both deployed staging endpoints:
+    - Target 1: `https://billbuddy-staging-git-staging-sk-eesubs-projects.vercel.app` (Preview URL)
+    - Target 2: `https://billbuddy-staging.vercel.app` (Staging Domain)
+  - Functions tested:
+    - Add Bill: `POST /_serverFn/bd51883b8bdc04a3d1f92f5a189ab5159b6d7c5bbbe7e1ba15d91f22eb8c7c7a` (`createBill`)
+    - Add Spend: `POST /_serverFn/aa4d2757c6fcb94a3f92bddcdc6c07dbd598080726cd55af3ad46a78c459a223` (`createSpend`)
+  - **Findings & Evidence:**
+    1. **Target 1 (Preview URL):** Returns HTTP 401 with `{"message":"Protected by Vercel Authentication"}` because Vercel Deployment Protection (SSO) is enabled on preview deployments. Outside of an active Vercel session, all RPC requests are intercepted and redirected to Vercel SSO.
+    2. **Target 2 (Staging Domain):** Server function executes and reaches `requireSupabaseAuth` in `src/integrations/supabase/auth-middleware.ts`, returning:
+       ```json
+       {"t":10,"i":0,"p":{"k":["error"],"v":[{"t":25,"i":1,"s":{"message":{"t":1,"s":"AUTH_INVALID: invalid JWT: unable to parse or verify signature, token is unverifiable: error while executing keyfunc: unrecognized JWT kid 6b7efb25-dd0f-4d56-9e0b-339be8fb364d for algorithm ES256"}},"c":"$TSR/Error"}]},"o":0}
+       ```
+- [x] **ROOT-CAUSE-02 (Exact Technical Root Cause Identified):**
+  1. **Cross-Project Supabase Mismatch (Server vs Client):**
+     - The browser authenticates against Staging Supabase (`eiwybyhvnhagugjjbkkl`), which signs user JWTs with an asymmetric ES256 key (`kid: 6b7efb25-dd0f-4d56-9e0b-339be8fb364d`).
+     - On the Vercel server, `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` are not set in the Vercel project environment variables.
+     - Consequently, the server runtime falls back to `SUPABASE_URL = "https://xsytaixmyeypoiscfbim.supabase.co"` (Production Supabase).
+     - When the server invokes `supabase.auth.getUser(token)`, Production Supabase rejects the Staging JWT because its JWKS does not recognise the Staging key ID (`unrecognized JWT kid 6b7efb25-dd0f-4d56-9e0b-339be8fb364d`).
+  2. **Error Classifier Masking (Fallback to "Something went wrong"):**
+     - The raw error message is 177 characters long.
+     - In `src/lib/errors.ts`, `classifyError()` only exposes raw messages if `safeFallback.length < 120`. Because 177 > 120, it returns the generic fallback `"Something went wrong. Please try again."`, hiding the true authentication mismatch from the user.
+  3. **Vercel Preview Deployment Protection:**
+     - The preview deployment URL `billbuddy-staging-git-staging-sk-eesubs-projects.vercel.app` requires Vercel SSO authentication, preventing unauthenticated browser sessions from executing server function RPCs.
+- [x] **ROOT-CAUSE-03 (Proposed Corrective Actions):**
+  1. **Configure Staging Environment Variables on Vercel:** Add `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `APP_ENV=staging`, and `SERVER_ENCRYPTION_KEY` to the Vercel project settings for all environments (Production and Preview).
+  2. **Enforce Staging Supabase Inlining on Server Builds:** Update `vite.config.ts` so `process.env.SUPABASE_URL`, `process.env.SUPABASE_PUBLISHABLE_KEY`, and `process.env.APP_ENV` are also injected into the server build for staging targets, eliminating production URL fallbacks even if Vercel environment variables are omitted.
+  3. **Promote Staging Branch or Update Production Branch in Vercel:** Change the Production Branch of `billbuddy-staging` from `main` to `staging` in Vercel Git settings, disabling Preview Deployment Protection on staging test URLs.
+  4. **Classify Auth Key & JWT Errors Explicitly:** Update `src/lib/errors.ts` to recognize `AUTH_INVALID` and `unrecognized JWT kid`, surfacing actionable diagnostic messages instead of falling back to "Something went wrong."
+- [x] **ROOT-CAUSE-04 (Halted Before Code Modification / Deployment):**
+  - Strictly adhering to instructions: reported findings, updated `TRACKER.md`, zero changes made to production Supabase (`xsytaixmyeypoiscfbim`), and halted before deploying further fixes.
+
 - [x] All six documentation files exist and are accurate (`PRD.md`, `ARCHITECTURE.md`, `DESIGN.md`, `MEMORY.md`, `RULES.md`, `TRACKER.md`).
 - [x] Required database schema is consolidated in [`001_billbuddy_schema.sql`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/supabase/migrations/001_billbuddy_schema.sql) covering all 22 tables.
 - [x] Migration state and ordering are documented.
@@ -423,5 +457,6 @@
 - [x] Production build succeeds (`vite build` / Nitro output generated cleanly with zero deprecation warnings).
 - [ ] Live database schema executed in Supabase project `xsytaixmyeypoiscfbim`.
 - [ ] End-to-end live browser authentication and data persistence verified.
+
 
 

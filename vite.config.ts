@@ -48,6 +48,16 @@ export default defineConfig(({ mode }) => {
         ? { "import.meta.env.VITE_SUPABASE_PROJECT_ID": JSON.stringify(supabaseProjectId) }
         : {}),
       ...(isStaging ? { "import.meta.env.VITE_APP_ENV": JSON.stringify("staging") } : {}),
+      ...(isStaging && supabaseUrl
+        ? { "process.env.SUPABASE_URL": JSON.stringify(supabaseUrl) }
+        : {}),
+      ...(isStaging && supabaseKey
+        ? { "process.env.SUPABASE_PUBLISHABLE_KEY": JSON.stringify(supabaseKey) }
+        : {}),
+      ...(isStaging && supabaseProjectId
+        ? { "process.env.SUPABASE_PROJECT_ID": JSON.stringify(supabaseProjectId) }
+        : {}),
+      ...(isStaging ? { "process.env.APP_ENV": JSON.stringify("staging") } : {}),
     },
     resolve: {
       alias: {

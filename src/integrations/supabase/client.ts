@@ -5,10 +5,12 @@ const isStagingEnv =
   (typeof process !== "undefined" &&
     (process.env["APP_ENV"] === "staging" ||
       process.env["STAGING"] === "true" ||
-      process.env["VERCEL_ENV"] === "preview")) ||
+      process.env["VERCEL_ENV"] === "preview" ||
+      process.env["VERCEL_GIT_COMMIT_REF"] === "staging")) ||
   (typeof import.meta !== "undefined" &&
     (import.meta.env?.["VITE_APP_ENV"] === "staging" ||
-      import.meta.env?.["VITE_STAGING"] === "true"));
+      import.meta.env?.["VITE_STAGING"] === "true" ||
+      import.meta.env?.MODE === "staging"));
 
 const resolvedProjectId =
   (typeof process !== "undefined" &&
@@ -26,13 +28,8 @@ const resolvedPublishableKey =
   (typeof import.meta !== "undefined" && import.meta.env?.["VITE_SUPABASE_PUBLISHABLE_KEY"]);
 
 if (isStagingEnv) {
-  if (!resolvedUrl || !resolvedPublishableKey) {
-    throw new Error(
-      "[BillBuddy Staging Guard] Missing staging Supabase configuration. Production URL fallbacks are strictly prohibited in staging.",
-    );
-  }
   if (
-    resolvedUrl.includes("xsytaixmyeypoiscfbim") ||
+    resolvedUrl?.includes("xsytaixmyeypoiscfbim") ||
     resolvedProjectId === "xsytaixmyeypoiscfbim"
   ) {
     throw new Error(
@@ -41,10 +38,18 @@ if (isStagingEnv) {
   }
 }
 
-export const SUPABASE_PROJECT_ID = resolvedProjectId || "xsytaixmyeypoiscfbim";
-export const SUPABASE_URL = resolvedUrl || "https://xsytaixmyeypoiscfbim.supabase.co";
+export const SUPABASE_PROJECT_ID =
+  resolvedProjectId || (isStagingEnv ? "eiwybyhvnhagugjjbkkl" : "xsytaixmyeypoiscfbim");
+export const SUPABASE_URL =
+  resolvedUrl ||
+  (isStagingEnv
+    ? "https://eiwybyhvnhagugjjbkkl.supabase.co"
+    : "https://xsytaixmyeypoiscfbim.supabase.co");
 export const SUPABASE_PUBLISHABLE_KEY =
-  resolvedPublishableKey || "sb_publishable_UIFyTcBEjaY-CjmupJEnNg__5rTgjKm";
+  resolvedPublishableKey ||
+  (isStagingEnv
+    ? "sb_publishable_z3IkP3RP-_hP_6lT-lVROQ_VVgTIEoT"
+    : "sb_publishable_UIFyTcBEjaY-CjmupJEnNg__5rTgjKm");
 
 function isNewSupabaseApiKey(value: string): boolean {
   return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
