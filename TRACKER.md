@@ -1,35 +1,36 @@
 # Project Task Tracker & Issue Register — BillBuddy Rebuild
 
-**Document Version:** 2.2.0  
+**Document Version:** 2.3.0  
 **Status:** Living Document / Authoritative Rebuild Tracker  
 **Target Architecture:** Minimal, Premium, Single-Screen Bill Reminder App  
-**Current Verification:** 269/269 Unit Tests Passing | TypeScript: 0 Errors | ESLint: 0 Errors | Production Build: Succeeded  
+**Current Verification:** 276/276 Unit Tests Passing | TypeScript: 0 Errors | ESLint: 0 Errors | Production Build: Succeeded  
 **Last Updated:** 2026-11-04
 
 ---
 
 ## 1. Product Rebuild Phases
 
-| Phase        | Description                                               | Status       | Verification                                                                                                                                                                                        |
-| :----------- | :-------------------------------------------------------- | :----------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Phase 1**  | Project Audit & Cleanup Plan                              | ✅ Completed | Architecture mapped, dead code inventory confirmed                                                                                                                                                  |
-| **Phase 2**  | Architecture & Design Foundation                          | ✅ Completed | Dead routes & pages pruned; Glassmorphic/Neumorphic design tokens added; DB migration created; 186/186 tests passing                                                                                |
-| **Phase 3**  | Single-Screen UI                                          | ✅ Completed | Header & greeting ("Hi, [User]"), compact Money Summary box, sorted bill list, 3-action bottom navigation; 186/186 tests passing                                                                    |
-| **Phase 4**  | Add Bill & Bill Details                                   | ✅ Completed | Reusable bill form (Name, ₹ Amount, Due Date, Reminder Time, Reminder Email, Repeat, Reminder Before, Notes); Details sheet (Mark as Completed, Edit, Delete); 186/186 tests passing                |
-| **Phase 5**  | Real Email Reminders                                      | ✅ Completed | Server-side email delivery service, HTML reminder templates, scheduler integration, automated reminder sync and cancellation; 189/189 tests passing                                                 |
-| **Phase 6**  | Final Polish & Verification                               | ✅ Completed | Full responsive audit, interaction verification, 0 TypeScript errors, 0 ESLint errors, 189/189 tests passing, production build succeeded                                                            |
-| **Phase 7**  | Spends: Navigation & UI (Phase 1)                         | ✅ Completed | Bills / Spends navigation, cartoon wallet logo asset, Spends dashboard UI, Add Choice sheet                                                                                                         |
-| **Phase 8**  | Spends: Add Form & DB (Phase 2)                           | ✅ Completed | Dedicated Add Spend modal, database table & migrations, persistence logic                                                                                                                           |
-| **Phase 9**  | Spends: Edit, Delete, Totals (3)                          | ✅ Completed | Mutation operations, date selector filtering, accurate daily totals calculations                                                                                                                    |
-| **Phase 10** | Spends: Testing & QA (Phase 4)                            | ✅ Completed | 17/17 Vitest test suites passing (253/253 tests), 0 TS errors, 0 ESLint errors, production build verified                                                                                           |
-| **Phase 11** | Upgrade Phase 1: 3-Action Bottom Nav & Section Separation | ✅ Completed | Redesigned bottom nav [Bills][+][Spends], removed top segmented control, added in-page Remaining/Completed controls, verified AddChoiceSheet; 253/253 tests passing, 0 TS errors, prod build passed |
-| **Phase 12** | Upgrade Phase 2: Date Selector & Spends Dashboard         | ✅ Completed | Timezone-safe date navigation (`shiftDateString`), Prev/Next controls, calendar picker <= today, Total Spent card with mascot, daily expense cards, daily total footer; 255/255 tests passing       |
-| **Phase 13** | Bills Mascot in Navigation & Add Choice Sheet (Phase A)   | ✅ Completed | Replaced receipt icon with official BillBuddy mascot (`/billbuddy-icon.png`) in BottomNav and AddChoiceSheet; 256/256 tests passing, 0 TS errors, 0 ESLint errors, prod build succeeded |
-| **Phase 14** | Floating 3D Spends Cards (Phase B)                        | ✅ Completed | Applied `.spend-card-premium` & `.spend-card-floating` with layered shadows, ambient edge highlights, staggered physics, and `e.stopPropagation()`; 260/260 tests passing |
-| **Phase 15** | Mobile Authentication Viewport Fit (Phase C)              | ✅ Completed | Scaled illustrations & spacing for Onboarding, Email, and OTP screens to fit mobile viewports cleanly with safe area and keyboard resilience; 260/260 tests passing |
-| **Phase 16** | Email Reminder System Audit & Repair (Phase D)            | ✅ Completed | Repaired destructive over-deletion in `deleteBill`, enhanced `processDueEmailReminders` with diagnostics and idempotency, identified missing Resend key & cron configuration; 262/262 tests passing |
-| **Phase 17** | Remaining / Completed Toggle Navbar Match                  | ✅ Completed | Redesigned segmented toggle on Bills screen with `glass-nav` rounded pill container, glossy blue-to-purple gradient active pill with 3D sheen highlight, muted inactive pill, and count badges; 262/262 tests passing, 0 TS errors, 0 ESLint errors, prod build succeeded |
+| Phase        | Description                                                                                 | Status       | Verification                                                                                                                                                                                                                                                                                          |
+| :----------- | :------------------------------------------------------------------------------------------ | :----------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Phase 1**  | Project Audit & Cleanup Plan                                                                | ✅ Completed | Architecture mapped, dead code inventory confirmed                                                                                                                                                                                                                                                    |
+| **Phase 2**  | Architecture & Design Foundation                                                            | ✅ Completed | Dead routes & pages pruned; Glassmorphic/Neumorphic design tokens added; DB migration created; 186/186 tests passing                                                                                                                                                                                  |
+| **Phase 3**  | Single-Screen UI                                                                            | ✅ Completed | Header & greeting ("Hi, [User]"), compact Money Summary box, sorted bill list, 3-action bottom navigation; 186/186 tests passing                                                                                                                                                                      |
+| **Phase 4**  | Add Bill & Bill Details                                                                     | ✅ Completed | Reusable bill form (Name, ₹ Amount, Due Date, Reminder Time, Reminder Email, Repeat, Reminder Before, Notes); Details sheet (Mark as Completed, Edit, Delete); 186/186 tests passing                                                                                                                  |
+| **Phase 5**  | Real Email Reminders                                                                        | ✅ Completed | Server-side email delivery service, HTML reminder templates, scheduler integration, automated reminder sync and cancellation; 189/189 tests passing                                                                                                                                                   |
+| **Phase 6**  | Final Polish & Verification                                                                 | ✅ Completed | Full responsive audit, interaction verification, 0 TypeScript errors, 0 ESLint errors, 189/189 tests passing, production build succeeded                                                                                                                                                              |
+| **Phase 7**  | Spends: Navigation & UI (Phase 1)                                                           | ✅ Completed | Bills / Spends navigation, cartoon wallet logo asset, Spends dashboard UI, Add Choice sheet                                                                                                                                                                                                           |
+| **Phase 8**  | Spends: Add Form & DB (Phase 2)                                                             | ✅ Completed | Dedicated Add Spend modal, database table & migrations, persistence logic                                                                                                                                                                                                                             |
+| **Phase 9**  | Spends: Edit, Delete, Totals (3)                                                            | ✅ Completed | Mutation operations, date selector filtering, accurate daily totals calculations                                                                                                                                                                                                                      |
+| **Phase 10** | Spends: Testing & QA (Phase 4)                                                              | ✅ Completed | 17/17 Vitest test suites passing (253/253 tests), 0 TS errors, 0 ESLint errors, production build verified                                                                                                                                                                                             |
+| **Phase 11** | Upgrade Phase 1: 3-Action Bottom Nav & Section Separation                                   | ✅ Completed | Redesigned bottom nav [Bills][+][Spends], removed top segmented control, added in-page Remaining/Completed controls, verified AddChoiceSheet; 253/253 tests passing, 0 TS errors, prod build passed                                                                                                   |
+| **Phase 12** | Upgrade Phase 2: Date Selector & Spends Dashboard                                           | ✅ Completed | Timezone-safe date navigation (`shiftDateString`), Prev/Next controls, calendar picker <= today, Total Spent card with mascot, daily expense cards, daily total footer; 255/255 tests passing                                                                                                         |
+| **Phase 13** | Bills Mascot in Navigation & Add Choice Sheet (Phase A)                                     | ✅ Completed | Replaced receipt icon with official BillBuddy mascot (`/billbuddy-icon.png`) in BottomNav and AddChoiceSheet; 256/256 tests passing, 0 TS errors, 0 ESLint errors, prod build succeeded                                                                                                               |
+| **Phase 14** | Floating 3D Spends Cards (Phase B)                                                          | ✅ Completed | Applied `.spend-card-premium` & `.spend-card-floating` with layered shadows, ambient edge highlights, staggered physics, and `e.stopPropagation()`; 260/260 tests passing                                                                                                                             |
+| **Phase 15** | Mobile Authentication Viewport Fit (Phase C)                                                | ✅ Completed | Scaled illustrations & spacing for Onboarding, Email, and OTP screens to fit mobile viewports cleanly with safe area and keyboard resilience; 260/260 tests passing                                                                                                                                   |
+| **Phase 16** | Email Reminder System Audit & Repair (Phase D)                                              | ✅ Completed | Repaired destructive over-deletion in `deleteBill`, enhanced `processDueEmailReminders` with diagnostics and idempotency, identified missing Resend key & cron configuration; 262/262 tests passing                                                                                                   |
+| **Phase 17** | Remaining / Completed Toggle Navbar Match                                                   | ✅ Completed | Redesigned segmented toggle on Bills screen with `glass-nav` rounded pill container, glossy blue-to-purple gradient active pill with 3D sheen highlight, muted inactive pill, and count badges; 262/262 tests passing, 0 TS errors, 0 ESLint errors, prod build succeeded                             |
 | **Phase 18** | Four Approved Updates: Auth Screens, Monthly Spends, Coins Animation & Bill Completion Date | ✅ Completed | Replaced 3 auth screens to match supplied reference designs; switched Spends summary card to Total Monthly Spends; added falling-coins and money-received celebration animation; corrected completed bill details date display; 269/269 tests passing, 0 TS errors, 0 ESLint errors, prod build clean |
+| **Phase 19** | Mascot Celebration & Upgraded Falling-Coins Animation                                       | ✅ Completed | Upgraded golden ₹ coins drop; animated mascot celebration jump (`@keyframes mascot-celebration-jump`); upward hands celebration (`\o/`); subtle happy facial expression & sparkles; smooth monthly total amount counter (`useSmoothAmount`); 276/276 tests passing, 0 TS errors, 0 ESLint errors, prod build clean |
 
 ---
 
@@ -271,16 +272,37 @@
   - When marked complete, displays `Completed ✓` and `Payment completed on: [Date]` (e.g. "Payment completed on: 4 November 2026").
   - Preserves the original due date separately under "Due Date" in the configuration details list.
   - Built `formatFullDate` in `src/lib/format.ts` to convert date strings and ISO timestamps into full human dates ("4 November 2026").
-- [x] **VERIFICATION:** 17/17 Vitest test suites (269/269 tests) passing, `npx tsc --noEmit` 0 errors, ESLint passing, and production build succeeded.
+- [x] **VERIFICATION:** 17/17 Vitest test suites (276/276 tests) passing, `npx tsc --noEmit` 0 errors, ESLint passing, and production build succeeded.
+
+---
+
+## 13. Phase 19 Detailed Register: Mascot Celebration & Upgraded Falling-Coins Animation
+
+- [x] **CELEB-01 (Upgraded Falling Coins):** Enhanced the falling ₹ coin physics, visuals, and cascade:
+  - 10 staggered metallic gold coins dropping into the monthly spends card with sharp rupee embossing (`₹`), inner metallic rim highlights, specular diagonal sheens, and multi-axis 3D rotation (`rotateX`, `rotateY`, `rotateZ`).
+  - Retained all existing classes (`falling-coins-container`, `falling-coin`, `money-received-pulse`, `money-received-glow`).
+- [x] **CELEB-02 (Happy Jumping Mascot Animation):** Built `CelebrationMascot.tsx` and keyframes `@keyframes mascot-celebration-jump`:
+  - Energetic squash-and-stretch leap with celebratory hover, tilt, and elastic landing bounce.
+  - Returns cleanly and completely to its original appearance at the end of the celebration timer (2.4s).
+- [x] **CELEB-03 (Upward Hands Celebration):** Added animated celebratory arms and hands overlay:
+  - Reaching upward `\ ( ^ ‿ ^ ) /` in triumphant celebration with joyful waving keyframes (`@keyframes mascot-hands-wave`).
+- [x] **CELEB-04 (Subtle Happy Face & Sparkles):** Added happy facial expression overlay and golden particle sparkles:
+  - Cute curved smiling eyes (`⌒ ⌒`) and soft rosy blush cheeks (`@keyframes mascot-happy-face`).
+  - Staggered multi-color and golden sparkle stars popping and twinkling around the mascot (`@keyframes sparkle-pop`).
+- [x] **CELEB-05 (Smooth Monthly Amount Update):** Implemented `useSmoothAmount` hook in `SpendsDashboard.tsx`:
+  - Animates the monthly spending amount counter smoothly from previous to new amount using cubic ease-out interpolation over 1200ms.
+  - Adds subtle golden counter glow (`amount-smooth-count`, `@keyframes amount-smooth-glow`).
+- [x] **CELEB-06 (Branding Preservation & Clean Layout):** Preserved official BillBuddy mascot artwork (`/billbuddy-icon.png`) and cartoon wallet illustration (`/spends-icon.png`) without substituting characters or modifying dashboard layout.
+- [x] **CELEB-07 (Accessibility & Reduced Motion):** Full support for `prefers-reduced-motion` and `.reduce-motion`, immediately rendering target amounts and bypassing celebration keyframes.
+- [x] **CELEB-08 (Automated Tests & Build Verification):** 276/276 tests passing (17/17 suites), 0 TypeScript compiler errors, 0 ESLint errors on modified components, and production build succeeded.
 
 ---
 
 - [x] All six documentation files exist and are accurate (`PRD.md`, `ARCHITECTURE.md`, `DESIGN.md`, `MEMORY.md`, `RULES.md`, `TRACKER.md`).
 - [x] Required database schema is consolidated in [`001_billbuddy_schema.sql`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/supabase/migrations/001_billbuddy_schema.sql) covering all 22 tables.
 - [x] Migration state and ordering are documented.
-- [x] Automated tests pass (269/269 passing).
+- [x] Automated tests pass (276/276 passing).
 - [x] Type checking passes (0 errors).
 - [x] Production build succeeds (`npm run build` / Nitro output generated cleanly with zero deprecation warnings).
 - [ ] Live database schema executed in Supabase project `xsytaixmyeypoiscfbim`.
 - [ ] End-to-end live browser authentication and data persistence verified.
-

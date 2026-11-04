@@ -8,7 +8,65 @@ import {
   Trash2,
 } from "lucide-react";
 import { formatAmount, formatDate, shiftDateString, MONTHS_LONG } from "@/lib/format";
+import { CelebrationMascot } from "./CelebrationMascot";
 import type { Spend } from "@/types/database";
+
+/**
+ * Smoothly animates numeric amounts with ease-out interpolation.
+ * Respects prefers-reduced-motion accessibility settings by updating immediately.
+ */
+function useSmoothAmount(targetAmount: number, isAnimating: boolean): number {
+  const [displayed, setDisplayed] = useState(targetAmount);
+  const prevTargetRef = useRef(targetAmount);
+  const animFrameRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const prev = prevTargetRef.current;
+    prevTargetRef.current = targetAmount;
+
+    // Respect reduced motion
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      (window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+        document.documentElement.classList.contains("reduce-motion"));
+
+    if (prev === targetAmount || prefersReducedMotion || !isAnimating) {
+      setDisplayed(targetAmount);
+      return;
+    }
+
+    const startVal = prev;
+    const diff = targetAmount - startVal;
+    const startTime = performance.now();
+    const duration = 1200; // ms, aligns with falling coins drop and celebration jump
+
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // easeOutCubic
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const currentVal = startVal + diff * ease;
+
+      setDisplayed(currentVal);
+
+      if (progress < 1) {
+        animFrameRef.current = requestAnimationFrame(animate);
+      } else {
+        setDisplayed(targetAmount);
+      }
+    };
+
+    animFrameRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animFrameRef.current !== null) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
+    };
+  }, [targetAmount, isAnimating]);
+
+  return displayed;
+}
 
 interface SpendsDashboardProps {
   selectedDate: string;
@@ -107,6 +165,9 @@ export function SpendsDashboard({
       return sum + (Number.isFinite(amt) ? amt : 0);
     }, 0);
   }, [monthSpends]);
+
+  // Smooth numeric amount counter transition when a spend is logged
+  const displayedMonthlyTotal = useSmoothAmount(monthlyTotal, isAnimatingCoins);
 
   // Total monthly transaction count
   const monthlyCount = monthSpends.length;
@@ -218,25 +279,30 @@ export function SpendsDashboard({
             aria-hidden="true"
           >
             {[
-              { left: "15%", delay: "0ms", dur: "1.2s", size: "w-7 h-7 text-xs" },
-              { left: "28%", delay: "120ms", dur: "1.3s", size: "w-8 h-8 text-sm" },
-              { left: "42%", delay: "60ms", dur: "1.1s", size: "w-7 h-7 text-xs" },
-              { left: "55%", delay: "200ms", dur: "1.4s", size: "w-8 h-8 text-sm" },
-              { left: "68%", delay: "100ms", dur: "1.25s", size: "w-7 h-7 text-xs" },
-              { left: "80%", delay: "280ms", dur: "1.35s", size: "w-8 h-8 text-sm" },
-              { left: "35%", delay: "350ms", dur: "1.2s", size: "w-6 h-6 text-[10px]" },
-              { left: "62%", delay: "420ms", dur: "1.3s", size: "w-7 h-7 text-xs" },
+              { left: "12%", delay: "0ms", dur: "1.2s", size: "w-7 h-7 text-xs" },
+              { left: "24%", delay: "120ms", dur: "1.3s", size: "w-8 h-8 text-sm" },
+              { left: "38%", delay: "60ms", dur: "1.15s", size: "w-7 h-7 text-xs" },
+              { left: "52%", delay: "200ms", dur: "1.35s", size: "w-8 h-8 text-sm" },
+              { left: "66%", delay: "100ms", dur: "1.25s", size: "w-7 h-7 text-xs" },
+              { left: "78%", delay: "280ms", dur: "1.3s", size: "w-8 h-8 text-sm" },
+              { left: "30%", delay: "360ms", dur: "1.2s", size: "w-6 h-6 text-[10px]" },
+              { left: "60%", delay: "420ms", dur: "1.3s", size: "w-7 h-7 text-xs" },
+              { left: "18%", delay: "480ms", dur: "1.25s", size: "w-6 h-6 text-[10px]" },
+              { left: "72%", delay: "240ms", dur: "1.4s", size: "w-7 h-7 text-xs" },
             ].map((coin, i) => (
               <div
                 key={i}
-                className={`falling-coin absolute rounded-full flex items-center justify-center font-black text-amber-900 bg-gradient-to-br from-amber-200 via-yellow-400 to-amber-500 shadow-md border border-yellow-200/90 ${coin.size}`}
+                className={`falling-coin absolute rounded-full flex items-center justify-center font-black text-amber-950 bg-gradient-to-br from-amber-200 via-yellow-400 to-amber-500 shadow-[0_4px_12px_rgba(245,158,11,0.4),inset_0_1.5px_2px_rgba(255,255,255,0.9),inset_0_-2px_2px_rgba(180,83,9,0.5)] border border-yellow-100/90 ${coin.size}`}
                 style={{
                   left: coin.left,
-                  top: "-36px",
+                  top: "-40px",
                   animation: `falling-coin-drop ${coin.dur} cubic-bezier(0.25, 0.9, 0.35, 1) ${coin.delay} forwards`,
                 }}
               >
-                <span>₹</span>
+                <span className="relative z-10 drop-shadow-[0_1px_1px_rgba(255,255,255,0.6)] font-black">
+                  ₹
+                </span>
+                <span className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/30 to-transparent pointer-events-none" />
               </div>
             ))}
             <div className="money-received-glow absolute inset-0 bg-gradient-to-r from-amber-400/10 via-yellow-300/20 to-emerald-400/15 pointer-events-none" />
@@ -253,20 +319,25 @@ export function SpendsDashboard({
                 {monthName} {year}
               </span>
             </div>
-            <p className="text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums text-slate-900 dark:text-white">
-              {formatAmount(monthlyTotal)}
+            <p
+              className={`text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums text-slate-900 dark:text-white transition-all ${
+                isAnimatingCoins ? "amount-smooth-count" : ""
+              }`}
+            >
+              {formatAmount(displayedMonthlyTotal)}
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
               {monthlyCount} {monthlyCount === 1 ? "transaction" : "transactions"} in {monthName}
             </p>
           </div>
 
-          {/* Supplied Cartoon Wallet Illustration */}
-          <div className="flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-2xl bg-white/80 dark:bg-slate-800/80 p-1.5 shadow-xs border border-white/90 dark:border-slate-700/80 overflow-hidden">
-            <img
+          {/* Supplied Cartoon Wallet Illustration with Animated Mascot Celebration */}
+          <div className="relative flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-2xl bg-white/80 dark:bg-slate-800/80 p-1.5 shadow-xs border border-white/90 dark:border-slate-700/80">
+            <CelebrationMascot
               src="/spends-icon.png"
               alt="BillBuddy Wallet Mascot"
-              className="h-full w-full object-contain animate-gentle-float hover:scale-105 transition-transform"
+              isCelebrating={isAnimatingCoins}
+              className="h-full w-full"
             />
           </div>
         </div>

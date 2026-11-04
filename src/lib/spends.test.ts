@@ -379,4 +379,67 @@ describe("Spends Feature — Business Logic & Validation", () => {
       expect(stylesSrc).toContain("@media (prefers-reduced-motion: reduce)");
     });
   });
+
+  describe("Mascot Celebration & Upgraded Falling Coins Animation", () => {
+    const dashboardSrc = readFileSync(
+      join(process.cwd(), "src/components/spends/SpendsDashboard.tsx"),
+      "utf8",
+    );
+    const mascotSrc = readFileSync(
+      join(process.cwd(), "src/components/spends/CelebrationMascot.tsx"),
+      "utf8",
+    );
+    const homeSrc = readFileSync(join(process.cwd(), "src/pages/HomePage.tsx"), "utf8");
+    const stylesSrc = readFileSync(join(process.cwd(), "src/styles.css"), "utf8");
+
+    it("upgrades golden ₹ coins dropping into the monthly spends card", () => {
+      expect(dashboardSrc).toContain("falling-coins-container");
+      expect(dashboardSrc).toContain("falling-coin");
+      expect(dashboardSrc).toContain("₹");
+      expect(stylesSrc).toContain("@keyframes falling-coin-drop");
+      expect(stylesSrc).toContain("rotateX");
+      expect(stylesSrc).toContain("rotateY");
+    });
+
+    it("implements happy jumping animation for the mascot", () => {
+      expect(mascotSrc).toContain("mascot-celebrating");
+      expect(stylesSrc).toContain("@keyframes mascot-celebration-jump");
+      expect(stylesSrc).toContain(".mascot-celebrating");
+    });
+
+    it("animates mascot hands moving upward in celebration", () => {
+      expect(mascotSrc).toContain("mascot-hands-celebrate");
+      expect(stylesSrc).toContain("@keyframes mascot-hands-wave");
+      expect(mascotSrc).toContain("strokeWidth");
+    });
+
+    it("adds subtle happy facial expression and sparkle effects", () => {
+      expect(mascotSrc).toContain("mascot-happy-expression");
+      expect(stylesSrc).toContain("@keyframes mascot-happy-face");
+      expect(mascotSrc).toContain("mascot-sparkle");
+      expect(stylesSrc).toContain("@keyframes sparkle-pop");
+    });
+
+    it("smoothly updates the monthly spending amount", () => {
+      expect(dashboardSrc).toContain("useSmoothAmount");
+      expect(dashboardSrc).toContain("displayedMonthlyTotal");
+      expect(dashboardSrc).toContain("amount-smooth-count");
+      expect(stylesSrc).toContain("@keyframes amount-smooth-glow");
+      expect(stylesSrc).toContain(".amount-smooth-count");
+    });
+
+    it("preserves official BillBuddy branding and returns cleanly to original appearance", () => {
+      expect(homeSrc).toContain('src="/billbuddy-icon.png"');
+      expect(dashboardSrc).toContain('src="/spends-icon.png"');
+      expect(mascotSrc).toContain("animate-gentle-float");
+    });
+
+    it("strictly respects prefers-reduced-motion for all celebration animations", () => {
+      expect(stylesSrc).toContain(".reduce-motion .mascot-celebrating");
+      expect(stylesSrc).toContain(".reduce-motion .mascot-hands-celebrate");
+      expect(stylesSrc).toContain(".reduce-motion .mascot-happy-expression");
+      expect(stylesSrc).toContain(".reduce-motion .mascot-sparkle");
+      expect(stylesSrc).toContain(".reduce-motion .amount-smooth-count");
+    });
+  });
 });

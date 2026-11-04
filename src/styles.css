@@ -1169,42 +1169,174 @@
 
 @keyframes falling-coin-drop {
   0% {
-    transform: translateY(-40px) rotate(0deg) scale(0.6);
+    transform: translateY(-44px) rotateX(15deg) rotateY(0deg) rotateZ(-10deg) scale(0.6);
     opacity: 0;
   }
-  20% {
+  15% {
     opacity: 1;
   }
-  75% {
-    transform: translateY(75px) rotate(180deg) scale(1);
+  60% {
+    transform: translateY(68px) rotateX(160deg) rotateY(180deg) rotateZ(140deg) scale(1.05);
     opacity: 1;
+  }
+  80% {
+    transform: translateY(100px) rotateX(290deg) rotateY(270deg) rotateZ(210deg) scale(0.96);
+    opacity: 0.95;
   }
   100% {
-    transform: translateY(115px) rotate(360deg) scale(0.85);
+    transform: translateY(125px) rotateX(360deg) rotateY(360deg) rotateZ(260deg) scale(0.85);
     opacity: 0;
   }
 }
 
 @keyframes money-received-card-glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 10px 30px -8px rgba(15, 39, 66, 0.06);
     border-color: rgba(255, 255, 255, 0.9);
   }
   30% {
-    box-shadow: 0 12px 36px 0 rgba(234, 179, 8, 0.28), 0 0 0 2px rgba(245, 158, 11, 0.4);
+    box-shadow:
+      0 12px 36px 0 rgba(234, 179, 8, 0.28),
+      0 0 0 2px rgba(245, 158, 11, 0.4);
     border-color: rgba(245, 158, 11, 0.6);
     transform: scale(1.012);
   }
   70% {
-    box-shadow: 0 10px 30px -4px rgba(16, 185, 129, 0.2), 0 0 0 1px rgba(16, 185, 129, 0.3);
+    box-shadow:
+      0 10px 30px -4px rgba(16, 185, 129, 0.2),
+      0 0 0 1px rgba(16, 185, 129, 0.3);
     border-color: rgba(16, 185, 129, 0.5);
   }
 }
 
 @keyframes fade-in-out {
-  0% { opacity: 0; }
-  35% { opacity: 1; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ==================================================================== *
+ * UPDATE: MASCOT CELEBRATION, JUMP, HANDS UPWARD & SPARKLES ANIMATIONS *
+ * ==================================================================== */
+
+@keyframes mascot-celebration-jump {
+  0% {
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+  12% {
+    /* Anticipation squash */
+    transform: translateY(4px) scale(1.08, 0.92) rotate(-2deg);
+  }
+  28% {
+    /* Energetic leap into the air */
+    transform: translateY(-18px) scale(0.94, 1.08) rotate(4deg);
+  }
+  44% {
+    /* Peak height with joyful tilt */
+    transform: translateY(-22px) scale(1.02, 1.02) rotate(-3deg);
+  }
+  60% {
+    /* Hover and celebration wiggle */
+    transform: translateY(-14px) scale(0.98, 1.04) rotate(3deg);
+  }
+  74% {
+    /* Second celebratory bounce */
+    transform: translateY(-18px) scale(1.02, 1) rotate(-2deg);
+  }
+  88% {
+    /* Landing compression */
+    transform: translateY(2px) scale(1.06, 0.94) rotate(0deg);
+  }
+  100% {
+    /* Restored cleanly to original */
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+}
+
+@keyframes mascot-hands-wave {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.7);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  32% {
+    transform: translateY(-3px) rotate(6deg) scale(1.06);
+  }
+  48% {
+    transform: translateY(-1px) rotate(-6deg) scale(1.06);
+  }
+  65% {
+    transform: translateY(-3px) rotate(5deg) scale(1.06);
+  }
+  82% {
+    opacity: 1;
+    transform: translateY(0) scale(0.96);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.7);
+  }
+}
+
+@keyframes mascot-happy-face {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  15% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  85% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes sparkle-pop {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  30% {
+    transform: scale(1.25) rotate(90deg);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(0.95) rotate(180deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(0) rotate(270deg);
+    opacity: 0;
+  }
+}
+
+@keyframes amount-smooth-glow {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  35%,
+  65% {
+    transform: scale(1.025);
+    filter: drop-shadow(0 2px 8px rgba(245, 158, 11, 0.35));
+  }
 }
 
 .money-received-pulse {
@@ -1215,6 +1347,15 @@
   animation: fade-in-out 1.6s ease-out forwards;
 }
 
+.mascot-celebrating {
+  animation: mascot-celebration-jump 2.2s cubic-bezier(0.25, 0.9, 0.35, 1) forwards;
+  will-change: transform;
+}
+
+.amount-smooth-count {
+  animation: amount-smooth-glow 1.4s ease-out forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1222,6 +1363,14 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  .mascot-celebrating,
+  .mascot-hands-celebrate,
+  .mascot-happy-expression,
+  .mascot-sparkle,
+  .amount-smooth-count {
+    animation: none !important;
+    transform: none !important;
   }
 }
 
@@ -1233,4 +1382,13 @@
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;
   scroll-behavior: auto !important;
+}
+
+.reduce-motion .mascot-celebrating,
+.reduce-motion .mascot-hands-celebrate,
+.reduce-motion .mascot-happy-expression,
+.reduce-motion .mascot-sparkle,
+.reduce-motion .amount-smooth-count {
+  animation: none !important;
+  transform: none !important;
 }

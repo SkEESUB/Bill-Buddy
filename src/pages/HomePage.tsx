@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
   Calendar,
@@ -28,6 +28,7 @@ import { UserMenu } from "@/components/UserMenu";
 import { AddChoiceSheet } from "@/components/AddChoiceSheet";
 import { SpendsDashboard } from "@/components/spends/SpendsDashboard";
 import { SpendFormModal } from "@/components/spends/SpendFormModal";
+import { CelebrationMascot } from "@/components/spends/CelebrationMascot";
 import type { Bill, Spend } from "@/types/database";
 import type { SpendInput } from "@/lib/spends.functions";
 
@@ -48,6 +49,15 @@ export function HomePage() {
   const [editingSpend, setEditingSpend] = useState<Spend | null>(null);
   const [deleteSpendTarget, setDeleteSpendTarget] = useState<Spend | null>(null);
   const [coinAnimationTrigger, setCoinAnimationTrigger] = useState(0);
+  const [isHeaderCelebrating, setIsHeaderCelebrating] = useState(false);
+
+  // Animate the BillBuddy brand mascot celebration whenever a spend is saved
+  useEffect(() => {
+    if (!coinAnimationTrigger) return;
+    setIsHeaderCelebrating(true);
+    const timer = setTimeout(() => setIsHeaderCelebrating(false), 2400);
+    return () => clearTimeout(timer);
+  }, [coinAnimationTrigger]);
 
   // Modals & Action Targets
   const [choiceSheetOpen, setChoiceSheetOpen] = useState(false);
@@ -243,11 +253,12 @@ export function HomePage() {
       <header className="flex items-center justify-between pt-2 pb-1">
         <div className="flex items-center gap-2.5">
           {/* BillBuddy Brand Mascot */}
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm border border-slate-200/60 overflow-hidden p-1">
-            <img
+          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm border border-slate-200/60 p-1">
+            <CelebrationMascot
               src="/billbuddy-icon.png"
               alt="BillBuddy"
-              className="h-full w-full object-contain animate-gentle-float"
+              isCelebrating={isHeaderCelebrating}
+              className="h-full w-full"
             />
           </div>
           <div>
