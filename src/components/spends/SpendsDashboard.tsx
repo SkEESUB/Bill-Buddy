@@ -8,7 +8,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { formatAmount, formatDate, shiftDateString, MONTHS_LONG } from "@/lib/format";
-import { CelebrationMascot } from "./CelebrationMascot";
 import type { Spend } from "@/types/database";
 
 /**
@@ -258,8 +257,8 @@ export function SpendsDashboard({
       {/* 3.2 TOTAL MONTHLY SPENDS SUMMARY CARD                                */}
       {/* ==================================================================== */}
       <div
-        className={`glass-panel rounded-3xl p-5 border border-white/90 dark:border-slate-800/90 shadow-[0_10px_30px_-8px_rgba(15,39,66,0.06)] relative overflow-hidden transition-all duration-300 ${
-          isAnimatingCoins ? "money-received-pulse" : ""
+        className={`spends-summary-card-premium rounded-3xl p-5 relative overflow-hidden transition-all duration-300 ${
+          isAnimatingCoins ? "money-received-pulse" : "spends-summary-card-floating"
         }`}
       >
         {/* Subtle decorative glow */}
@@ -309,8 +308,8 @@ export function SpendsDashboard({
           </div>
         )}
 
-        <div className="flex items-center justify-between relative z-10">
-          <div>
+        <div className="flex items-center justify-between relative z-10 gap-3">
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 mb-1.5 flex-wrap">
               <span className="text-[11px] sm:text-xs font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400">
                 TOTAL MONTHLY SPENDS
@@ -331,13 +330,12 @@ export function SpendsDashboard({
             </p>
           </div>
 
-          {/* Supplied Cartoon Wallet Illustration with Animated Mascot Celebration */}
-          <div className="relative flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-2xl bg-white/80 dark:bg-slate-800/80 p-1.5 shadow-xs border border-white/90 dark:border-slate-700/80">
-            <CelebrationMascot
+          {/* Supplied Cartoon Wallet Illustration - Enlarged Static Mascot */}
+          <div className="relative flex h-20 w-20 sm:h-24 sm:w-24 shrink-0 items-center justify-center rounded-2xl bg-white/95 dark:bg-slate-800/95 p-1 shadow-xs border border-white/90 dark:border-slate-700/80 overflow-hidden">
+            <img
               src="/spends-icon.png"
               alt="BillBuddy Wallet Mascot"
-              isCelebrating={isAnimatingCoins}
-              className="h-full w-full"
+              className="h-full w-full object-contain select-none"
             />
           </div>
         </div>

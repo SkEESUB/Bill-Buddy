@@ -380,47 +380,25 @@ describe("Spends Feature — Business Logic & Validation", () => {
     });
   });
 
-  describe("Mascot Celebration & Upgraded Falling Coins Animation", () => {
+  describe("Spends Summary Card Refinement: Premium 3D Floating & Enlarged Logo", () => {
     const dashboardSrc = readFileSync(
       join(process.cwd(), "src/components/spends/SpendsDashboard.tsx"),
-      "utf8",
-    );
-    const mascotSrc = readFileSync(
-      join(process.cwd(), "src/components/spends/CelebrationMascot.tsx"),
       "utf8",
     );
     const homeSrc = readFileSync(join(process.cwd(), "src/pages/HomePage.tsx"), "utf8");
     const stylesSrc = readFileSync(join(process.cwd(), "src/styles.css"), "utf8");
 
-    it("upgrades golden ₹ coins dropping into the monthly spends card", () => {
+    it("preserves golden ₹ coins dropping into the monthly spends card without alteration", () => {
       expect(dashboardSrc).toContain("falling-coins-container");
       expect(dashboardSrc).toContain("falling-coin");
       expect(dashboardSrc).toContain("₹");
       expect(stylesSrc).toContain("@keyframes falling-coin-drop");
       expect(stylesSrc).toContain("rotateX");
       expect(stylesSrc).toContain("rotateY");
+      expect(stylesSrc).toContain("rotateZ");
     });
 
-    it("implements happy jumping animation for the mascot", () => {
-      expect(mascotSrc).toContain("mascot-celebrating");
-      expect(stylesSrc).toContain("@keyframes mascot-celebration-jump");
-      expect(stylesSrc).toContain(".mascot-celebrating");
-    });
-
-    it("animates mascot hands moving upward in celebration", () => {
-      expect(mascotSrc).toContain("mascot-hands-celebrate");
-      expect(stylesSrc).toContain("@keyframes mascot-hands-wave");
-      expect(mascotSrc).toContain("strokeWidth");
-    });
-
-    it("adds subtle happy facial expression and sparkle effects", () => {
-      expect(mascotSrc).toContain("mascot-happy-expression");
-      expect(stylesSrc).toContain("@keyframes mascot-happy-face");
-      expect(mascotSrc).toContain("mascot-sparkle");
-      expect(stylesSrc).toContain("@keyframes sparkle-pop");
-    });
-
-    it("smoothly updates the monthly spending amount", () => {
+    it("preserves smooth monthly spending amount counter and glow", () => {
       expect(dashboardSrc).toContain("useSmoothAmount");
       expect(dashboardSrc).toContain("displayedMonthlyTotal");
       expect(dashboardSrc).toContain("amount-smooth-count");
@@ -428,18 +406,48 @@ describe("Spends Feature — Business Logic & Validation", () => {
       expect(stylesSrc).toContain(".amount-smooth-count");
     });
 
-    it("preserves official BillBuddy branding and returns cleanly to original appearance", () => {
-      expect(homeSrc).toContain('src="/billbuddy-icon.png"');
+    it("enlarges the spends card mascot/logo image and keeps it static", () => {
+      // Icon container is enlarged with p-1 padding so image occupies more of the container
+      expect(dashboardSrc).toContain("h-20 w-20 sm:h-24 sm:w-24");
+      expect(dashboardSrc).toContain("p-1");
       expect(dashboardSrc).toContain('src="/spends-icon.png"');
-      expect(mascotSrc).toContain("animate-gentle-float");
+      expect(dashboardSrc).toContain("object-contain");
+      // Mascot remains static - no celebration animations on the mascot
+      expect(dashboardSrc).not.toContain("mascot-celebrating");
+      expect(dashboardSrc).not.toContain("CelebrationMascot");
     });
 
-    it("strictly respects prefers-reduced-motion for all celebration animations", () => {
-      expect(stylesSrc).toContain(".reduce-motion .mascot-celebrating");
-      expect(stylesSrc).toContain(".reduce-motion .mascot-hands-celebrate");
-      expect(stylesSrc).toContain(".reduce-motion .mascot-happy-expression");
-      expect(stylesSrc).toContain(".reduce-motion .mascot-sparkle");
+    it("upgrades Total Monthly Spends card to premium 3D glassmorphic floating card", () => {
+      expect(dashboardSrc).toContain("spends-summary-card-premium");
+      expect(dashboardSrc).toContain("spends-summary-card-floating");
+      expect(stylesSrc).toContain("@keyframes spends-summary-float");
+      expect(stylesSrc).toContain(".spends-summary-card-premium");
+      expect(stylesSrc).toContain(".spends-summary-card-premium.spends-summary-card-floating");
+      expect(stylesSrc).toContain(".spends-summary-card-premium::before");
+      expect(stylesSrc).toContain("perspective");
+    });
+
+    it("preserves official BillBuddy branding in header and spends card", () => {
+      expect(homeSrc).toContain('src="/billbuddy-icon.png"');
+      expect(dashboardSrc).toContain('src="/spends-icon.png"');
+      expect(homeSrc).not.toContain("CelebrationMascot");
+    });
+
+    it("verifies removal of mascot celebration jump, arms, happy expression, and sparkles", () => {
+      expect(stylesSrc).not.toContain("@keyframes mascot-celebration-jump");
+      expect(stylesSrc).not.toContain("@keyframes mascot-hands-wave");
+      expect(stylesSrc).not.toContain("@keyframes mascot-happy-face");
+      expect(stylesSrc).not.toContain("@keyframes sparkle-pop");
+      expect(stylesSrc).not.toContain(".mascot-celebrating");
+    });
+
+    it("strictly respects prefers-reduced-motion for the summary card and smooth amount", () => {
+      expect(stylesSrc).toContain(".reduce-motion .spends-summary-card-premium");
+      expect(stylesSrc).toContain(
+        ".reduce-motion .spends-summary-card-premium.spends-summary-card-floating",
+      );
       expect(stylesSrc).toContain(".reduce-motion .amount-smooth-count");
+      expect(stylesSrc).toContain("@media (prefers-reduced-motion: reduce)");
     });
   });
 });

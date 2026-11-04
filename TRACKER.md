@@ -31,6 +31,7 @@
 | **Phase 17** | Remaining / Completed Toggle Navbar Match                                                   | ✅ Completed | Redesigned segmented toggle on Bills screen with `glass-nav` rounded pill container, glossy blue-to-purple gradient active pill with 3D sheen highlight, muted inactive pill, and count badges; 262/262 tests passing, 0 TS errors, 0 ESLint errors, prod build succeeded                             |
 | **Phase 18** | Four Approved Updates: Auth Screens, Monthly Spends, Coins Animation & Bill Completion Date | ✅ Completed | Replaced 3 auth screens to match supplied reference designs; switched Spends summary card to Total Monthly Spends; added falling-coins and money-received celebration animation; corrected completed bill details date display; 269/269 tests passing, 0 TS errors, 0 ESLint errors, prod build clean |
 | **Phase 19** | Mascot Celebration & Upgraded Falling-Coins Animation                                       | ✅ Completed | Upgraded golden ₹ coins drop; animated mascot celebration jump (`@keyframes mascot-celebration-jump`); upward hands celebration (`\o/`); subtle happy facial expression & sparkles; smooth monthly total amount counter (`useSmoothAmount`); 276/276 tests passing, 0 TS errors, 0 ESLint errors, prod build clean |
+| **Phase 20** | Spends Summary Card Refinement: Premium 3D Floating & Enlarged Logo                         | ✅ Completed | Removed mascot celebration animation, hands, happy face & sparkles; enlarged cartoon wallet logo to occupy container with suitable padding; upgraded Total Monthly Spends card to premium 3D glassmorphic floating card (`spends-summary-card-premium`, `spends-summary-card-floating`); preserved falling ₹ coins cascade & smooth monthly total amount counter; 276/276 tests passing, 0 TS errors, 0 ESLint errors, prod build clean |
 
 ---
 
@@ -295,6 +296,35 @@
 - [x] **CELEB-06 (Branding Preservation & Clean Layout):** Preserved official BillBuddy mascot artwork (`/billbuddy-icon.png`) and cartoon wallet illustration (`/spends-icon.png`) without substituting characters or modifying dashboard layout.
 - [x] **CELEB-07 (Accessibility & Reduced Motion):** Full support for `prefers-reduced-motion` and `.reduce-motion`, immediately rendering target amounts and bypassing celebration keyframes.
 - [x] **CELEB-08 (Automated Tests & Build Verification):** 276/276 tests passing (17/17 suites), 0 TypeScript compiler errors, 0 ESLint errors on modified components, and production build succeeded.
+
+---
+
+## 14. Phase 20 Detailed Register: Spends Summary Card Refinement
+
+- [x] **REFINE-01 (Remove Mascot Celebration):** Removed mascot celebration animation introduced in Phase 19:
+  - Removed jumping animation, animated arms/hands upward, happy facial expressions, and sparkle star bursts.
+  - Removed celebration timer and `isHeaderCelebrating` state in `src/pages/HomePage.tsx`.
+  - Removed obsolete `CelebrationMascot.tsx` component and cleaned up all celebration keyframes (`@keyframes mascot-celebration-jump`, `@keyframes mascot-hands-wave`, `@keyframes mascot-happy-face`, `@keyframes sparkle-pop`, `.mascot-celebrating`).
+  - Preserved static mascot logo and official BillBuddy branding.
+- [x] **REFINE-02 (Preserve Falling Coins & Smooth Amount Counter):**
+  - Falling ₹ coins animation remains 100% intact (same 10 coins, timing, colors, 3D physics, drop animation, and trigger behavior on spend creation).
+  - Smooth monthly amount counter (`useSmoothAmount`) and subtle golden counter glow (`amount-smooth-count`) remain intact.
+  - Monthly spending calculations and transaction counts remain strictly accurate.
+- [x] **REFINE-03 (Enlarge Spends Card Logo):**
+  - Enlarged the cartoon wallet mascot icon container (`h-20 w-20 sm:h-24 sm:w-24`) with `p-1` padding so image occupies noticeably more of its white container.
+  - Preserved exact 1:1 aspect ratio with `object-fit: contain`, no cropping or stretching, maintaining suitable padding and vertical alignment with monthly spends information on both mobile (tested for narrow 360px Android viewports) and desktop.
+  - Mascot logo remains static without celebration movement.
+- [x] **REFINE-04 (Premium 3D Floating Summary Card):**
+  - Upgraded Total Monthly Spends card with `.spends-summary-card-premium` and `.spends-summary-card-floating`.
+  - Premium glassmorphism with high-saturation blur and soft layered elevation shadows.
+  - Subtle vertical floating movement (3.5px) and 0.4deg 3D perspective depth effect (`@keyframes spends-summary-float`).
+  - Refined multi-stop purple/blue edge highlights via masked `::before` pseudo-element.
+  - Strictly disables all floating movement under `prefers-reduced-motion: reduce` and `.reduce-motion`.
+- [x] **REFINE-05 (Verification & QA):**
+  - 17/17 Vitest test suites (276/276 tests) passing.
+  - TypeScript `npx tsc --noEmit` 0 errors.
+  - ESLint 0 errors.
+  - Production build compiled successfully with zero errors.
 
 ---
 
