@@ -132,6 +132,20 @@ export function formatDate(day: string): string {
   return `${String(d).padStart(2, "0")} ${MONTHS_SHORT[m - 1]} ${y}`;
 }
 
+/** "4 November 2026" full human date string from YYYY-MM-DD or ISO timestamp. */
+export function formatFullDate(dateStr?: string | null): string {
+  if (!dateStr) return "";
+  if (dateStr.includes("T")) {
+    const d = new Date(dateStr);
+    if (!Number.isNaN(d.getTime())) {
+      return `${d.getDate()} ${MONTHS_LONG[d.getMonth()]} ${d.getFullYear()}`;
+    }
+  }
+  const [y, m, d] = dateStr.split("-").map(Number);
+  if (!y || !m || !d) return dateStr;
+  return `${d} ${MONTHS_LONG[m - 1]} ${y}`;
+}
+
 /** "Due Today" / "Due Tomorrow" / "Due 15 Mar" / "Overdue · 15 Mar" */
 export function formatDue(dueDate: string, today: string): string {
   if (dueDate === today) return "Due Today";

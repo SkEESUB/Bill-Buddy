@@ -47,6 +47,7 @@ export function HomePage() {
   const [spendModalOpen, setSpendModalOpen] = useState(false);
   const [editingSpend, setEditingSpend] = useState<Spend | null>(null);
   const [deleteSpendTarget, setDeleteSpendTarget] = useState<Spend | null>(null);
+  const [coinAnimationTrigger, setCoinAnimationTrigger] = useState(0);
 
   // Modals & Action Targets
   const [choiceSheetOpen, setChoiceSheetOpen] = useState(false);
@@ -60,27 +61,29 @@ export function HomePage() {
   const profileName = snapshot.profile?.full_name?.trim();
   const userName = profileName || "there";
 
-  // Spends for selected date (derived authoritatively from snapshot.spends or transactions fallback)
-  const dateSpends = useMemo<Spend[]>(() => {
-    const allSpends: Spend[] =
-      snapshot.spends && snapshot.spends.length > 0
-        ? snapshot.spends
-        : (snapshot.transactions || [])
-            .filter((t: any) => t.type === "expense")
-            .map((t: any) => ({
-              id: t.id,
-              user_id: t.user_id,
-              name: t.description || t.category || "Expense",
-              amount: Number(t.amount) || 0,
-              spend_date: t.date,
-              notes: t.notes ?? null,
-              created_at: t.created_at,
-            }));
+  // All spends (derived authoritatively from snapshot.spends or transactions fallback)
+  const allSpendsList = useMemo<Spend[]>(() => {
+    return snapshot.spends && snapshot.spends.length > 0
+      ? snapshot.spends
+      : (snapshot.transactions || [])
+          .filter((t) => t.type === "expense")
+          .map((t) => ({
+            id: t.id,
+            user_id: t.user_id,
+            name: t.description || t.category || "Expense",
+            amount: Number(t.amount) || 0,
+            spend_date: t.date,
+            notes: t.notes ?? null,
+            created_at: t.created_at,
+          }));
+  }, [snapshot.spends, snapshot.transactions]);
 
-    return allSpends
+  // Spends filtered strictly for the selected date
+  const dateSpends = useMemo<Spend[]>(() => {
+    return allSpendsList
       .filter((s) => s.spend_date === selectedSpendDate)
       .sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""));
-  }, [snapshot.spends, snapshot.transactions, selectedSpendDate]);
+  }, [allSpendsList, selectedSpendDate]);
 
   // Bill occurrence views
   const views = useMemo(() => toViews(snapshot.occurrences, today), [snapshot.occurrences, today]);
@@ -204,6 +207,7 @@ export function HomePage() {
       } else {
         await actions.createSpend(values);
         toast.success("Spend added successfully");
+        setCoinAnimationTrigger((prev) => prev + 1);
       }
       // If the saved expense has a different date, switch to that date to display it
       if (values.spend_date && values.spend_date !== selectedSpendDate) {
@@ -534,6 +538,8 @@ export function HomePage() {
             onDateChange={(d) => setSelectedSpendDate(d)}
             today={today}
             spends={dateSpends}
+            allSpends={allSpendsList}
+            coinAnimationTrigger={coinAnimationTrigger}
             loading={loading}
             onAddSpend={() => {
               setEditingSpend(null);

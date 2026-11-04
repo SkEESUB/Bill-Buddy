@@ -1163,6 +1163,58 @@
   animation: bb-shimmer 1.4s ease-in-out infinite;
 }
 
+/* ==================================================================== *
+ * UPDATE 3: FALLING COINS & MONEY RECEIVED ANIMATION                   *
+ * ==================================================================== */
+
+@keyframes falling-coin-drop {
+  0% {
+    transform: translateY(-40px) rotate(0deg) scale(0.6);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(75px) rotate(180deg) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(115px) rotate(360deg) scale(0.85);
+    opacity: 0;
+  }
+}
+
+@keyframes money-received-card-glow {
+  0%, 100% {
+    box-shadow: 0 10px 30px -8px rgba(15, 39, 66, 0.06);
+    border-color: rgba(255, 255, 255, 0.9);
+  }
+  30% {
+    box-shadow: 0 12px 36px 0 rgba(234, 179, 8, 0.28), 0 0 0 2px rgba(245, 158, 11, 0.4);
+    border-color: rgba(245, 158, 11, 0.6);
+    transform: scale(1.012);
+  }
+  70% {
+    box-shadow: 0 10px 30px -4px rgba(16, 185, 129, 0.2), 0 0 0 1px rgba(16, 185, 129, 0.3);
+    border-color: rgba(16, 185, 129, 0.5);
+  }
+}
+
+@keyframes fade-in-out {
+  0% { opacity: 0; }
+  35% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.money-received-pulse {
+  animation: money-received-card-glow 1.8s ease-out forwards;
+}
+
+.money-received-glow {
+  animation: fade-in-out 1.6s ease-out forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

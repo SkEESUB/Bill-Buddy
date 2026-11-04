@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -7,7 +7,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { formatAmount, formatDate, shiftDateString } from "@/lib/format";
+import { formatAmount, formatDate, shiftDateString, MONTHS_LONG } from "@/lib/format";
 import type { Spend } from "@/types/database";
 
 interface SpendsDashboardProps {
@@ -15,6 +15,8 @@ interface SpendsDashboardProps {
   onDateChange: (date: string) => void;
   today: string;
   spends: Spend[];
+  allSpends?: Spend[];
+  coinAnimationTrigger?: number;
   loading?: boolean;
   onAddSpend: () => void;
   onEditSpend?: (spend: Spend) => void;
@@ -35,12 +37,24 @@ export function SpendsDashboard({
   onDateChange,
   today,
   spends,
+  allSpends,
+  coinAnimationTrigger = 0,
   loading = false,
   onAddSpend,
   onEditSpend,
   onDeleteSpend,
 }: SpendsDashboardProps) {
   const dateInputRef = useRef<HTMLInputElement>(null);
+
+  // Falling coins animation state triggered after spend is added
+  const [isAnimatingCoins, setIsAnimatingCoins] = useState(false);
+
+  useEffect(() => {
+    if (!coinAnimationTrigger) return;
+    setIsAnimatingCoins(true);
+    const timer = setTimeout(() => setIsAnimatingCoins(false), 2400);
+    return () => clearTimeout(timer);
+  }, [coinAnimationTrigger]);
 
   // Timezone-safe date navigation
   const isToday = selectedDate === today;
@@ -65,6 +79,37 @@ export function SpendsDashboard({
       onDateChange(val);
     }
   };
+
+  // Derive selected month prefix "YYYY-MM" (e.g. "2026-11") and human month name (e.g. "November")
+  const { monthKey, monthName, year } = useMemo(() => {
+    const parts = selectedDate.split("-").map(Number);
+    const y = parts[0] || new Date().getFullYear();
+    const m = parts[1] || new Date().getMonth() + 1;
+    return {
+      monthKey: `${y}-${String(m).padStart(2, "0")}`,
+      monthName: MONTHS_LONG[m - 1] || "Month",
+      year: y,
+    };
+  }, [selectedDate]);
+
+  // Source list for monthly calculations: allSpends if provided, otherwise fallback to spends
+  const sourceSpends = allSpends ?? spends;
+
+  // Monthly spends: strictly filtered by the selected month and year
+  const monthSpends = useMemo(() => {
+    return sourceSpends.filter((s) => s.spend_date?.startsWith(monthKey));
+  }, [sourceSpends, monthKey]);
+
+  // Total monthly spending amount
+  const monthlyTotal = useMemo(() => {
+    return monthSpends.reduce((sum, s) => {
+      const amt = Number(s.amount);
+      return sum + (Number.isFinite(amt) ? amt : 0);
+    }, 0);
+  }, [monthSpends]);
+
+  // Total monthly transaction count
+  const monthlyCount = monthSpends.length;
 
   // Safe daily calculations derived exclusively from persisted date records
   const dailyTotal = useMemo(() => {
@@ -149,9 +194,13 @@ export function SpendsDashboard({
       </div>
 
       {/* ==================================================================== */}
-      {/* 3.2 TOTAL SPENT SUMMARY CARD                                         */}
+      {/* 3.2 TOTAL MONTHLY SPENDS SUMMARY CARD                                */}
       {/* ==================================================================== */}
-      <div className="glass-panel rounded-3xl p-5 border border-white/90 dark:border-slate-800/90 shadow-[0_10px_30px_-8px_rgba(15,39,66,0.06)] relative overflow-hidden">
+      <div
+        className={`glass-panel rounded-3xl p-5 border border-white/90 dark:border-slate-800/90 shadow-[0_10px_30px_-8px_rgba(15,39,66,0.06)] relative overflow-hidden transition-all duration-300 ${
+          isAnimatingCoins ? "money-received-pulse" : ""
+        }`}
+      >
         {/* Subtle decorative glow */}
         <div
           className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-indigo-400/15 blur-2xl pointer-events-none"
@@ -162,18 +211,53 @@ export function SpendsDashboard({
           aria-hidden="true"
         />
 
+        {/* Falling coins animation layer */}
+        {isAnimatingCoins && (
+          <div
+            className="falling-coins-container absolute inset-0 pointer-events-none z-20 overflow-hidden"
+            aria-hidden="true"
+          >
+            {[
+              { left: "15%", delay: "0ms", dur: "1.2s", size: "w-7 h-7 text-xs" },
+              { left: "28%", delay: "120ms", dur: "1.3s", size: "w-8 h-8 text-sm" },
+              { left: "42%", delay: "60ms", dur: "1.1s", size: "w-7 h-7 text-xs" },
+              { left: "55%", delay: "200ms", dur: "1.4s", size: "w-8 h-8 text-sm" },
+              { left: "68%", delay: "100ms", dur: "1.25s", size: "w-7 h-7 text-xs" },
+              { left: "80%", delay: "280ms", dur: "1.35s", size: "w-8 h-8 text-sm" },
+              { left: "35%", delay: "350ms", dur: "1.2s", size: "w-6 h-6 text-[10px]" },
+              { left: "62%", delay: "420ms", dur: "1.3s", size: "w-7 h-7 text-xs" },
+            ].map((coin, i) => (
+              <div
+                key={i}
+                className={`falling-coin absolute rounded-full flex items-center justify-center font-black text-amber-900 bg-gradient-to-br from-amber-200 via-yellow-400 to-amber-500 shadow-md border border-yellow-200/90 ${coin.size}`}
+                style={{
+                  left: coin.left,
+                  top: "-36px",
+                  animation: `falling-coin-drop ${coin.dur} cubic-bezier(0.25, 0.9, 0.35, 1) ${coin.delay} forwards`,
+                }}
+              >
+                <span>₹</span>
+              </div>
+            ))}
+            <div className="money-received-glow absolute inset-0 bg-gradient-to-r from-amber-400/10 via-yellow-300/20 to-emerald-400/15 pointer-events-none" />
+          </div>
+        )}
+
         <div className="flex items-center justify-between relative z-10">
           <div>
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400">
-                TOTAL SPENT
+            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+              <span className="text-[11px] sm:text-xs font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400">
+                TOTAL MONTHLY SPENDS
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full text-[10.5px] font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900">
+                {monthName} {year}
               </span>
             </div>
             <p className="text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums text-slate-900 dark:text-white">
-              {formatAmount(dailyTotal)}
+              {formatAmount(monthlyTotal)}
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
-              {spendsCount} {spendsCount === 1 ? "expense" : "expenses"}
+              {monthlyCount} {monthlyCount === 1 ? "transaction" : "transactions"} in {monthName}
             </p>
           </div>
 

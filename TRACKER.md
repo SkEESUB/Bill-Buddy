@@ -1,10 +1,10 @@
 # Project Task Tracker & Issue Register — BillBuddy Rebuild
 
-**Document Version:** 2.1.0  
+**Document Version:** 2.2.0  
 **Status:** Living Document / Authoritative Rebuild Tracker  
 **Target Architecture:** Minimal, Premium, Single-Screen Bill Reminder App  
-**Current Verification:** 262/262 Unit Tests Passing | TypeScript: 0 Errors | ESLint: 0 Errors | Production Build: Succeeded  
-**Last Updated:** 2026-10-26
+**Current Verification:** 269/269 Unit Tests Passing | TypeScript: 0 Errors | ESLint: 0 Errors | Production Build: Succeeded  
+**Last Updated:** 2026-11-04
 
 ---
 
@@ -29,6 +29,7 @@
 | **Phase 15** | Mobile Authentication Viewport Fit (Phase C)              | ✅ Completed | Scaled illustrations & spacing for Onboarding, Email, and OTP screens to fit mobile viewports cleanly with safe area and keyboard resilience; 260/260 tests passing |
 | **Phase 16** | Email Reminder System Audit & Repair (Phase D)            | ✅ Completed | Repaired destructive over-deletion in `deleteBill`, enhanced `processDueEmailReminders` with diagnostics and idempotency, identified missing Resend key & cron configuration; 262/262 tests passing |
 | **Phase 17** | Remaining / Completed Toggle Navbar Match                  | ✅ Completed | Redesigned segmented toggle on Bills screen with `glass-nav` rounded pill container, glossy blue-to-purple gradient active pill with 3D sheen highlight, muted inactive pill, and count badges; 262/262 tests passing, 0 TS errors, 0 ESLint errors, prod build succeeded |
+| **Phase 18** | Four Approved Updates: Auth Screens, Monthly Spends, Coins Animation & Bill Completion Date | ✅ Completed | Replaced 3 auth screens to match supplied reference designs; switched Spends summary card to Total Monthly Spends; added falling-coins and money-received celebration animation; corrected completed bill details date display; 269/269 tests passing, 0 TS errors, 0 ESLint errors, prod build clean |
 
 ---
 
@@ -250,11 +251,36 @@
 - [x] **REMIND-04:** Documented root cause of missing reminder email: missing `RESEND_API_KEY` in environment causing simulation mode failure, and missing automated cron/pg_cron invocation for `/api/public/hooks/scheduler`.
 - [x] **REMIND-05:** Added unit test suite in `src/lib/email.test.ts` covering reminder idempotency and bill deletion isolation. Verified 17/17 test suites (262/262 tests passing), 0 TypeScript compiler errors, 0 ESLint errors, and production build succeeded.
 
+## 12. Phase 18 Detailed Register: Four Approved Updates
+
+- [x] **UPDATE-01 (Auth Screens):** Replaced all 3 authentication screens in `src/pages/LoginPage.tsx` with high-fidelity reproductions of the supplied reference designs:
+  - Screen 1: Centered branding, "Manage Your Bills & Spends" (with Spends in orange), product subtext, 3D smartphone mockup with glowing neon orbital ring and live mini dashboard, 3 feature cards (Track Bills, Auto Spends, Budgets & Insights), 3-dot carousel indicator, full-width "Get Started ->" gradient button, and clickable "Sign In" link.
+  - Screen 2: Top bar with circular back button and centered BillBuddy branding, 3D open purple envelope with `@` symbol and security shield, "Enter Your Email" title, email input with mail icon and purple border, "Continue ->" button, and "Passwordless OTP · No password required" badge.
+  - Screen 3: Top bar with circular back button, 3D security shield with embossed padlock, "Enter OTP" title, recipient email pill, 6-digit OTP input boxes with purple active focus state, green verification status banner, "Verify & Continue ->" button, resend countdown timer with mm:ss formatting, and "Change email address" card button.
+  - Added organic lavender bottom wave graphics (`BottomWaves`). Preserved existing Supabase authentication (`signInWithOtp`, `verifyOtp`, `getSession`).
+- [x] **UPDATE-02 (Monthly Spends Summary):** Updated the main summary card in `src/components/spends/SpendsDashboard.tsx` to display **TOTAL MONTHLY SPENDS** for the currently selected month:
+  - Calculates total expenditures strictly for the selected month and year boundaries (e.g. October ₹8,500, November ₹12,450, December ₹6,200).
+  - Displays formatted total amount alongside live monthly transaction count (`X transactions in [Month]`).
+  - Automatically updates immediately upon spend creation, update, or deletion via `allSpends` propagation from `HomePage.tsx`.
+- [x] **UPDATE-03 (Falling Coins Animation):** Added celebration animation to the Spends summary box:
+  - Staggered falling 3D gold coins with `₹` markings dropping into the summary card when an expense is logged.
+  - Money-received pulse and glow animation (`.money-received-pulse`, `.money-received-glow`).
+  - Built with lightweight, hardware-accelerated CSS keyframes (`@keyframes falling-coin-drop`, `@keyframes money-received-card-glow`).
+  - Strictly honors accessibility `prefers-reduced-motion` and `.reduce-motion`.
+- [x] **UPDATE-04 (Bill Completion Date):** Corrected the bill completion display in `src/components/BillDetailsModal.tsx`:
+  - When marked complete, displays `Completed ✓` and `Payment completed on: [Date]` (e.g. "Payment completed on: 4 November 2026").
+  - Preserves the original due date separately under "Due Date" in the configuration details list.
+  - Built `formatFullDate` in `src/lib/format.ts` to convert date strings and ISO timestamps into full human dates ("4 November 2026").
+- [x] **VERIFICATION:** 17/17 Vitest test suites (269/269 tests) passing, `npx tsc --noEmit` 0 errors, ESLint passing, and production build succeeded.
+
+---
+
 - [x] All six documentation files exist and are accurate (`PRD.md`, `ARCHITECTURE.md`, `DESIGN.md`, `MEMORY.md`, `RULES.md`, `TRACKER.md`).
 - [x] Required database schema is consolidated in [`001_billbuddy_schema.sql`](file:///c:/Users/EESUB/Downloads/Bill%20Buddy/supabase/migrations/001_billbuddy_schema.sql) covering all 22 tables.
 - [x] Migration state and ordering are documented.
-- [x] Automated tests pass (186/186 passing).
+- [x] Automated tests pass (269/269 passing).
 - [x] Type checking passes (0 errors).
-- [x] Production build succeeds (`vite build` / Nitro output generated cleanly with zero deprecation warnings).
+- [x] Production build succeeds (`npm run build` / Nitro output generated cleanly with zero deprecation warnings).
 - [ ] Live database schema executed in Supabase project `xsytaixmyeypoiscfbim`.
 - [ ] End-to-end live browser authentication and data persistence verified.
+

@@ -11,7 +11,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { formatAmount } from "@/lib/format";
+import { formatAmount, formatFullDate } from "@/lib/format";
 import type { OccurrenceView } from "@/lib/occurrences";
 import type { Bill } from "@/types/database";
 
@@ -106,7 +106,7 @@ export function BillDetailsModal({
           >
             {isCompleted ? (
               <>
-                <CheckCircle2 className="h-3.5 w-3.5" /> Completed
+                <CheckCircle2 className="h-3.5 w-3.5" /> Completed ✓
               </>
             ) : occurrence.status === "overdue" ? (
               <>
@@ -121,18 +121,40 @@ export function BillDetailsModal({
           <p className="text-3xl font-extrabold text-slate-900 tabular-nums tracking-tight">
             {formatAmount(occurrence.amount)}
           </p>
-          <p className="text-xs text-slate-500 mt-1 font-medium">Due on {occurrence.dueDate}</p>
+          {isCompleted ? (
+            <p className="text-xs text-emerald-700 font-semibold mt-1">
+              Payment completed on: {formatFullDate(occurrence.paidAt || occurrence.dueDate)}
+            </p>
+          ) : (
+            <p className="text-xs text-slate-500 mt-1 font-medium">
+              Due on {formatFullDate(occurrence.dueDate) || occurrence.dueDate}
+            </p>
+          )}
         </div>
 
         {/* Configuration Details List */}
         <div className="mt-4 space-y-2.5 divide-y divide-slate-100 text-xs">
-          {/* Due Date */}
+          {/* Due Date (always preserved as original deadline) */}
           <div className="flex items-center justify-between pt-1">
             <span className="flex items-center gap-2 text-slate-500 font-medium">
-              <Calendar className="h-4 w-4 text-slate-400" /> Payment Deadline
+              <Calendar className="h-4 w-4 text-slate-400" /> Due Date
             </span>
-            <span className="font-semibold text-slate-900 tabular-nums">{occurrence.dueDate}</span>
+            <span className="font-semibold text-slate-900 tabular-nums">
+              {formatFullDate(occurrence.dueDate) || occurrence.dueDate}
+            </span>
           </div>
+
+          {/* Actual Completion Date row when completed */}
+          {isCompleted && (
+            <div className="flex items-center justify-between pt-2.5">
+              <span className="flex items-center gap-2 text-emerald-600 font-medium">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Payment completed on
+              </span>
+              <span className="font-semibold text-emerald-700 tabular-nums">
+                {formatFullDate(occurrence.paidAt || occurrence.dueDate)}
+              </span>
+            </div>
+          )}
 
           {/* Recurrence */}
           <div className="flex items-center justify-between pt-2.5">

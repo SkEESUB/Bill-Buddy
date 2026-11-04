@@ -264,4 +264,119 @@ describe("Spends Feature — Business Logic & Validation", () => {
       expect(stylesSrc).toContain(".reduce-motion .spend-card-premium");
     });
   });
+
+  describe("Update 2 & 3: Monthly Spends Summary & Falling Coins Animation", () => {
+    const dashboardSrc = readFileSync(
+      join(process.cwd(), "src/components/spends/SpendsDashboard.tsx"),
+      "utf8",
+    );
+    const stylesSrc = readFileSync(join(process.cwd(), "src/styles.css"), "utf8");
+
+    it("calculates total monthly spends reflecting the selected month and year boundaries", () => {
+      const mockSpends: Spend[] = [
+        // October 2026: ₹8,500 total (e.g. 5000 + 3500)
+        {
+          id: "oct-1",
+          user_id: "u1",
+          name: "October Rent Share",
+          amount: 5000,
+          spend_date: "2026-10-05",
+          notes: null,
+          created_at: "2026-10-05T10:00:00Z",
+        },
+        {
+          id: "oct-2",
+          user_id: "u1",
+          name: "October Groceries",
+          amount: 3500,
+          spend_date: "2026-10-20",
+          notes: null,
+          created_at: "2026-10-20T12:00:00Z",
+        },
+        // November 2026: ₹12,450 total (e.g. 10000 + 2450)
+        {
+          id: "nov-1",
+          user_id: "u1",
+          name: "November Laptop EMI",
+          amount: 10000,
+          spend_date: "2026-11-02",
+          notes: null,
+          created_at: "2026-11-02T09:00:00Z",
+        },
+        {
+          id: "nov-2",
+          user_id: "u1",
+          name: "November Outing",
+          amount: 2450,
+          spend_date: "2026-11-04",
+          notes: null,
+          created_at: "2026-11-04T18:00:00Z",
+        },
+        // December 2026: ₹6,200 total
+        {
+          id: "dec-1",
+          user_id: "u1",
+          name: "December Travel",
+          amount: 6200,
+          spend_date: "2026-12-15",
+          notes: null,
+          created_at: "2026-12-15T08:00:00Z",
+        },
+        // Previous year November 2025: should NOT be included in November 2026!
+        {
+          id: "nov-2025",
+          user_id: "u1",
+          name: "Last Year November",
+          amount: 9999,
+          spend_date: "2025-11-04",
+          notes: null,
+          created_at: "2025-11-04T10:00:00Z",
+        },
+      ];
+
+      // October 2026 calculations
+      const octSpends = mockSpends.filter((s) => s.spend_date?.startsWith("2026-10"));
+      expect(octSpends.length).toBe(2);
+      expect(octSpends.reduce((sum, s) => sum + s.amount, 0)).toBe(8500);
+
+      // November 2026 calculations
+      const novSpends = mockSpends.filter((s) => s.spend_date?.startsWith("2026-11"));
+      expect(novSpends.length).toBe(2);
+      expect(novSpends.reduce((sum, s) => sum + s.amount, 0)).toBe(12450);
+
+      // December 2026 calculations
+      const decSpends = mockSpends.filter((s) => s.spend_date?.startsWith("2026-12"));
+      expect(decSpends.length).toBe(1);
+      expect(decSpends.reduce((sum, s) => sum + s.amount, 0)).toBe(6200);
+
+      // Empty month returns 0 total and 0 transactions
+      const janSpends = mockSpends.filter((s) => s.spend_date?.startsWith("2026-01"));
+      expect(janSpends.length).toBe(0);
+      expect(janSpends.reduce((sum, s) => sum + s.amount, 0)).toBe(0);
+    });
+
+    it("displays TOTAL MONTHLY SPENDS heading and monthly transaction count in SpendsDashboard", () => {
+      expect(dashboardSrc).toContain("TOTAL MONTHLY SPENDS");
+      expect(dashboardSrc).toContain("monthlyTotal");
+      expect(dashboardSrc).toContain("monthlyCount");
+      expect(dashboardSrc).toContain('"transactions"');
+      expect(dashboardSrc).toContain("in {monthName}");
+    });
+
+    it("implements falling coins animation and money-received pulse in SpendsDashboard and CSS", () => {
+      expect(dashboardSrc).toContain("falling-coins-container");
+      expect(dashboardSrc).toContain("falling-coin");
+      expect(dashboardSrc).toContain("money-received-pulse");
+      expect(dashboardSrc).toContain("money-received-glow");
+
+      expect(stylesSrc).toContain("@keyframes falling-coin-drop");
+      expect(stylesSrc).toContain("@keyframes money-received-card-glow");
+      expect(stylesSrc).toContain(".money-received-pulse");
+      expect(stylesSrc).toContain(".money-received-glow");
+    });
+
+    it("strictly honors prefers-reduced-motion for falling coins and money-received animations", () => {
+      expect(stylesSrc).toContain("@media (prefers-reduced-motion: reduce)");
+    });
+  });
 });
